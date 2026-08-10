@@ -17,6 +17,10 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
 .tab{padding:9px 16px;border-radius:9px;background:var(--surface-1);color:var(--text-2);border:1px solid var(--line);cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
 .tab:hover{background:var(--surface-2)}
 .tab.on{background:var(--text-1);color:#000;border-color:var(--text-1)}
+.daychips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.daychip{padding:6px 11px;border-radius:8px;background:var(--surface-2);color:var(--text-2);border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:600;transition:.12s}
+.daychip:hover{background:#2c2c2a}
+.daychip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .kpi{background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
 .kpi .lab{color:var(--text-3);font-size:12px;font-weight:600}
@@ -66,6 +70,7 @@ function moveTip(e){tip.style.left=Math.min(e.clientX+14,window.innerWidth-tip.o
 function hideTip(){tip.style.opacity=0;}
 
 let cur='전체통합';
+let curDay=D.days[D.days.length-1];
 const TABS=['전체통합','W컨셉','29CM','롯데온','자사몰'];
 const tabsEl=document.getElementById('tabs');
 TABS.forEach(t=>{const b=document.createElement('div');b.className='tab'+(t==cur?' on':'');b.textContent=t=='전체통합'?'전채널 통합':t;b.onclick=()=>{cur=t;render();};tabsEl.appendChild(b);});
@@ -95,8 +100,33 @@ function render(){
   h+=`<div class="card"><h3>TOP 상품</h3><div class="cs">${isC?'전채널 합산':cur} · 실결제금액</div>`+topBars(top, isC?'#3987e5':PCH[cur])+`</div>`;
   h+=`<div class="card"><h3>TOP 상품 표</h3><div class="cs">수량 · 실결제 · 비중</div>`+topTable(top,src.periodAmt)+`</div>`;
   h+=`</div>`;
+  // daily top products
+  h+=`<div class="card"><h3>일별 TOP 상품</h3><div class="cs">${isC?'전채널 합산':cur} · 날짜 선택</div>`;
+  h+=`<div class="daychips" id="daychips">`+D.days.map(d=>`<button class="daychip${d==curDay?' on':''}" data-day="${d}">${dlab(d)}</button>`).join('')+`</div>`;
+  h+=`<div id="dayTopTable"></div></div>`;
   document.getElementById('views').innerHTML=h;
+  document.querySelectorAll('.daychip').forEach(b=>b.onclick=()=>{curDay=b.dataset.day;renderDayTop();});
+  renderDayTop();
   attachHovers();
+}
+
+function renderDayTop(){
+  const isC=cur=='전체통합';
+  const src=isC?D.combined:D.byPlat[cur];
+  const list=(src.dayTop&&src.dayTop[curDay])?src.dayTop[curDay]:[];
+  const dayAmt=list.reduce((s,t)=>s+t.amt,0);
+  document.querySelectorAll('.daychip').forEach(b=>b.classList.toggle('on',b.dataset.day==curDay));
+  let h='';
+  if(!list.length){ h='<div class="cs" style="padding:8px 0">해당 날짜 판매 없음</div>'; }
+  else{
+    h='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
+    list.forEach((t,i)=>{
+      const share=dayAmt?(t.amt/dayAmt*100).toFixed(1):'0.0';
+      h+=`<tr class="${i==0?'r1':''}"><td class="n"><span class="rank">${i+1}</span>${t.name}${isNew(t.name)?'<span class="new">NEW</span>':''}</td><td>${t.qty}</td><td>${won(t.amt)}</td><td>${share}%</td></tr>`;
+    });
+    h+='</table>';
+  }
+  const el=document.getElementById('dayTopTable'); if(el) el.innerHTML=h;
 }
 
 function dailyChart(isC,src){
