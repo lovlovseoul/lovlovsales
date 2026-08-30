@@ -71,8 +71,32 @@
       if(tr){var td=tr.querySelector('td');if(td){var nm=clean(td.textContent);if(C[nm]){show(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}}
       hide();
     });
+    // ===== 26FW 신상 판매 섹션 =====
+    var FW26=["아티잔 워크 카고 팬츠","컷아웃 숄더 드레이핑 니트","랩 브이넥 니트 티","글로시 벨벳 스커트","헤리티지 트윌 치노 팬츠","웜 립 하렘 팬츠","아티잔 러플 블라우스","웜 파인 체크 셔츠","언발란스 랩 체크 셔츠","실키 볼륨 블라우스","마이 젠틀 가디건","레이어 카라 니트","컬러 라인 가디건","스컬프트 드레이핑 니트","더블 레이어 버튼 후디","레이어 슬릿 티","소프트 레이어 터틀 넥","소프트 히트 티","레트로 스트라이프 피케 티","멀티 스트라이프 피케 티","파인 스트라이프 실켓 티","마이 모먼트 스웨이드 봄버","릴렉스 레더 봄버","빈티지 크랙 레더 봄버","프렌치 트위드 자켓","헤리티지 워크자켓","모던 하이넥 점퍼","프렌치 워크 자켓"];
+    function won(n){return '₩'+Math.round(n).toLocaleString('en-US');}
+    function renderFW26(){
+      var items=[];
+      FW26.forEach(function(p){var cd=C[p];if(!cd)return;var q=0,a=0;Object.keys(cd).forEach(function(k){q+=cd[k][0];a+=cd[k][1];});if(q>0)items.push({name:p,qty:q,amt:a});});
+      items.sort(function(x,y){return y.amt-x.amt;});
+      var old=document.getElementById('fw26card'); if(old)old.remove();
+      if(!items.length)return;
+      var tot=items.reduce(function(s,e){return s+e.amt;},0)||1;
+      var totQ=items.reduce(function(s,e){return s+e.qty;},0);
+      var card=document.createElement('div'); card.className='card'; card.id='fw26card';
+      var h='<h3>26FW 신상 판매</h3><div class="cs">전채널 합산 · 26FW 신상만 · 총 '+totQ+'장 · '+won(tot)+' · '+range+' 누적</div>';
+      h+='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
+      items.forEach(function(e,idx){var pct=Math.round(e.amt/tot*100);h+='<tr class="clk"><td class="n"><span class="rank">'+(idx+1)+'</span>'+e.name+'</td><td>'+e.qty+'</td><td>'+won(e.amt)+'</td><td>'+pct+'%</td></tr>';});
+      h+='</table>';
+      card.innerHTML=h;
+      var dailyCard=null,h3s=document.querySelectorAll('#views .card h3');
+      for(var i=0;i<h3s.length;i++){if(/일별/.test(h3s[i].textContent)){dailyCard=h3s[i].closest('.card');break;}}
+      if(dailyCard&&dailyCard.parentNode){dailyCard.parentNode.insertBefore(card,dailyCard.nextSibling);}
+      else if(v){v.appendChild(card);}
+      mark();
+    }
     var v=document.getElementById('views');
-    if(v){new MutationObserver(mark).observe(v,{childList:true,subtree:true});}
+    if(v){new MutationObserver(function(){mark();if(!document.getElementById('fw26card'))renderFW26();}).observe(v,{childList:true,subtree:true});}
     mark();
+    renderFW26();
   }).catch(function(){});
 })();
