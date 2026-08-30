@@ -1,10 +1,11 @@
 (function(){
   fetch('colors.json?cb='+Date.now()).then(function(r){return r.json();}).then(function(data){
-    var C=data.colors||{}, DC=data.dayColors||{}, SZ=data.sizes||{}, DSZ=data.daySizes||{}, days=data.days||[];
+    var C=data.colors||{}, DC=data.dayColors||{}, SZ=data.sizes||{}, DSZ=data.daySizes||{},
+        CS=data.combos||{}, DCS=data.dayCombos||{}, days=data.days||[];
     var range = days.length ? (days[0].slice(5).replace('-','/')+'~'+days[days.length-1].slice(5).replace('-','/')) : '';
     var st=document.createElement('style');
     st.textContent=
-    '.colorpop{position:fixed;z-index:60;background:#14140f;border:1px solid #3a3a30;border-radius:12px;padding:16px 16px 14px;min-width:255px;max-width:340px;box-shadow:0 10px 34px rgba(0,0,0,.55);font-size:13px;color:#eee}'+
+    '.colorpop{position:fixed;z-index:60;background:#14140f;border:1px solid #3a3a30;border-radius:12px;padding:16px 16px 14px;min-width:255px;max-width:340px;max-height:82vh;overflow:auto;box-shadow:0 10px 34px rgba(0,0,0,.55);font-size:13px;color:#eee}'+
     '.colorpop h4{margin:0 22px 2px 0;font-size:14px;line-height:1.3}'+
     '.colorpop .cpsub{font-size:11px;color:#8a8a80;margin-bottom:11px}'+
     '.colorpop .seclab{font-size:10.5px;letter-spacing:.04em;color:#8a8a80;margin:13px 0 7px;text-transform:none}'+
@@ -14,6 +15,7 @@
     '.colorpop .cbarwrap{height:6px;background:#2a2a24;border-radius:3px;overflow:hidden}'+
     '.colorpop .cbar{height:100%;border-radius:3px;background:#c9a227}'+
     '.colorpop .sbar{background:#5b8aa6}'+
+    '.colorpop .jbar{background:#7fae5f}'+
     '.colorpop .cempty{font-size:12px;color:#8a8a80;padding:4px 0}'+
     '.colorpop .cpclose{position:absolute;top:9px;right:11px;cursor:pointer;color:#8a8a80;font-size:13px}'+
     'tr.clk{cursor:pointer}tr.clk:hover{background:rgba(255,255,255,.05)}';
@@ -30,17 +32,24 @@
       ents.forEach(function(e){var c=e[0],v=e[1];var pct=Math.round(v[0]/tot*100);h+='<div class="crow"><div class="cline"><span>'+c+'</span><span class="cq">'+v[0]+'장 · '+pct+'%</span></div><div class="cbarwrap"><div class="cbar '+cls+'" style="width:'+pct+'%"></div></div></div>';});
       return h;
     }
+    // 컬러×사이즈 조인트 → 실 사이즈(FREE/미분류 제외)만 { "COLOR · SIZE":[q,a] }
+    function jointObj(co){
+      var o={},any=false;
+      if(co){Object.keys(co).forEach(function(k){var p=k.split('|');var color=p[0],sz=p[1];if(sz!=='FREE'&&sz!=='(미분류)'){o[color+' · '+sz]=co[k];any=true;}});}
+      return any?o:null;
+    }
     function show(name,daily,x,y){
-      var cd,sd,label;
-      if(daily){var d=curD();cd=(DC[d]||{})[name];sd=(DSZ[d]||{})[name];label='일별 · '+md(d)+' 기준';}
-      else{cd=C[name];sd=SZ[name];label='기간 총 · '+range;}
+      var cd,sd,jd,label;
+      if(daily){var d=curD();cd=(DC[d]||{})[name];sd=(DSZ[d]||{})[name];jd=(DCS[d]||{})[name];label='일별 · '+md(d)+' 기준';}
+      else{cd=C[name];sd=SZ[name];jd=CS[name];label='기간 총 · '+range;}
       var h='<span class="cpclose">✕</span><h4>'+name+'</h4>';
       if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cempty">이 날짜 컬러 데이터가 없어요<br>(컬러 집계 '+range+' 커버)</div>';}
       else{
         var tot=Object.keys(cd).reduce(function(s,k){return s+cd[k][0];},0)||1;
         h+='<div class="cpsub">'+label+' · 총 '+tot+'장</div>';
         h+='<div class="seclab">컬러별</div>'+bars(cd,'');
-        // 사이즈: FREE/미분류만 있으면 생략
+        var jo=jointObj(jd);
+        if(jo){ h+='<div class="seclab">컬러 × 사이즈</div>'+bars(jo,'jbar'); }
         if(sd){
           var real={}; var hasReal=false;
           Object.keys(sd).forEach(function(k){ if(k!=='(미분류)'){ real[k]=sd[k]; if(k!=='FREE') hasReal=true; } });
