@@ -50,7 +50,7 @@ svg text{font-family:inherit}
 <body><div class="wrap">
 <header>
 <h1>로브로브 판매 대시보드</h1>
-<div class="sub">2026.08.01 – 08.29 · W컨셉 · 29CM · 롯데온 · 자사몰 · 지그재그 · 실결제금액 기준 · 취소·환불 제외 · 반품 미제외 · 1+1/2PACK ×2 · 상품 클릭→컬러별</div>
+<div class="sub"><span id="daterange">2026.08.01 – 08.31</span> · W컨셉 · 29CM · 롯데온 · 자사몰 · 지그재그 · 실결제금액 기준 · 취소·환불 제외 · 반품 미제외 · 1+1/2PACK ×2 · 상품 클릭→컬러별</div>
 </header>
 <div class="tabs" id="tabs"></div>
 <div class="kpis" id="kpis"></div>
@@ -209,4 +209,4 @@ function attachHovers(){
   });
 }
 render();
-</script><script src="colorui.js?v=5"></script></body></html>
+</script><script src="colorui.js?v=5"></script><script>(function(){try{var d=(typeof D!=="undefined")&&D.days;if(d&&d.length){var el=document.getElementById("daterange");if(el)el.textContent=d[0].replace(/-/g,".")+" – "+d[d.length-1].slice(5).replace("-",".");}}catch(e){}})();</script></body></html>
