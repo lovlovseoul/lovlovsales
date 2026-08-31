@@ -1,8 +1,9 @@
 (function(){
   fetch('colors.json?cb='+Date.now()).then(function(r){return r.json();}).then(function(data){
-    var C=data.colors||{}, DC=data.dayColors||{}, SZ=data.sizes||{}, DSZ=data.daySizes||{},
-        CS=data.combos||{}, DCS=data.dayCombos||{}, days=data.days||[];
+    var BP=data.byPlat||{}, PLATS=data.platforms||Object.keys(BP), days=data.days||[];
     var range = days.length ? (days[0].slice(5).replace('-','/')+'~'+days[days.length-1].slice(5).replace('-','/')) : '';
+    // 클릭 가능한 상품 집합 (아무 플랫폼에서라도 판매된)
+    var ALLPROD={}; PLATS.forEach(function(p){var c=BP[p]&&BP[p].colors;if(c)Object.keys(c).forEach(function(k){ALLPROD[k]=1;});});
     var st=document.createElement('style');
     st.textContent=
     '.colorpop{position:fixed;z-index:60;background:#14140f;border:1px solid #3a3a30;border-radius:12px;padding:16px 16px 14px;min-width:255px;max-width:340px;max-height:82vh;overflow:auto;box-shadow:0 10px 34px rgba(0,0,0,.55);font-size:13px;color:#eee}'+
@@ -25,6 +26,19 @@
     function md(d){var p=d.split('-');return parseInt(p[1],10)+'/'+parseInt(p[2],10);}
     function sectionDaily(row){var el=row.parentElement;while(el&&el!==document.body){if(el.querySelector){var h=el.querySelector('h3');if(h)return /일별/.test(h.textContent);}el=el.parentElement;}return false;}
     function curD(){try{return (typeof curDay!=='undefined')?curDay:(days[days.length-1]);}catch(e){return days[days.length-1];}}
+    function curPlat(){try{return (typeof cur!=='undefined')?cur:'전체통합';}catch(e){return '전체통합';}}
+    function platList(){var p=curPlat();return (p==='전체통합'||!BP[p])?PLATS:[p];}
+    // 선택 스코프(플랫폼/일별)에서 상품의 {키:[q,a]} 병합
+    function getMap(prod,periodKey,dayKey,daily){
+      var out={},any=false,pl=platList(),d=curD();
+      pl.forEach(function(p){
+        var src;
+        if(daily){var dm=BP[p]&&BP[p][dayKey];src=dm&&dm[d]&&dm[d][prod];}
+        else{src=BP[p]&&BP[p][periodKey]&&BP[p][periodKey][prod];}
+        if(src){Object.keys(src).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=src[k][0];out[k][1]+=src[k][1];any=true;});}
+      });
+      return any?out:null;
+    }
     function bars(obj,cls){
       var ents=Object.keys(obj).map(function(k){return [k,obj[k]];}).sort(function(a,b){return b[1][0]-a[1][0];});
       var tot=ents.reduce(function(s,e){return s+e[1][0];},0)||1;
@@ -32,18 +46,19 @@
       ents.forEach(function(e){var c=e[0],v=e[1];var pct=Math.round(v[0]/tot*100);h+='<div class="crow"><div class="cline"><span>'+c+'</span><span class="cq">'+v[0]+'장 · '+pct+'%</span></div><div class="cbarwrap"><div class="cbar '+cls+'" style="width:'+pct+'%"></div></div></div>';});
       return h;
     }
-    // 컬러×사이즈 조인트 → 실 사이즈(FREE/미분류 제외)만 { "COLOR · SIZE":[q,a] }
     function jointObj(co){
       var o={},any=false;
       if(co){Object.keys(co).forEach(function(k){var p=k.split('|');var color=p[0],sz=p[1];if(sz!=='FREE'&&sz!=='(미분류)'){o[color+' · '+sz]=co[k];any=true;}});}
       return any?o:null;
     }
+    function scopeLabel(){var p=curPlat();return (p==='전체통합')?'전채널':p;}
     function show(name,daily,x,y){
-      var cd,sd,jd,label;
-      if(daily){var d=curD();cd=(DC[d]||{})[name];sd=(DSZ[d]||{})[name];jd=(DCS[d]||{})[name];label='일별 · '+md(d)+' 기준';}
-      else{cd=C[name];sd=SZ[name];jd=CS[name];label='기간 총 · '+range;}
+      var cd=getMap(name,'colors','dayColors',daily);
+      var sd=getMap(name,'sizes','daySizes',daily);
+      var jd=getMap(name,'combos','dayCombos',daily);
+      var label=scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+range));
       var h='<span class="cpclose">✕</span><h4>'+name+'</h4>';
-      if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cempty">이 날짜 컬러 데이터가 없어요<br>(컬러 집계 '+range+' 커버)</div>';}
+      if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cempty">이 조건 데이터가 없어요<br>(컬러 집계 '+range+' 커버)</div>';}
       else{
         var tot=Object.keys(cd).reduce(function(s,k){return s+cd[k][0];},0)||1;
         h+='<div class="cpsub">'+label+' · 총 '+tot+'장</div>';
@@ -51,7 +66,7 @@
         var jo=jointObj(jd);
         if(jo){ h+='<div class="seclab">컬러 × 사이즈</div>'+bars(jo,'jbar'); }
         if(sd){
-          var real={}; var hasReal=false;
+          var real={},hasReal=false;
           Object.keys(sd).forEach(function(k){ if(k!=='(미분류)'){ real[k]=sd[k]; if(k!=='FREE') hasReal=true; } });
           if(hasReal){ h+='<div class="seclab">사이즈별</div>'+bars(real,'sbar'); }
         }
@@ -64,19 +79,20 @@
       pop.querySelector('.cpclose').onclick=function(ev){ev.stopPropagation();hide();};
     }
     function hide(){pop.hidden=true;}
-    function mark(){var rows=document.querySelectorAll('#views table tr');for(var i=0;i<rows.length;i++){var td=rows[i].querySelector('td');if(td&&C[clean(td.textContent)])rows[i].classList.add('clk');}}
+    function mark(){var rows=document.querySelectorAll('#views table tr');for(var i=0;i<rows.length;i++){var td=rows[i].querySelector('td');if(td&&ALLPROD[clean(td.textContent)])rows[i].classList.add('clk');}}
     document.addEventListener('click',function(e){
       if(pop.contains(e.target))return;
       var tr=e.target.closest('tr');
-      if(tr){var td=tr.querySelector('td');if(td){var nm=clean(td.textContent);if(C[nm]){show(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}}
+      if(tr){var td=tr.querySelector('td');if(td){var nm=clean(td.textContent);if(ALLPROD[nm]){show(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}}
       hide();
     });
-    // ===== 26FW 신상 판매 섹션 =====
+    // ===== 26FW 신상 판매 섹션 (전채널 합산) =====
     var FW26=["아티잔 워크 카고 팬츠","컷아웃 숄더 드레이핑 니트","랩 브이넥 니트 티","글로시 벨벳 스커트","헤리티지 트윌 치노 팬츠","웜 립 하렘 팬츠","아티잔 러플 블라우스","웜 파인 체크 셔츠","언발란스 랩 체크 셔츠","실키 볼륨 블라우스","마이 젠틀 가디건","레이어 카라 니트","컬러 라인 가디건","스컬프트 드레이핑 니트","더블 레이어 버튼 후디","레이어 슬릿 티","소프트 레이어 터틀 넥","소프트 히트 티","레트로 스트라이프 피케 티","멀티 스트라이프 피케 티","파인 스트라이프 실켓 티","마이 모먼트 스웨이드 봄버","릴렉스 레더 봄버","빈티지 크랙 레더 봄버","프렌치 트위드 자켓","헤리티지 워크자켓","모던 하이넥 점퍼","프렌치 워크 자켓"];
     function won(n){return '₩'+Math.round(n).toLocaleString('en-US');}
+    function cprodTotal(prod){var q=0,a=0;PLATS.forEach(function(p){var cd=BP[p]&&BP[p].colors&&BP[p].colors[prod];if(cd)Object.keys(cd).forEach(function(k){q+=cd[k][0];a+=cd[k][1];});});return [q,a];}
     function renderFW26(){
       var items=[];
-      FW26.forEach(function(p){var cd=C[p];if(!cd)return;var q=0,a=0;Object.keys(cd).forEach(function(k){q+=cd[k][0];a+=cd[k][1];});if(q>0)items.push({name:p,qty:q,amt:a});});
+      FW26.forEach(function(p){var t=cprodTotal(p);if(t[0]>0)items.push({name:p,qty:t[0],amt:t[1]});});
       items.sort(function(x,y){return y.amt-x.amt;});
       var old=document.getElementById('fw26card'); if(old)old.remove();
       if(!items.length)return;
@@ -91,7 +107,7 @@
       var dailyCard=null,h3s=document.querySelectorAll('#views .card h3');
       for(var i=0;i<h3s.length;i++){if(/일별/.test(h3s[i].textContent)){dailyCard=h3s[i].closest('.card');break;}}
       if(dailyCard&&dailyCard.parentNode){dailyCard.parentNode.insertBefore(card,dailyCard.nextSibling);}
-      else if(v){v.appendChild(card);}
+      else{var v0=document.getElementById('views');if(v0)v0.appendChild(card);}
       mark();
     }
     var v=document.getElementById('views');
