@@ -12,11 +12,14 @@ header.top{position:sticky;top:0;z-index:20;background:rgba(244,242,238,.92);bac
 .hd{max-width:1280px;margin:0 auto;padding:16px 22px 12px}
 .htitle{font-size:20px;font-weight:800;letter-spacing:-.01em}
 .hsub{font-size:12px;color:var(--sub);margin-top:3px}
-.nav{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.plats{display:flex;gap:8px;margin:14px 0 2px}
+.ptab{padding:8px 22px;border-radius:10px;background:#fff;color:#55514a;border:1px solid var(--line);cursor:pointer;font-size:14.5px;font-weight:800;transition:.13s}
+.ptab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.nav{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
 .pill{font-size:12.5px;font-weight:700;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--pill);color:#55514a;cursor:pointer;transition:.13s;white-space:nowrap}
 .pill:hover{border-color:#b8b2a5}
 .pill.on{background:var(--pillon);color:#fff;border-color:var(--pillon)}
-section.cat{padding-top:34px;scroll-margin-top:118px}
+section.cat{padding-top:34px;scroll-margin-top:150px}
 .chead{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
 .chead h2{font-size:17px;font-weight:800;margin:0;letter-spacing:-.01em}
 .chead .cnt{font-size:12px;color:var(--sub)}
@@ -42,8 +45,9 @@ section.cat{padding-top:34px;scroll-margin-top:118px}
 
 <header class="top">
   <div class="hd">
-    <div class="htitle">☀️ 여름 제품군 기획 레퍼런스 · W컨셉</div>
+    <div class="htitle">☀️ 여름 제품군 기획 레퍼런스</div>
     <div class="hsub" id="hsub">브랜드별 서칭 · 카드 클릭 시 상품 상세페이지로 이동 · 관심수(♥)·가격은 수집 시점 기준</div>
+    <div class="plats" id="plats"></div>
     <div class="nav" id="nav"></div>
   </div>
 </header>
@@ -54,7 +58,8 @@ section.cat{padding-top:34px;scroll-margin-top:118px}
 
 <script>
 const D=[
- // ===== 반팔 셔츠 =====
+ // ============ W컨셉 ============
+ // ----- 반팔 셔츠 -----
  {cat:"반팔 셔츠", brand:"무니드", name:"PEARL HALF SHIRT - Light Silver", cust:124000, final:87494, dc:29, heart:5476, id:"308574546"},
  {cat:"반팔 셔츠", brand:"무니드", name:"PEARL HALF SHIRT - Cream", cust:124000, final:87494, dc:29, heart:3655, id:"308574545"},
  {cat:"반팔 셔츠", brand:"패브릭컬러지", name:"[New Color] Stripe Half Sleeve Shirt (4color)", cust:89000, final:56960, dc:36, heart:20566, id:"301720010"},
@@ -63,26 +68,21 @@ const D=[
  {cat:"반팔 셔츠", brand:"무니드", name:"ETE SATIN HALF SHIRT - Black", cust:119000, final:83966, dc:29, heart:3154, id:"308574542"},
  {cat:"반팔 셔츠", brand:"아워호프", name:"시어서커 스트라이프 네크라인 셔츠 - Sky Blue", cust:89000, final:56070, dc:37, heart:3907, id:"308471403"},
  {cat:"반팔 셔츠", brand:"아워호프", name:"시어서커 체크 네크라인 셔츠 - Navy", cust:89000, final:56070, dc:37, heart:1917, id:"308518433"},
-
- // ===== 여름 니트 =====
+ // ----- 여름 니트 -----
  {cat:"여름 니트", brand:"망고매니플리즈", name:"[단독] NEFF LINEN KNIT (5colors)", cust:98000, final:83300, dc:15, heart:45089, id:"305914779"},
  {cat:"여름 니트", brand:"망고매니플리즈", name:"NEFF LINEN CROP KNIT (5color)", cust:95000, final:80750, dc:15, heart:23590, id:"306801591"},
  {cat:"여름 니트", brand:"레더리", name:"어블룸 린넨 니트 가디건 (9color)", cust:59000, final:46197, dc:21, heart:21845, id:"306545445"},
  {cat:"여름 니트", brand:"레이지지", name:"Summer Breeze Knit (4color)", cust:109000, final:92933, dc:14, heart:2648, id:"308376878"},
-
- // ===== 여름 가디건 =====
+ // ----- 여름 가디건 -----
  {cat:"여름 가디건", brand:"레테라", name:"Basic Round Linen Cardigan (14color)", cust:69000, final:39606, dc:42, heart:83375, id:"306085072"},
  {cat:"여름 가디건", brand:"레이지지", name:"Summer Breeze Cardigan (4color)", cust:119000, final:98353, dc:17, heart:7389, id:"308376821"},
-
- // ===== 카라 니트 =====
+ // ----- 카라 니트 -----
  {cat:"카라 니트", brand:"우이", name:"레이온 카라니트 (5컬러) OU419", cust:74000, final:44400, dc:40, heart:24211, id:"301086043"},
-
- // ===== 체크 셔츠 =====
+ // ----- 체크 셔츠 -----
  {cat:"체크 셔츠", brand:"레이지지", name:"Loose Fit Classic Check Shirt (5color)", cust:109000, final:92933, dc:14, heart:16947, id:"306765618"},
  {cat:"체크 셔츠", brand:"리엘", name:"[15th] Dive overfit shirt (blue check)", cust:140000, final:89317, dc:36, heart:5747, id:"306879255"},
  {cat:"체크 셔츠", brand:"리엘", name:"[3rd] Bail overfit shirt (red check)", cust:140000, final:89317, dc:36, heart:3374, id:"308303345"},
-
- // ===== 블라우스 · 드레이프넥 · 티 =====
+ // ----- 블라우스 · 드레이프넥 · 티 -----
  {cat:"블라우스 · 드레이프넥 · 티", brand:"아틀리에 나인", name:"[장다연 PICK] LOND WAIST TUCK T-SHIRT (Z-BL-4225)", cust:49000, final:37240, dc:24, heart:42859, id:"305818731"},
  {cat:"블라우스 · 드레이프넥 · 티", brand:"주르티", name:"[NEW컬러추가] 선셋 블라우스 3컬러 (j1791)", cust:109000, final:61040, dc:44, heart:27054, id:"307191229"},
  {cat:"블라우스 · 드레이프넥 · 티", brand:"아틀리에 나인", name:"LOND2 WAIST TUCK BLOUSE (Z-BL-4287)", cust:59000, final:51330, dc:13, heart:17929, id:"306082781"},
@@ -91,14 +91,31 @@ const D=[
  {cat:"블라우스 · 드레이프넥 · 티", brand:"피버", name:"[단독][11th] Two-way Button Line Blouse - Ivory", cust:69000, final:44436, dc:35, heart:3145, id:"308533651"},
  {cat:"블라우스 · 드레이프넥 · 티", brand:"피버", name:"[10th] Mild Drape Neck T-shirt - Gray", cust:49000, final:31556, dc:35, heart:2030, id:"308533642"},
  {cat:"블라우스 · 드레이프넥 · 티", brand:"피버", name:"[9th] Mild Drape Neck T-shirt - Cream", cust:49000, final:31556, dc:35, heart:1282, id:"308533638"},
-
- // ===== 스커트 =====
+ // ----- 스커트 -----
  {cat:"스커트", brand:"무니드", name:"SILKY H LINE SKIRT - Olive", cust:103000, final:76714, dc:25, heart:15339, id:"307268545"},
  {cat:"스커트", brand:"시야쥬", name:"SIST9024 나일론 퍼티그 스커트 (2Colors)", cust:85000, final:51765, dc:39, heart:13093, id:"305929040"},
  {cat:"스커트", brand:"아워코모스", name:"one-button cotton maxi skirt (2color) orc6007", cust:100000, final:72000, dc:28, heart:7125, id:"308502706"},
  {cat:"스커트", brand:"무니드", name:"MELT MAXI SKIRT - Charcoal", cust:94000, final:71440, dc:24, heart:4573, id:"308283747"},
  {cat:"스커트", brand:"반원 아틀리에", name:"P3317 실키 맥시 스커트 - Charcoal", cust:77000, final:43120, dc:44, heart:2689, id:"308499943"},
  {cat:"스커트", brand:"무니드", name:"MOA LACE LONG SKIRT - Cream", cust:129000, final:96079, dc:25, heart:2004, id:"308574547"},
+
+ // ============ 29CM (여성/30대 · 여름 · 컨템포러리/페미닌) ============
+ // ----- 블라우스 -----
+ {plat:"29CM", cat:"블라우스", brand:"제너럴아이디어", name:"WOMAN 루즈핏 래글런 핀턱 블라우스 (Ivory)", cust:54000, final:37260, dc:31, heart:42727, url:"https://www.29cm.co.kr/product/catalog/3866102", imgFull:"https://img.29cm.co.kr/item/202604/11f141dafbe01a4fbc9223fafa55db99.jpg?width=500"},
+ {plat:"29CM", cat:"블라우스", brand:"어다울", name:"Drape Neck Belted Blouse", cust:115000, final:68430, dc:40, heart:8265, url:"https://www.29cm.co.kr/product/catalog/3493385", imgFull:"https://img.29cm.co.kr/item/202509/11f094fd391aa6eca7fa5bca5f3135b2.jpg?width=500"},
+ {plat:"29CM", cat:"블라우스", brand:"미치코런던 코시노", name:"Wrinkled Shirring Shirt (Ivory)", cust:79000, final:56320, dc:29, heart:2263, url:"https://www.29cm.co.kr/product/catalog/3947699", imgFull:"https://img.29cm.co.kr/item/202605/11f14f403e12d9938e7d1394cbf98131.jpg?width=500"},
+ {plat:"29CM", cat:"블라우스", brand:"유메르", name:"아네 볼륨 블라우스 (4color)", cust:162000, final:130820, dc:19, heart:2094, url:"https://www.29cm.co.kr/product/catalog/4175102", imgFull:"https://img.29cm.co.kr/item/202608/11f1a4cf9dd7d86085e13bd34b6b46ee.jpg?width=500"},
+ // ----- 니트 · 티 -----
+ {plat:"29CM", cat:"니트 · 티", brand:"몽돌", name:"에센셜 라운드넥 반팔 티셔츠 (10color)", cust:37000, final:21650, dc:41, heart:33019, url:"https://www.29cm.co.kr/product/catalog/3185392", imgFull:"https://img.29cm.co.kr/item/202603/11f128cfe3e36d419454f55a8a0462c2.jpg?width=500"},
+ {plat:"29CM", cat:"니트 · 티", brand:"아르토", name:"Essential Boat Neck Tee (4color)", cust:36000, final:34200, dc:5, heart:27473, url:"https://www.29cm.co.kr/product/catalog/2746755", imgFull:"https://img.29cm.co.kr/item/202603/11f1229b4aa66574a540f70c2f9f50ef.png?width=500"},
+ {plat:"29CM", cat:"니트 · 티", brand:"토아베", name:"Draped Tencel Layered Tee", cust:79800, final:55860, dc:30, heart:26682, url:"https://www.29cm.co.kr/product/catalog/3598810", imgFull:"https://img.29cm.co.kr/item/202511/11f0b66f7923a6cd93805931f675de35.jpg?width=500"},
+ {plat:"29CM", cat:"니트 · 티", brand:"시야쥬", name:"클래식 스트라이프 카라 니트 (Navy)", cust:97000, final:66790, dc:31, heart:17940, url:"https://www.29cm.co.kr/product/catalog/3033257", imgFull:"https://img.29cm.co.kr/item/202602/11f0ffde6857c396a3c0d1eec8e1376a.jpg?width=500"},
+ {plat:"29CM", cat:"니트 · 티", brand:"프리버07", name:"Button Collar PK Knit", cust:98000, final:68600, dc:30, heart:8120, url:"https://www.29cm.co.kr/product/catalog/4116902", imgFull:"https://img.29cm.co.kr/item/202608/11f19d0484bf5ec08fdcfdedb31a0499.jpg?width=500"},
+ {plat:"29CM", cat:"니트 · 티", brand:"에토아", name:"브이 슬릿 코튼 니트 (아이보리)", cust:92000, final:70380, dc:24, heart:5948, url:"https://www.29cm.co.kr/product/catalog/3739268", imgFull:"https://img.29cm.co.kr/item/202603/11f1177102cc69aca3c0d36a71b51555.jpg?width=500"},
+ {plat:"29CM", cat:"니트 · 티", brand:"오브유이", name:"소프트 딥 브이넥 니트 (2color)", cust:118000, final:74770, dc:37, heart:2886, url:"https://www.29cm.co.kr/product/catalog/4132224", imgFull:"https://img.29cm.co.kr/item/202608/11f19e15c5dcf58a8fdc55264ea4aba9.jpg?width=500"},
+ // ----- 스커트 -----
+ {plat:"29CM", cat:"스커트", brand:"씨타", name:"Essential Lounge Maxi Skirt", cust:59000, final:36450, dc:38, heart:14514, url:"https://www.29cm.co.kr/product/catalog/3781482", imgFull:"https://img.29cm.co.kr/item/202604/11f13481f4cdcf009ec50943ef3e0d76.jpg?width=500"},
+ {plat:"29CM", cat:"스커트", brand:"커스텀어클락 우먼", name:"포멀 슬릿 H라인 맥시 스커트 (차콜)", cust:62000, final:39290, dc:37, heart:6625, url:"https://www.29cm.co.kr/product/catalog/3462638", imgFull:"https://img.29cm.co.kr/item/202509/11f088b58eba7de7ab5de36827748911.jpg?width=500"},
 ];
 
 const IMG={
@@ -111,18 +128,22 @@ const IMG={
 "307268545":"img9/45/307268545_XE37110","305929040":"img9/40/305929040_YT36782","308502706":"img9/06/308502706_PL47153","308283747":"img9/47/308283747_UO30713","308499943":"img9/43/308499943_GG53692","308574547":"img9/47/308574547_MS33513"
 };
 
-const CATS=["반팔 셔츠","여름 니트","여름 가디건","카라 니트","체크 셔츠","블라우스 · 드레이프넥 · 티","스커트"];
+const PLATS=["W컨셉","29CM"];
+let curPlat="W컨셉";
+const platOf=p=>p.plat||"W컨셉";
 const won=n=>"₩"+(n||0).toLocaleString('en-US');
 const hk=n=>n>=1000?(n/1000).toFixed(n>=10000?0:1).replace('.0','')+'k':(n||0);
 const imgUrl=id=>IMG[id]?("https://product-image.wconcept.co.kr/productimg/image/"+IMG[id]+".jpg?RS=500"):"";
-const purl=id=>"https://www.wconcept.co.kr/Product/"+id;
+const srcOf=p=>p.imgFull?p.imgFull:imgUrl(p.id);
+const hrefOf=p=>p.url?p.url:("https://www.wconcept.co.kr/Product/"+p.id);
+function catsOf(plat){var seen={},out=[];D.forEach(function(p){if(platOf(p)===plat&&!seen[p.cat]){seen[p.cat]=1;out.push(p.cat);}});return out;}
 
 function cardHTML(p){
-  return '<a class="card" href="'+purl(p.id)+'" target="_blank" rel="noopener">'+
+  return '<a class="card" href="'+hrefOf(p)+'" target="_blank" rel="noopener">'+
     '<div class="thumb">'+
       (p.dc?'<span class="badge">'+p.dc+'%</span>':'')+
       (p.heart>0?'<span class="heart">♥ '+hk(p.heart)+'</span>':'')+
-      '<img loading="lazy" src="'+imgUrl(p.id)+'" alt="'+p.name.replace(/"/g,'')+'">'+
+      '<img loading="lazy" src="'+srcOf(p)+'" alt="'+p.name.replace(/"/g,'')+'">'+
     '</div>'+
     '<div class="info">'+
       '<div class="brand">'+p.brand+'</div>'+
@@ -135,25 +156,37 @@ function cardHTML(p){
 
 function render(){
   var v=document.getElementById('views'); v.innerHTML='';
-  CATS.forEach(function(cat){
-    var items=D.filter(function(p){return p.cat===cat;});
+  var cats=catsOf(curPlat);
+  cats.forEach(function(cat,ci){
+    var items=D.filter(function(p){return platOf(p)===curPlat && p.cat===cat;});
     if(!items.length)return;
     var brands=[...new Set(items.map(function(p){return p.brand;}))];
-    var sec=document.createElement('section'); sec.className='cat'; sec.id='c_'+CATS.indexOf(cat);
+    var sec=document.createElement('section'); sec.className='cat'; sec.id='c_'+ci;
     sec.innerHTML='<div class="chead"><h2>'+cat+'</h2><span class="cnt">'+items.length+'개 · '+brands.join(' · ')+'</span></div>'+
       '<p class="cnote">브랜드 서칭 결과 · 관심수 높은 순</p>'+
       '<div class="grid">'+items.map(cardHTML).join('')+'</div>';
     v.appendChild(sec);
   });
-  document.getElementById('foot').innerHTML='총 '+D.length+'개 상품 · '+CATS.length+'개 카테고리 · W컨셉 수집<br>썸네일/가격/관심수는 수집 시점(2026.09.02) 기준 — 시점에 따라 변동될 수 있어요';
+  var tot=D.filter(function(p){return platOf(p)===curPlat;}).length;
+  document.getElementById('foot').innerHTML=curPlat+' · 총 '+tot+'개 상품 · '+cats.length+'개 카테고리<br>썸네일/가격/관심수는 수집 시점(2026.09.02) 기준 — 시점에 따라 변동될 수 있어요';
+  buildNav(cats);
+  setObs();
 }
-function buildNav(){
+function buildNav(cats){
   var nav=document.getElementById('nav');
-  nav.innerHTML=CATS.map(function(cat,i){var n=D.filter(function(p){return p.cat===cat;}).length;return '<span class="pill" data-i="'+i+'">'+cat+' <b style="opacity:.5">'+n+'</b></span>';}).join('');
+  nav.innerHTML=cats.map(function(cat,i){var n=D.filter(function(p){return platOf(p)===curPlat&&p.cat===cat;}).length;return '<span class="pill" data-i="'+i+'">'+cat+' <b style="opacity:.5">'+n+'</b></span>';}).join('');
   nav.querySelectorAll('.pill').forEach(function(el){el.onclick=function(){var t=document.getElementById('c_'+el.dataset.i);if(t)t.scrollIntoView({behavior:'smooth'});};});
 }
-render(); buildNav();
-// scrollspy
-var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var i=e.target.id.split('_')[1];document.querySelectorAll('.pill').forEach(function(p){p.classList.toggle('on',p.dataset.i===i);});}});},{rootMargin:'-40% 0px -55% 0px'});
-document.querySelectorAll('section.cat').forEach(function(s){obs.observe(s);});
+function buildPlats(){
+  var el=document.getElementById('plats');
+  el.innerHTML=PLATS.map(function(p){var n=D.filter(function(x){return platOf(x)===p;}).length;return '<div class="ptab'+(p===curPlat?' on':'')+'" data-p="'+p+'">'+p+' <b style="opacity:.55;font-weight:700">'+n+'</b></div>';}).join('');
+  el.querySelectorAll('.ptab').forEach(function(b){b.onclick=function(){curPlat=b.dataset.p;el.querySelectorAll('.ptab').forEach(function(x){x.classList.toggle('on',x.dataset.p===curPlat);});render();window.scrollTo(0,0);};});
+}
+var _obs=null;
+function setObs(){
+  if(_obs)_obs.disconnect();
+  _obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var i=e.target.id.split('_')[1];document.querySelectorAll('.pill').forEach(function(p){p.classList.toggle('on',p.dataset.i===i);});}});},{rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('section.cat').forEach(function(s){_obs.observe(s);});
+}
+buildPlats(); render();
 </script>
