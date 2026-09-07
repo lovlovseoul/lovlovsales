@@ -115,7 +115,7 @@ function render(){
   let h='';
   // daily trend
   h+=`<div class="card"><h3>일별 매출 추이</h3><div class="cs">${isC?'채널별 누적 (막대) · 일 합계':cur+' 일별 실결제금액'}</div>`+dailyChart(isC,src)+`</div>`;
-  if(src.cancelAmt!=null && src.cancelAmt>0){ h+=cancelCard(isC,src); }
+  if(src.cancelAmt!=null && src.cancelCnt>0){ h+=cancelCard(isC,src); }
   if(isC){
     h+=`<div class="card"><h3>채널 비중</h3><div class="cs">기간 실결제금액 점유율</div>`+shareChart()+`</div>`;
   }
