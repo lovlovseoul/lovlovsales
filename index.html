@@ -157,7 +157,7 @@ function renderDayTop(){
 function dailyChart(isC,src){
   const W=1080,H=260,PL=54,PR=16,PT=14,PB=34;
   const days=D.days;
-  const totals=days.map(d=> isC? D.combined.dayTotals[d].amt : src.dayTotals[d].amt);
+  const totals=days.map(d=> isC? (D.combined.dayTotals[d]?D.combined.dayTotals[d].amt:0) : (src.dayTotals[d]?src.dayTotals[d].amt:0));
   const max=Math.max(...totals)*1.12;
   const bw=(W-PL-PR)/days.length;
   const y=v=>PT+(H-PT-PB)*(1-v/max);
@@ -169,13 +169,13 @@ function dailyChart(isC,src){
     if(isC){
       let yb=H-PB;
       D.platforms.forEach(p=>{
-        const v=D.combined.byPlatDay[p][d]; if(v<=0)return;
+        const v=D.combined.byPlatDay[p][d]||0; if(v<=0)return;
         const hh=(H-PT-PB)*(v/max); const yt=yb-hh;
         s+=`<rect class="hb" data-t="${dlab(d)} · ${p}" data-v="${won(v)}" x="${cx-bwid/2}" y="${yt}" width="${bwid}" height="${Math.max(hh-2,0)}" rx="3" fill="${PCH[p]}"/>`;
         yb=yt;
       });
     } else {
-      const v=src.dayTotals[d].amt; const hh=(H-PT-PB)*(v/max); 
+      const v=src.dayTotals[d]?src.dayTotals[d].amt:0; if(v<=0){ } const hh=(H-PT-PB)*(v/max); 
       s+=`<rect class="hb" data-t="${dlab(d)}" data-v="${won(v)}" x="${cx-bwid/2}" y="${H-PB-hh}" width="${bwid}" height="${Math.max(hh,0)}" rx="3" fill="${PCH[cur]}"/>`;
     }
     // total label
