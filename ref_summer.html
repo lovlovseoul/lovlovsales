@@ -1,4 +1,4 @@
-<title>여름 레퍼런스 보드</title>
+<title>시즌 레퍼런스 보드</title>
 <style>
 :root{
   --bg:#f4f2ee; --panel:#ffffff; --ink:#1c1a17; --sub:#8a8578; --line:#e5e1d8;
@@ -12,7 +12,10 @@ header.top{position:sticky;top:0;z-index:20;background:rgba(244,242,238,.92);bac
 .hd{max-width:1280px;margin:0 auto;padding:16px 22px 12px}
 .htitle{font-size:20px;font-weight:800;letter-spacing:-.01em}
 .hsub{font-size:12px;color:var(--sub);margin-top:3px}
-.plats{display:flex;gap:8px;margin:14px 0 2px}
+.seasons{display:flex;gap:8px;margin:12px 0 2px}
+.stab{padding:9px 24px;border-radius:12px;background:#fff;color:#55514a;border:1.5px solid var(--line);cursor:pointer;font-size:15px;font-weight:800;transition:.13s;letter-spacing:-.01em}
+.stab.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 10px rgba(178,59,59,.22)}
+.plats{display:flex;gap:8px;margin:12px 0 2px}
 .ptab{padding:8px 22px;border-radius:10px;background:#fff;color:#55514a;border:1px solid var(--line);cursor:pointer;font-size:14.5px;font-weight:800;transition:.13s}
 .ptab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .nav{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
@@ -45,8 +48,9 @@ section.cat{padding-top:34px;scroll-margin-top:150px}
 
 <header class="top">
   <div class="hd">
-    <div class="htitle">☀️ 여름 제품군 기획 레퍼런스</div>
+    <div class="htitle">🗓️ 시즌 기획 레퍼런스</div>
     <div class="hsub" id="hsub">브랜드별 서칭 · 카드 클릭 시 상품 상세페이지로 이동 · 관심수(♥)·가격은 수집 시점 기준</div>
+    <div class="seasons" id="seasons"></div>
     <div class="plats" id="plats"></div>
     <div class="nav" id="nav"></div>
   </div>
@@ -189,13 +193,16 @@ const IMG={
 
 const PLATS=["W컨셉","29CM"];
 let curPlat="W컨셉";
+const SEASONS=[["SS","🌸 봄+여름"],["FW","🍂 가을+겨울"]];
+let curSeason="SS";
+const seasonOf=p=>p.season||"SS";
 const platOf=p=>p.plat||"W컨셉";
 const won=n=>"₩"+(n||0).toLocaleString('en-US');
 const hk=n=>n>=1000?(n/1000).toFixed(n>=10000?0:1).replace('.0','')+'k':(n||0);
 const imgUrl=id=>IMG[id]?("https://product-image.wconcept.co.kr/productimg/image/"+IMG[id]+".jpg?RS=500"):"";
 const srcOf=p=>p.imgFull?p.imgFull:imgUrl(p.id);
 const hrefOf=p=>p.url?p.url:("https://www.wconcept.co.kr/Product/"+p.id);
-function catsOf(plat){var seen={},out=[];D.forEach(function(p){if(platOf(p)===plat&&!seen[p.cat]){seen[p.cat]=1;out.push(p.cat);}});return out;}
+function catsOf(plat){var seen={},out=[];D.forEach(function(p){if(seasonOf(p)===curSeason&&platOf(p)===plat&&!seen[p.cat]){seen[p.cat]=1;out.push(p.cat);}});return out;}
 
 function cardHTML(p){
   return '<a class="card" href="'+hrefOf(p)+'" target="_blank" rel="noopener">'+
@@ -216,8 +223,14 @@ function cardHTML(p){
 function render(){
   var v=document.getElementById('views'); v.innerHTML='';
   var cats=catsOf(curPlat);
+  if(!cats.length){
+    var slab=curSeason==="FW"?"가을+겨울":"봄+여름";
+    v.innerHTML='<div style="text-align:center;padding:90px 20px;color:var(--sub)"><div style="font-size:44px;margin-bottom:14px">'+(curSeason==="FW"?"🍂":"🌸")+'</div><div style="font-size:16px;font-weight:700;color:#55514a">'+slab+' · '+curPlat+' 레퍼런스는 아직 준비 중이에요</div><div style="font-size:13px;margin-top:8px">상품 링크를 주면 여기에 추가할게요.</div></div>';
+    document.getElementById('foot').innerHTML='';
+    buildNav([]); if(_obs)_obs.disconnect(); return;
+  }
   cats.forEach(function(cat,ci){
-    var items=D.filter(function(p){return platOf(p)===curPlat && p.cat===cat;});
+    var items=D.filter(function(p){return seasonOf(p)===curSeason && platOf(p)===curPlat && p.cat===cat;});
     if(!items.length)return;
     var brands=[...new Set(items.map(function(p){return p.brand;}))];
     var sec=document.createElement('section'); sec.className='cat'; sec.id='c_'+ci;
@@ -226,20 +239,26 @@ function render(){
       '<div class="grid">'+items.map(cardHTML).join('')+'</div>';
     v.appendChild(sec);
   });
-  var tot=D.filter(function(p){return platOf(p)===curPlat;}).length;
-  document.getElementById('foot').innerHTML=curPlat+' · 총 '+tot+'개 상품 · '+cats.length+'개 카테고리<br>썸네일/가격/관심수는 수집 시점(2026.09.02) 기준 — 시점에 따라 변동될 수 있어요';
+  var tot=D.filter(function(p){return seasonOf(p)===curSeason&&platOf(p)===curPlat;}).length;
+  var slab=curSeason==="FW"?"가을+겨울":"봄+여름";
+  document.getElementById('foot').innerHTML=slab+' · '+curPlat+' · 총 '+tot+'개 상품 · '+cats.length+'개 카테고리<br>썸네일/가격/관심수는 수집 시점 기준 — 시점에 따라 변동될 수 있어요';
   buildNav(cats);
   setObs();
 }
 function buildNav(cats){
   var nav=document.getElementById('nav');
-  nav.innerHTML=cats.map(function(cat,i){var n=D.filter(function(p){return platOf(p)===curPlat&&p.cat===cat;}).length;return '<span class="pill" data-i="'+i+'">'+cat+' <b style="opacity:.5">'+n+'</b></span>';}).join('');
+  nav.innerHTML=cats.map(function(cat,i){var n=D.filter(function(p){return seasonOf(p)===curSeason&&platOf(p)===curPlat&&p.cat===cat;}).length;return '<span class="pill" data-i="'+i+'">'+cat+' <b style="opacity:.5">'+n+'</b></span>';}).join('');
   nav.querySelectorAll('.pill').forEach(function(el){el.onclick=function(){var t=document.getElementById('c_'+el.dataset.i);if(t)t.scrollIntoView({behavior:'smooth'});};});
 }
 function buildPlats(){
   var el=document.getElementById('plats');
-  el.innerHTML=PLATS.map(function(p){var n=D.filter(function(x){return platOf(x)===p;}).length;return '<div class="ptab'+(p===curPlat?' on':'')+'" data-p="'+p+'">'+p+' <b style="opacity:.55;font-weight:700">'+n+'</b></div>';}).join('');
+  el.innerHTML=PLATS.map(function(p){var n=D.filter(function(x){return seasonOf(x)===curSeason&&platOf(x)===p;}).length;return '<div class="ptab'+(p===curPlat?' on':'')+'" data-p="'+p+'">'+p+' <b style="opacity:.55;font-weight:700">'+n+'</b></div>';}).join('');
   el.querySelectorAll('.ptab').forEach(function(b){b.onclick=function(){curPlat=b.dataset.p;el.querySelectorAll('.ptab').forEach(function(x){x.classList.toggle('on',x.dataset.p===curPlat);});render();window.scrollTo(0,0);};});
+}
+function buildSeasons(){
+  var el=document.getElementById('seasons');
+  el.innerHTML=SEASONS.map(function(s){var n=D.filter(function(x){return seasonOf(x)===s[0];}).length;return '<div class="stab'+(s[0]===curSeason?' on':'')+'" data-s="'+s[0]+'">'+s[1]+' <b style="opacity:.6;font-weight:800">'+n+'</b></div>';}).join('');
+  el.querySelectorAll('.stab').forEach(function(b){b.onclick=function(){curSeason=b.dataset.s;curPlat="W컨셉";el.querySelectorAll('.stab').forEach(function(x){x.classList.toggle('on',x.dataset.s===curSeason);});buildPlats();render();window.scrollTo(0,0);};});
 }
 var _obs=null;
 function setObs(){
@@ -247,5 +266,5 @@ function setObs(){
   _obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var i=e.target.id.split('_')[1];document.querySelectorAll('.pill').forEach(function(p){p.classList.toggle('on',p.dataset.i===i);});}});},{rootMargin:'-45% 0px -50% 0px'});
   document.querySelectorAll('section.cat').forEach(function(s){_obs.observe(s);});
 }
-buildPlats(); render();
+buildSeasons(); buildPlats(); render();
 </script>
