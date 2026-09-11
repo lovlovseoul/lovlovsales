@@ -79,11 +79,12 @@
       pop.querySelector('.cpclose').onclick=function(ev){ev.stopPropagation();hide();};
     }
     function hide(){pop.hidden=true;}
-    function mark(){var rows=document.querySelectorAll('#views table tr');for(var i=0;i<rows.length;i++){var td=rows[i].querySelector('td');if(td&&ALLPROD[clean(td.textContent)])rows[i].classList.add('clk');}}
+    function prodOf(tr){if(!tr)return '';if(tr.dataset&&tr.dataset.prod)return tr.dataset.prod;var td=tr.querySelector('td');return td?clean(td.textContent):'';}
+    function mark(){var rows=document.querySelectorAll('#views table tr');for(var i=0;i<rows.length;i++){if(ALLPROD[prodOf(rows[i])])rows[i].classList.add('clk');}}
     document.addEventListener('click',function(e){
       if(pop.contains(e.target))return;
       var tr=e.target.closest('tr');
-      if(tr){var td=tr.querySelector('td');if(td){var nm=clean(td.textContent);if(ALLPROD[nm]){show(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}}
+      if(tr){var nm=prodOf(tr);if(ALLPROD[nm]){show(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}
       hide();
     });
     // ===== 26FW 신상 판매 섹션 (전채널 합산) =====
@@ -101,7 +102,7 @@
       var card=document.createElement('div'); card.className='card'; card.id='fw26card';
       var h='<h3>26FW 신상 판매</h3><div class="cs">전채널 합산 · 26FW 신상만 · 8/28 오픈 후 누적 · 총 '+totQ+'장 · '+won(tot)+'</div>';
       h+='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
-      items.forEach(function(e,idx){var pct=Math.round(e.amt/tot*100);h+='<tr class="clk"><td class="n"><span class="rank">'+(idx+1)+'</span>'+e.name+'</td><td>'+e.qty+'</td><td>'+won(e.amt)+'</td><td>'+pct+'%</td></tr>';});
+      items.forEach(function(e,idx){var pct=Math.round(e.amt/tot*100);h+='<tr class="clk" data-prod="'+String(e.name).replace(/"/g,'&quot;')+'"><td class="n"><span class="rank">'+(idx+1)+'</span>'+e.name+'</td><td>'+e.qty+'</td><td>'+won(e.amt)+'</td><td>'+pct+'%</td></tr>';});
       h+='</table>';
       card.innerHTML=h;
       var dailyCard=null,h3s=document.querySelectorAll('#views .card h3');

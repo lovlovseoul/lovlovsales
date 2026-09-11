@@ -147,7 +147,7 @@ function renderDayTop(){
     h='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
     list.forEach((t,i)=>{
       const share=dayAmt?(t.amt/dayAmt*100).toFixed(1):'0.0';
-      h+=`<tr class="${i==0?'r1':''}"><td class="n"><span class="rank">${i+1}</span>${t.name}${isNew(t.name)?'<span class="new">NEW</span>':''}</td><td>${t.qty}</td><td>${won(t.amt)}</td><td>${share}%</td></tr>`;
+      h+=`<tr class="${i==0?'r1':''}" data-prod="${String(t.name).replace(/"/g,'&quot;')}"><td class="n"><span class="rank">${i+1}</span>${t.name}${isNew(t.name)?'<span class="new">NEW</span>':''}</td><td>${t.qty}</td><td>${won(t.amt)}</td><td>${share}%</td></tr>`;
     });
     h+='</table>';
   }
@@ -222,7 +222,7 @@ function topTable(top,tot){
   let h=`<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>`;
   top.slice(0,12).forEach((t,i)=>{
     const nm=t.name.replace(/_\(\dcolor\)/,'');
-    h+=`<tr class="${i==0?'r1':''}"><td class="n"><span class="rank">${i+1}</span>${nm}${isNew(t.name)?'<span class="new">NEW</span>':''}</td><td>${t.qty}</td><td>${won(t.amt)}</td><td>${(t.amt/tot*100).toFixed(1)}%</td></tr>`;
+    h+=`<tr class="${i==0?'r1':''}" data-prod="${String(t.name).replace(/"/g,'&quot;')}"><td class="n"><span class="rank">${i+1}</span>${nm}${isNew(t.name)?'<span class="new">NEW</span>':''}</td><td>${t.qty}</td><td>${won(t.amt)}</td><td>${(t.amt/tot*100).toFixed(1)}%</td></tr>`;
   });
   h+=`</table>`;return h;
 }
@@ -235,4 +235,4 @@ function attachHovers(){
   });
 }
 render();
-</script><script src="colorui.js?v=8"></script><script>(function(){try{var d=(typeof D!=="undefined")&&D.days;if(d&&d.length){var el=document.getElementById("daterange");if(el)el.textContent=d[0].replace(/-/g,".")+" – "+d[d.length-1].slice(5).replace("-",".");}}catch(e){}})();</script></body></html>
+</script><script src="colorui.js?v=9"></script><script>(function(){try{var d=(typeof D!=="undefined")&&D.days;if(d&&d.length){var el=document.getElementById("daterange");if(el)el.textContent=d[0].replace(/-/g,".")+" – "+d[d.length-1].slice(5).replace("-",".");}}catch(e){}})();</script></body></html>
