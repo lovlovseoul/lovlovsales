@@ -99,7 +99,7 @@ function cancelCard(isC,src){
 }
 
 function newCard(src,isC){
-  var items=src.top.filter(function(t){return isNew(t.name);});
+  var EXTRA={'스노우 블룸 집업':1,'마이 시어링 무스탕':1},aEx=curMonth>='2026-10';var items=src.top.filter(function(t){var nm=t.name.replace(/_\(\dcolor\)/,'');return isNew(nm)||(aEx&&EXTRA[nm]);});
   var sumA=0,sumQ=0; items.forEach(function(t){sumA+=t.amt;sumQ+=t.qty;});
   var b='<div class="card"><h3>26FW 2차 신상 판매현황 <span class="new">NEW</span></h3><div class="cs">'+(isC?'전채널 합산':cur)+' · '+(curMonth.slice(5)*1)+'월 오픈 후 누적 · 2차 신상만</div>';
   if(!items.length){return b+'<div class="cs" style="padding:12px 2px">이 달 2차 신상 판매 내역 없음</div></div>';}
