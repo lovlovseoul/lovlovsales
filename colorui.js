@@ -29,13 +29,14 @@
     function curPlat(){try{return (typeof cur!=='undefined')?cur:'전체통합';}catch(e){return '전체통합';}}
     function platList(){var p=curPlat();return (p==='전체통합'||!BP[p])?PLATS:[p];}
     // 선택 스코프(플랫폼/일별)에서 상품의 {키:[q,a]} 병합
+    function mdays_(){try{if(typeof curMonth!=='undefined'&&typeof DM!=='undefined'&&DM[curMonth])return DM[curMonth].days;}catch(e){}return days;}
     function getMap(prod,periodKey,dayKey,daily){
-      var out={},any=false,pl=platList(),d=curD();
+      var out={},any=false,pl=platList(),d=curD(),mdays=mdays_();
+      function acc(s){if(s)Object.keys(s).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=s[k][0];out[k][1]+=s[k][1];any=true;});}
       pl.forEach(function(p){
-        var src;
-        if(daily){var dm=BP[p]&&BP[p][dayKey];src=dm&&dm[d]&&dm[d][prod];}
-        else{src=BP[p]&&BP[p][periodKey]&&BP[p][periodKey][prod];}
-        if(src){Object.keys(src).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=src[k][0];out[k][1]+=src[k][1];any=true;});}
+        var dm=BP[p]&&BP[p][dayKey]; if(!dm)return;
+        if(daily){acc(dm[d]&&dm[d][prod]);}
+        else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}
       });
       return any?out:null;
     }
@@ -56,7 +57,7 @@
       var cd=getMap(name,'colors','dayColors',daily);
       var sd=getMap(name,'sizes','daySizes',daily);
       var jd=getMap(name,'combos','dayCombos',daily);
-      var label=scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+range));
+      var mdys=mdays_();var mrange=mdys.length?(mdys[0].slice(5).replace('-','/')+'~'+mdys[mdys.length-1].slice(5).replace('-','/')):range;var label=scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+mrange));
       var h='<span class="cpclose">✕</span><h4>'+name+'</h4>';
       if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cempty">이 조건 데이터가 없어요<br>(컬러 집계 '+range+' 커버)</div>';}
       else{
@@ -100,7 +101,7 @@
       var tot=items.reduce(function(s,e){return s+e.amt;},0)||1;
       var totQ=items.reduce(function(s,e){return s+e.qty;},0);
       var card=document.createElement('div'); card.className='card'; card.id='fw26card';
-      var h='<h3>26FW 신상 판매</h3><div class="cs">전채널 합산 · 26FW 신상만 · 8/28 오픈 후 누적 · 총 '+totQ+'장 · '+won(tot)+'</div>';
+      var h='<h3>26FW 1차 신상 판매</h3><div class="cs">전채널 합산 · 26FW 신상만 · 8/28 오픈 후 누적 · 총 '+totQ+'장 · '+won(tot)+'</div>';
       h+='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
       items.forEach(function(e,idx){var pct=Math.round(e.amt/tot*100);h+='<tr class="clk" data-prod="'+String(e.name).replace(/"/g,'&quot;')+'"><td class="n"><span class="rank">'+(idx+1)+'</span>'+e.name+'</td><td>'+e.qty+'</td><td>'+won(e.amt)+'</td><td>'+pct+'%</td></tr>';});
       h+='</table>';
