@@ -98,6 +98,17 @@ function cancelCard(isC,src){
     '<table><tr><th class="n">날짜</th><th>건수</th><th>취소·환불액</th><th style="text-align:left">플랫폼</th></tr>'+rows+'</table></div>';
 }
 
+function newCard(src,isC){
+  var items=src.top.filter(function(t){return isNew(t.name);});
+  var sumA=0,sumQ=0; items.forEach(function(t){sumA+=t.amt;sumQ+=t.qty;});
+  var b='<div class="card"><h3>26FW 2차 신상 판매현황 <span class="new">NEW</span></h3><div class="cs">'+(isC?'전채널 합산':cur)+' · '+(curMonth.slice(5)*1)+'월 오픈 후 누적 · 2차 신상만</div>';
+  if(!items.length){return b+'<div class="cs" style="padding:12px 2px">이 달 2차 신상 판매 내역 없음</div></div>';}
+  b+='<div style="font-size:15px;font-weight:700;color:var(--text);margin:2px 0 10px">총 '+sumQ+'장 · '+won(sumA)+'</div>';
+  b+='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
+  items.forEach(function(t,i){var nm=t.name.replace(/_\(\dcolor\)/,'');
+    b+='<tr class="'+(i==0?'r1':'')+'" data-prod="'+String(t.name).replace(/"/g,'&quot;')+'"><td class="n"><span class="rank">'+(i+1)+'</span>'+nm+'</td><td>'+t.qty+'</td><td>'+won(t.amt)+'</td><td>'+(t.amt/sumA*100).toFixed(1)+'%</td></tr>';});
+  return b+'</table></div>';
+}
 function render(){
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',TABS[i]==cur));
   const isC=cur=='전체통합';
@@ -119,6 +130,7 @@ function render(){
   if(isC){
     h+=`<div class="card"><h3>채널 비중</h3><div class="cs">기간 실결제금액 점유율</div>`+shareChart()+`</div>`;
   }
+  h+=newCard(src,isC);
   // top products
   const top=src.top;
   h+=`<div class="grid">`;
@@ -216,7 +228,7 @@ function topBars(top,barcol){
   return s;
 }
 
-const NEWSET=new Set([]);
+const NEWSET=new Set(["무디 투웨이 니트","버튼 저지 롱 스커트","소프트 레이스 탑","딥 후드 퍼 파카","퍼 라인 엠에이원 자켓","밀키 블룸 퍼 자켓","스너그 하이넥 퍼 자켓","플러쉬 퍼 하프 코트","모엘 하이넥 울 롱 코트","오웬 울 하프 코트","프로스트 하이넥 무스탕"]);
 function isNew(n){return NEWSET.has(n.replace(/_\(\dcolor\)/,''));}
 function topTable(top,tot){
   let h=`<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>`;
