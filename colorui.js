@@ -30,12 +30,13 @@
     function platList(){var p=curPlat();return (p==='전체통합'||!BP[p])?PLATS:[p];}
     // 선택 스코프(플랫폼/일별)에서 상품의 {키:[q,a]} 병합
     function mdays_(){try{if(typeof curMonth!=='undefined'&&typeof DM!=='undefined'&&DM[curMonth])return DM[curMonth].days;}catch(e){}return days;}
-    function getMap(prod,periodKey,dayKey,daily){
-      var out={},any=false,pl=platList(),d=curD(),mdays=mdays_();
+    function getMap(prod,periodKey,dayKey,daily,fw){
+      var out={},any=false,pl=fw?PLATS:platList(),d=curD(),mdays=mdays_();
       function acc(s){if(s)Object.keys(s).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=s[k][0];out[k][1]+=s[k][1];any=true;});}
       pl.forEach(function(p){
         var dm=BP[p]&&BP[p][dayKey]; if(!dm)return;
-        if(daily){acc(dm[d]&&dm[d][prod]);}
+        if(fw){Object.keys(dm).forEach(function(dd){if(dd>='2026-08-28')acc(dm[dd]&&dm[dd][prod]);});}
+        else if(daily){acc(dm[d]&&dm[d][prod]);}
         else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}
       });
       return any?out:null;
@@ -53,11 +54,11 @@
       return any?o:null;
     }
     function scopeLabel(){var p=curPlat();return (p==='전체통합')?'전채널':p;}
-    function show(name,daily,x,y){
-      var cd=getMap(name,'colors','dayColors',daily);
-      var sd=getMap(name,'sizes','daySizes',daily);
-      var jd=getMap(name,'combos','dayCombos',daily);
-      var mdys=mdays_();var mrange=mdys.length?(mdys[0].slice(5).replace('-','/')+'~'+mdys[mdys.length-1].slice(5).replace('-','/')):range;var label=scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+mrange));
+    function show(name,daily,x,y,fw){
+      var cd=getMap(name,'colors','dayColors',daily,fw);
+      var sd=getMap(name,'sizes','daySizes',daily,fw);
+      var jd=getMap(name,'combos','dayCombos',daily,fw);
+      var mdys=mdays_();var mrange=mdys.length?(mdys[0].slice(5).replace('-','/')+'~'+mdys[mdys.length-1].slice(5).replace('-','/')):range;var label=fw?('전채널 · 8/28~ 누적'):(scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+mrange)));
       var h='<span class="cpclose">✕</span><h4>'+name+'</h4>';
       if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cempty">이 조건 데이터가 없어요<br>(컬러 집계 '+range+' 커버)</div>';}
       else{
@@ -85,7 +86,7 @@
     document.addEventListener('click',function(e){
       if(pop.contains(e.target))return;
       var tr=e.target.closest('tr');
-      if(tr){var nm=prodOf(tr);if(ALLPROD[nm]){show(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}
+      if(tr){var nm=prodOf(tr);if(ALLPROD[nm]){var fw=!!(tr.closest&&tr.closest('#fw26card'));show(nm,fw?false:sectionDaily(tr),e.clientX,e.clientY,fw);return;}}
       hide();
     });
     // ===== 26FW 신상 판매 섹션 (전채널 합산) =====
