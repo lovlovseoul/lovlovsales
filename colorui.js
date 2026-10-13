@@ -6,20 +6,20 @@
     var ALLPROD={}; PLATS.forEach(function(p){var c=BP[p]&&BP[p].colors;if(c)Object.keys(c).forEach(function(k){ALLPROD[k]=1;});});
     var st=document.createElement('style');
     st.textContent=
-    '.colorpop{position:fixed;z-index:60;background:#14140f;border:1px solid #3a3a30;border-radius:12px;padding:16px 16px 14px;min-width:255px;max-width:340px;max-height:82vh;overflow:auto;box-shadow:0 10px 34px rgba(0,0,0,.55);font-size:13px;color:#eee}'+
+    '.colorpop{position:fixed;z-index:60;background:#FFFFFF;border:1px solid #DCDFE4;border-radius:12px;padding:16px 16px 14px;min-width:255px;max-width:340px;max-height:82vh;overflow:auto;box-shadow:0 10px 30px rgba(16,24,40,.14);font-size:13px;color:#1A1D21}'+
     '.colorpop h4{margin:0 22px 2px 0;font-size:14px;line-height:1.3}'+
-    '.colorpop .cpsub{font-size:11px;color:#8a8a80;margin-bottom:11px}'+
-    '.colorpop .seclab{font-size:10.5px;letter-spacing:.04em;color:#8a8a80;margin:13px 0 7px;text-transform:none}'+
+    '.colorpop .cpsub{font-size:11px;color:#9AA3AD;margin-bottom:11px}'+
+    '.colorpop .seclab{font-size:10.5px;letter-spacing:.04em;color:#9AA3AD;margin:13px 0 7px;text-transform:none}'+
     '.colorpop .crow{margin:7px 0}'+
     '.colorpop .cline{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}'+
-    '.colorpop .cq{color:#bdbdb2;white-space:nowrap;padding-left:10px}'+
-    '.colorpop .cbarwrap{height:6px;background:#2a2a24;border-radius:3px;overflow:hidden}'+
-    '.colorpop .cbar{height:100%;border-radius:3px;background:#c9a227}'+
-    '.colorpop .sbar{background:#5b8aa6}'+
-    '.colorpop .jbar{background:#7fae5f}'+
-    '.colorpop .cempty{font-size:12px;color:#8a8a80;padding:4px 0}'+
-    '.colorpop .cpclose{position:absolute;top:9px;right:11px;cursor:pointer;color:#8a8a80;font-size:13px}'+
-    'tr.clk{cursor:pointer}tr.clk:hover{background:rgba(255,255,255,.05)}';
+    '.colorpop .cq{color:#5B6470;white-space:nowrap;padding-left:10px}'+
+    '.colorpop .cbarwrap{height:6px;background:#EEF0F3;border-radius:3px;overflow:hidden}'+
+    '.colorpop .cbar{height:100%;border-radius:3px;background:#2563EB}'+
+    '.colorpop .sbar{background:#EA5529}'+
+    '.colorpop .jbar{background:#16A34A}'+
+    '.colorpop .cempty{font-size:12px;color:#9AA3AD;padding:4px 0}'+
+    '.colorpop .cpclose{position:absolute;top:9px;right:11px;cursor:pointer;color:#9AA3AD;font-size:13px}'+
+    'tr.clk{cursor:pointer}tr.clk:hover{background:#F4F5F7}';
     document.head.appendChild(st);
     var pop=document.createElement('div');pop.className='colorpop';pop.hidden=true;document.body.appendChild(pop);
     function clean(n){return n.replace(/^\d+\s*/,'').replace(/\s*NEW\s*$/,'').trim();}
