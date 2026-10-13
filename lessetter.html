@@ -30,6 +30,7 @@ h1{font-size:23px;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line)}
 th{color:var(--text-3);font-weight:600;font-size:11px;text-align:right}
+td{color:var(--text-1);font-weight:500}
 th.n,td.n{text-align:left}
 tr.r1 td{background:var(--accent-soft)}
 tr.clk{cursor:pointer}tr.clk:hover td{background:#F4F5F7}
@@ -87,7 +88,7 @@ function topBars(top){
   var max=Math.max.apply(null,top.map(function(t){return t.amt;}))||1;var rows=top.slice(0,20);
   var W=1080,rh=30,H=rows.length*rh+8,PL=4,barX=180,PR=78;var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
   rows.forEach(function(t,i){var yy=i*rh+6;var w=(W-barX-PR)*(t.amt/max);var nm=t.name;
-    s+='<text x="'+PL+'" y="'+(yy+15)+'" fill="#a8a398" font-size="11.5">'+(i+1)+'. '+(nm.length>15?nm.slice(0,15)+'…':nm)+'</text>';
+    s+='<text x="'+PL+'" y="'+(yy+15)+'" fill="var(--text-1)" font-size="11.5" font-weight="600">'+(i+1)+'. '+(nm.length>15?nm.slice(0,15)+'…':nm)+'</text>';
     s+='<rect class="hb" data-t="'+nm+'" data-v="'+won(t.amt)+' · '+t.qty+'장" x="'+barX+'" y="'+(yy+3)+'" width="'+Math.max(w,2)+'" height="16" rx="4" fill="'+(i==0?'#EA5529':'#2563EB')+'"/>';
     s+='<text x="'+(barX+w+8)+'" y="'+(yy+15)+'" fill="#5B6470" font-size="11">'+won(t.amt)+'</text>';});
   return s+'</svg>';
