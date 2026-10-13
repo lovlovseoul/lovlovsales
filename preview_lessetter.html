@@ -1,0 +1,164 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>레세터 판매 대시보드 · 2026.10</title>
+<style>
+:root{--bg:#E4DED0;--card:#EFEADC;--ink:#17150F;--ink-2:#4A453A;--muted:#827B6A;--line:#17150F;--soft:#D6CDBB;--acc:#2743E0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 18px 72px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+h1{font-family:"Oswald",sans-serif;font-size:44px;margin:0 0 2px;font-weight:700;letter-spacing:.015em;text-transform:uppercase;line-height:.96}
+.sub{color:var(--ink-2);font-size:11.5px;max-width:860px;margin-top:8px}
+.brandsw{display:flex;gap:0;flex-shrink:0}
+.brandsw a{text-decoration:none;font-family:"Oswald",sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;padding:9px 16px;border:2px solid var(--ink);color:var(--ink);background:transparent}
+.brandsw a:first-child{border-right:none}
+.brandsw a.on{background:var(--ink);color:#fff}
+.mtabs{display:flex;gap:8px;margin:22px 0 6px;flex-wrap:wrap}
+.mtab{cursor:pointer;font-family:"Oswald",sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;padding:8px 20px;background:var(--card);border:2px solid var(--ink);color:var(--ink)}
+.mtab.on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:8px;margin:10px 0 2px;flex-wrap:wrap}
+.tab{cursor:pointer;font-size:12.5px;font-weight:600;padding:8px 15px;background:transparent;border:2px solid var(--ink);color:var(--ink)}
+.tab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.kpi{background:var(--card);border:2px solid var(--ink);padding:16px 18px}
+.kpi .lab{color:var(--ink-2);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px}
+.kpi .val{font-family:"Oswald",sans-serif;font-size:35px;font-weight:700;letter-spacing:.01em;line-height:1}
+.kpi .sub2{color:var(--muted);font-size:11px;margin-top:7px;min-height:14px}
+.card{background:var(--card);border:2px solid var(--ink);padding:18px;margin:14px 0}
+.card h3{margin:0 0 2px;font-family:"Oswald",sans-serif;font-size:19px;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.cs{color:var(--ink-2);font-size:11.5px;margin-bottom:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--soft)}
+th{color:var(--ink-2);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;text-align:right}
+th.n,td.n{text-align:left}
+tr.r1 td{background:rgba(39,67,224,.1)}
+tr.clk{cursor:pointer}tr.clk:hover td{background:rgba(23,21,15,.05)}
+.rank{display:inline-block;min-width:20px;color:var(--muted);font-weight:700;margin-right:6px}
+.daychips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.daychip{cursor:pointer;font-size:11.5px;font-weight:500;padding:6px 11px;background:transparent;border:1.5px solid var(--ink);color:var(--ink-2)}
+.daychip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.hb{transition:opacity .1s}.hb:hover{opacity:.82}
+.colorpop{position:fixed;z-index:60;background:var(--card);border:2px solid var(--ink);padding:16px 16px 14px;min-width:255px;max-width:340px;max-height:82vh;overflow:auto;box-shadow:6px 6px 0 rgba(23,21,15,.9);font-size:13px;color:var(--ink)}
+.colorpop h4{margin:0 22px 2px 0;font-family:"Oswald",sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.02em}.colorpop .cpsub{font-size:11px;color:var(--muted);margin-bottom:11px}
+.colorpop .seclab{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:13px 0 7px}
+.colorpop .crow{margin:7px 0}.colorpop .cline{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.colorpop .cq{color:var(--ink-2);padding-left:10px;white-space:nowrap}
+.colorpop .cbarwrap{height:6px;background:var(--soft);overflow:hidden}.colorpop .cbar{height:100%;background:var(--ink)}
+.colorpop .sbar{background:var(--acc)}.colorpop .jbar{background:#B5653F}
+.colorpop .cpclose{position:absolute;top:9px;right:11px;cursor:pointer;color:var(--muted)}
+.foot{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-top:28px}
+</style></head><body><div class="wrap">
+<div class="top"><div><h1>레세터 판매 대시보드</h1><div class="sub" id="daterange"></div></div>
+<div class="brandsw"><a href="preview_lovlov.html">로브로브</a><a href="preview_lessetter.html" class="on">레세터</a></div></div>
+<div class="mtabs" id="months"></div>
+<div class="tabs" id="tabs"></div>
+<div class="kpis" id="kpis"></div>
+<div id="views"></div>
+<div class="foot">LESSETTER · 실결제금액 기준 · 취소·환불 제외 · 상품 클릭 → 컬러/사이즈별</div>
+</div>
+<script>
+const DM={"2026-10":{"days":["2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10","2026-10-11","2026-10-12","2026-10-13"],"platforms":["무신사"],"byPlat":{"무신사":{"dayTotals":{"2026-10-01":{"amt":82720,"qty":2,"orders":2},"2026-10-02":{"amt":60980,"qty":1,"orders":1},"2026-10-03":{"amt":65430,"qty":2,"orders":2},"2026-10-04":{"amt":109120,"qty":3,"orders":3},"2026-10-05":{"amt":287970,"qty":7,"orders":7},"2026-10-06":{"amt":182480,"qty":4,"orders":4},"2026-10-07":{"amt":47280,"qty":1,"orders":1},"2026-10-08":{"amt":357350,"qty":9,"orders":8},"2026-10-09":{"amt":115290,"qty":3,"orders":3},"2026-10-10":{"amt":113170,"qty":3,"orders":3},"2026-10-11":{"amt":307050,"qty":6,"orders":5},"2026-10-12":{"amt":162330,"qty":4,"orders":4},"2026-10-13":{"amt":83860,"qty":2,"orders":2}},"periodAmt":1975030,"periodQty":47,"periodOrders":45,"top":[{"name":"오버 사이즈 하이넥 후드 집업","qty":13,"amt":525300},{"name":"에센셜 배색 트랙 팬츠","qty":7,"amt":274480},{"name":"크롭 비건 봄버 자켓","qty":4,"amt":260910},{"name":"버튼 모크넥 롱 슬리브","qty":8,"amt":227400},{"name":"스터드 커브드 밴딩 팬츠","qty":5,"amt":224040},{"name":"플로우 오버사이즈 레더 자켓","qty":2,"amt":129970},{"name":"클라우드 후드 패딩 자켓","qty":2,"amt":94560},{"name":"커브드 볼륨 카고 팬츠","qty":2,"amt":80610},{"name":"언발 스트라이프 롱 슬리브","qty":2,"amt":65980},{"name":"컴포트 하프 집업 후리스","qty":1,"amt":52580},{"name":"슬림핏 보트넥 스트라이프 롱 슬리브","qty":1,"amt":39200}],"dayTop":{"2026-10-01":[{"name":"에센셜 배색 트랙 팬츠","qty":1,"amt":42060},{"name":"스터드 커브드 밴딩 팬츠","qty":1,"amt":40660}],"2026-10-02":[{"name":"크롭 비건 봄버 자켓","qty":1,"amt":60980}],"2026-10-03":[{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":41640},{"name":"버튼 모크넥 롱 슬리브","qty":1,"amt":23790}],"2026-10-04":[{"name":"슬림핏 보트넥 스트라이프 롱 슬리브","qty":1,"amt":39200},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":37760},{"name":"언발 스트라이프 롱 슬리브","qty":1,"amt":32160}],"2026-10-05":[{"name":"오버 사이즈 하이넥 후드 집업","qty":3,"amt":108390},{"name":"에센셜 배색 트랙 팬츠","qty":2,"amt":72900},{"name":"플로우 오버사이즈 레더 자켓","qty":1,"amt":59400},{"name":"클라우드 후드 패딩 자켓","qty":1,"amt":47280}],"2026-10-06":[{"name":"플로우 오버사이즈 레더 자켓","qty":1,"amt":70570},{"name":"버튼 모크넥 롱 슬리브","qty":2,"amt":59330},{"name":"컴포트 하프 집업 후리스","qty":1,"amt":52580}],"2026-10-07":[{"name":"클라우드 후드 패딩 자켓","qty":1,"amt":47280}],"2026-10-08":[{"name":"스터드 커브드 밴딩 팬츠","qty":2,"amt":94630},{"name":"버튼 모크넥 롱 슬리브","qty":3,"amt":86050},{"name":"크롭 비건 봄버 자켓","qty":1,"amt":60980},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":41640},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40230},{"name":"언발 스트라이프 롱 슬리브","qty":1,"amt":33820}],"2026-10-09":[{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":49680},{"name":"에센셜 배색 트랙 팬츠","qty":1,"amt":37550},{"name":"버튼 모크넥 롱 슬리브","qty":1,"amt":28060}],"2026-10-10":[{"name":"오버 사이즈 하이넥 후드 집업","qty":2,"amt":83000},{"name":"버튼 모크넥 롱 슬리브","qty":1,"amt":30170}],"2026-10-11":[{"name":"크롭 비건 봄버 자켓","qty":2,"amt":138950},{"name":"에센셜 배색 트랙 팬츠","qty":2,"amt":81430},{"name":"스터드 커브드 밴딩 팬츠","qty":1,"amt":46290},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40380}],"2026-10-12":[{"name":"오버 사이즈 하이넥 후드 집업","qty":3,"amt":121790},{"name":"에센셜 배색 트랙 팬츠","qty":1,"amt":40540}],"2026-10-13":[{"name":"스터드 커브드 밴딩 팬츠","qty":1,"amt":42460},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":41400}]},"cancelAmt":0,"cancelCnt":0,"dayCancel":{}}},"combined":{"dayTotals":{"2026-10-01":{"amt":82720,"qty":2,"orders":2},"2026-10-02":{"amt":60980,"qty":1,"orders":1},"2026-10-03":{"amt":65430,"qty":2,"orders":2},"2026-10-04":{"amt":109120,"qty":3,"orders":3},"2026-10-05":{"amt":287970,"qty":7,"orders":7},"2026-10-06":{"amt":182480,"qty":4,"orders":4},"2026-10-07":{"amt":47280,"qty":1,"orders":1},"2026-10-08":{"amt":357350,"qty":9,"orders":8},"2026-10-09":{"amt":115290,"qty":3,"orders":3},"2026-10-10":{"amt":113170,"qty":3,"orders":3},"2026-10-11":{"amt":307050,"qty":6,"orders":5},"2026-10-12":{"amt":162330,"qty":4,"orders":4},"2026-10-13":{"amt":83860,"qty":2,"orders":2}},"periodAmt":1975030,"periodQty":47,"periodOrders":45,"top":[{"name":"오버 사이즈 하이넥 후드 집업","qty":13,"amt":525300},{"name":"에센셜 배색 트랙 팬츠","qty":7,"amt":274480},{"name":"크롭 비건 봄버 자켓","qty":4,"amt":260910},{"name":"버튼 모크넥 롱 슬리브","qty":8,"amt":227400},{"name":"스터드 커브드 밴딩 팬츠","qty":5,"amt":224040},{"name":"플로우 오버사이즈 레더 자켓","qty":2,"amt":129970},{"name":"클라우드 후드 패딩 자켓","qty":2,"amt":94560},{"name":"커브드 볼륨 카고 팬츠","qty":2,"amt":80610},{"name":"언발 스트라이프 롱 슬리브","qty":2,"amt":65980},{"name":"컴포트 하프 집업 후리스","qty":1,"amt":52580},{"name":"슬림핏 보트넥 스트라이프 롱 슬리브","qty":1,"amt":39200}],"dayTop":{"2026-10-01":[{"name":"에센셜 배색 트랙 팬츠","qty":1,"amt":42060},{"name":"스터드 커브드 밴딩 팬츠","qty":1,"amt":40660}],"2026-10-02":[{"name":"크롭 비건 봄버 자켓","qty":1,"amt":60980}],"2026-10-03":[{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":41640},{"name":"버튼 모크넥 롱 슬리브","qty":1,"amt":23790}],"2026-10-04":[{"name":"슬림핏 보트넥 스트라이프 롱 슬리브","qty":1,"amt":39200},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":37760},{"name":"언발 스트라이프 롱 슬리브","qty":1,"amt":32160}],"2026-10-05":[{"name":"오버 사이즈 하이넥 후드 집업","qty":3,"amt":108390},{"name":"에센셜 배색 트랙 팬츠","qty":2,"amt":72900},{"name":"플로우 오버사이즈 레더 자켓","qty":1,"amt":59400},{"name":"클라우드 후드 패딩 자켓","qty":1,"amt":47280}],"2026-10-06":[{"name":"플로우 오버사이즈 레더 자켓","qty":1,"amt":70570},{"name":"버튼 모크넥 롱 슬리브","qty":2,"amt":59330},{"name":"컴포트 하프 집업 후리스","qty":1,"amt":52580}],"2026-10-07":[{"name":"클라우드 후드 패딩 자켓","qty":1,"amt":47280}],"2026-10-08":[{"name":"스터드 커브드 밴딩 팬츠","qty":2,"amt":94630},{"name":"버튼 모크넥 롱 슬리브","qty":3,"amt":86050},{"name":"크롭 비건 봄버 자켓","qty":1,"amt":60980},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":41640},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40230},{"name":"언발 스트라이프 롱 슬리브","qty":1,"amt":33820}],"2026-10-09":[{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":49680},{"name":"에센셜 배색 트랙 팬츠","qty":1,"amt":37550},{"name":"버튼 모크넥 롱 슬리브","qty":1,"amt":28060}],"2026-10-10":[{"name":"오버 사이즈 하이넥 후드 집업","qty":2,"amt":83000},{"name":"버튼 모크넥 롱 슬리브","qty":1,"amt":30170}],"2026-10-11":[{"name":"크롭 비건 봄버 자켓","qty":2,"amt":138950},{"name":"에센셜 배색 트랙 팬츠","qty":2,"amt":81430},{"name":"스터드 커브드 밴딩 팬츠","qty":1,"amt":46290},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40380}],"2026-10-12":[{"name":"오버 사이즈 하이넥 후드 집업","qty":3,"amt":121790},{"name":"에센셜 배색 트랙 팬츠","qty":1,"amt":40540}],"2026-10-13":[{"name":"스터드 커브드 밴딩 팬츠","qty":1,"amt":42460},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":41400}]},"cancelAmt":0,"cancelCnt":0,"dayCancel":{},"byPlatDay":{"무신사":{"2026-10-01":82720,"2026-10-02":60980,"2026-10-03":65430,"2026-10-04":109120,"2026-10-05":287970,"2026-10-06":182480,"2026-10-07":47280,"2026-10-08":357350,"2026-10-09":115290,"2026-10-10":113170,"2026-10-11":307050,"2026-10-12":162330,"2026-10-13":83860}},"byPlatDayCancel":{"무신사":{}}}}};
+const COL={"days":["2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10","2026-10-11","2026-10-12","2026-10-13"],"platforms":["무신사"],"byPlat":{"무신사":{"colors":{"에센셜 배색 트랙 팬츠":{"BLACK":[7,274480]},"스터드 커브드 밴딩 팬츠":{"BLACK":[5,224040]},"크롭 비건 봄버 자켓":{"BLACK":[4,260910]},"버튼 모크넥 롱 슬리브":{"DARK GRAY":[3,78420],"GRAY":[5,148980]},"오버 사이즈 하이넥 후드 집업":{"GRAY":[13,525300]},"슬림핏 보트넥 스트라이프 롱 슬리브":{"CHARCOAL":[1,39200]},"언발 스트라이프 롱 슬리브":{"CHARCOAL":[2,65980]},"플로우 오버사이즈 레더 자켓":{"BLACK":[2,129970]},"클라우드 후드 패딩 자켓":{"IVORY":[2,94560]},"컴포트 하프 집업 후리스":{"BLACK":[1,52580]},"커브드 볼륨 카고 팬츠":{"BLACK":[2,80610]}},"dayColors":{"2026-10-01":{"에센셜 배색 트랙 팬츠":{"BLACK":[1,42060]},"스터드 커브드 밴딩 팬츠":{"BLACK":[1,40660]}},"2026-10-02":{"크롭 비건 봄버 자켓":{"BLACK":[1,60980]}},"2026-10-03":{"버튼 모크넥 롱 슬리브":{"DARK GRAY":[1,23790]},"오버 사이즈 하이넥 후드 집업":{"GRAY":[1,41640]}},"2026-10-04":{"오버 사이즈 하이넥 후드 집업":{"GRAY":[1,37760]},"슬림핏 보트넥 스트라이프 롱 슬리브":{"CHARCOAL":[1,39200]},"언발 스트라이프 롱 슬리브":{"CHARCOAL":[1,32160]}},"2026-10-05":{"플로우 오버사이즈 레더 자켓":{"BLACK":[1,59400]},"오버 사이즈 하이넥 후드 집업":{"GRAY":[3,108390]},"클라우드 후드 패딩 자켓":{"IVORY":[1,47280]},"에센셜 배색 트랙 팬츠":{"BLACK":[2,72900]}},"2026-10-06":{"버튼 모크넥 롱 슬리브":{"GRAY":[2,59330]},"플로우 오버사이즈 레더 자켓":{"BLACK":[1,70570]},"컴포트 하프 집업 후리스":{"BLACK":[1,52580]}},"2026-10-07":{"클라우드 후드 패딩 자켓":{"IVORY":[1,47280]}},"2026-10-08":{"오버 사이즈 하이넥 후드 집업":{"GRAY":[1,41640]},"커브드 볼륨 카고 팬츠":{"BLACK":[1,40230]},"스터드 커브드 밴딩 팬츠":{"BLACK":[2,94630]},"언발 스트라이프 롱 슬리브":{"CHARCOAL":[1,33820]},"버튼 모크넥 롱 슬리브":{"GRAY":[2,59480],"DARK GRAY":[1,26570]},"크롭 비건 봄버 자켓":{"BLACK":[1,60980]}},"2026-10-09":{"에센셜 배색 트랙 팬츠":{"BLACK":[1,37550]},"버튼 모크넥 롱 슬리브":{"DARK GRAY":[1,28060]},"오버 사이즈 하이넥 후드 집업":{"GRAY":[1,49680]}},"2026-10-10":{"오버 사이즈 하이넥 후드 집업":{"GRAY":[2,83000]},"버튼 모크넥 롱 슬리브":{"GRAY":[1,30170]}},"2026-10-11":{"커브드 볼륨 카고 팬츠":{"BLACK":[1,40380]},"스터드 커브드 밴딩 팬츠":{"BLACK":[1,46290]},"크롭 비건 봄버 자켓":{"BLACK":[2,138950]},"에센셜 배색 트랙 팬츠":{"BLACK":[2,81430]}},"2026-10-12":{"오버 사이즈 하이넥 후드 집업":{"GRAY":[3,121790]},"에센셜 배색 트랙 팬츠":{"BLACK":[1,40540]}},"2026-10-13":{"오버 사이즈 하이넥 후드 집업":{"GRAY":[1,41400]},"스터드 커브드 밴딩 팬츠":{"BLACK":[1,42460]}}},"sizes":{"에센셜 배색 트랙 팬츠":{"XL":[1,42060],"L":[4,155200],"M":[2,77220]},"스터드 커브드 밴딩 팬츠":{"M":[4,176980],"L":[1,47060]},"크롭 비건 봄버 자켓":{"L":[3,199930],"M":[1,60980]},"버튼 모크넥 롱 슬리브":{"FREE":[8,227400]},"오버 사이즈 하이넥 후드 집업":{"FREE":[13,525300]},"슬림핏 보트넥 스트라이프 롱 슬리브":{"FREE":[1,39200]},"언발 스트라이프 롱 슬리브":{"L":[2,65980]},"플로우 오버사이즈 레더 자켓":{"L":[2,129970]},"클라우드 후드 패딩 자켓":{"FREE":[2,94560]},"컴포트 하프 집업 후리스":{"FREE":[1,52580]},"커브드 볼륨 카고 팬츠":{"L":[2,80610]}},"daySizes":{"2026-10-01":{"에센셜 배색 트랙 팬츠":{"XL":[1,42060]},"스터드 커브드 밴딩 팬츠":{"M":[1,40660]}},"2026-10-02":{"크롭 비건 봄버 자켓":{"L":[1,60980]}},"2026-10-03":{"버튼 모크넥 롱 슬리브":{"FREE":[1,23790]},"오버 사이즈 하이넥 후드 집업":{"FREE":[1,41640]}},"2026-10-04":{"오버 사이즈 하이넥 후드 집업":{"FREE":[1,37760]},"슬림핏 보트넥 스트라이프 롱 슬리브":{"FREE":[1,39200]},"언발 스트라이프 롱 슬리브":{"L":[1,32160]}},"2026-10-05":{"플로우 오버사이즈 레더 자켓":{"L":[1,59400]},"오버 사이즈 하이넥 후드 집업":{"FREE":[3,108390]},"클라우드 후드 패딩 자켓":{"FREE":[1,47280]},"에센셜 배색 트랙 팬츠":{"L":[1,35510],"M":[1,37390]}},"2026-10-06":{"버튼 모크넥 롱 슬리브":{"FREE":[2,59330]},"플로우 오버사이즈 레더 자켓":{"L":[1,70570]},"컴포트 하프 집업 후리스":{"FREE":[1,52580]}},"2026-10-07":{"클라우드 후드 패딩 자켓":{"FREE":[1,47280]}},"2026-10-08":{"오버 사이즈 하이넥 후드 집업":{"FREE":[1,41640]},"커브드 볼륨 카고 팬츠":{"L":[1,40230]},"스터드 커브드 밴딩 팬츠":{"L":[1,47060],"M":[1,47570]},"언발 스트라이프 롱 슬리브":{"L":[1,33820]},"버튼 모크넥 롱 슬리브":{"FREE":[3,86050]},"크롭 비건 봄버 자켓":{"M":[1,60980]}},"2026-10-09":{"에센셜 배색 트랙 팬츠":{"L":[1,37550]},"버튼 모크넥 롱 슬리브":{"FREE":[1,28060]},"오버 사이즈 하이넥 후드 집업":{"FREE":[1,49680]}},"2026-10-10":{"오버 사이즈 하이넥 후드 집업":{"FREE":[2,83000]},"버튼 모크넥 롱 슬리브":{"FREE":[1,30170]}},"2026-10-11":{"커브드 볼륨 카고 팬츠":{"L":[1,40380]},"스터드 커브드 밴딩 팬츠":{"M":[1,46290]},"크롭 비건 봄버 자켓":{"L":[2,138950]},"에센셜 배색 트랙 팬츠":{"M":[1,39830],"L":[1,41600]}},"2026-10-12":{"오버 사이즈 하이넥 후드 집업":{"FREE":[3,121790]},"에센셜 배색 트랙 팬츠":{"L":[1,40540]}},"2026-10-13":{"오버 사이즈 하이넥 후드 집업":{"FREE":[1,41400]},"스터드 커브드 밴딩 팬츠":{"M":[1,42460]}}},"combos":{"에센셜 배색 트랙 팬츠":{"BLACK|XL":[1,42060],"BLACK|L":[4,155200],"BLACK|M":[2,77220]},"스터드 커브드 밴딩 팬츠":{"BLACK|M":[4,176980],"BLACK|L":[1,47060]},"크롭 비건 봄버 자켓":{"BLACK|L":[3,199930],"BLACK|M":[1,60980]},"버튼 모크넥 롱 슬리브":{"DARK GRAY|FREE":[3,78420],"GRAY|FREE":[5,148980]},"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[13,525300]},"슬림핏 보트넥 스트라이프 롱 슬리브":{"CHARCOAL|FREE":[1,39200]},"언발 스트라이프 롱 슬리브":{"CHARCOAL|L":[2,65980]},"플로우 오버사이즈 레더 자켓":{"BLACK|L":[2,129970]},"클라우드 후드 패딩 자켓":{"IVORY|FREE":[2,94560]},"컴포트 하프 집업 후리스":{"BLACK|FREE":[1,52580]},"커브드 볼륨 카고 팬츠":{"BLACK|L":[2,80610]}},"dayCombos":{"2026-10-01":{"에센셜 배색 트랙 팬츠":{"BLACK|XL":[1,42060]},"스터드 커브드 밴딩 팬츠":{"BLACK|M":[1,40660]}},"2026-10-02":{"크롭 비건 봄버 자켓":{"BLACK|L":[1,60980]}},"2026-10-03":{"버튼 모크넥 롱 슬리브":{"DARK GRAY|FREE":[1,23790]},"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[1,41640]}},"2026-10-04":{"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[1,37760]},"슬림핏 보트넥 스트라이프 롱 슬리브":{"CHARCOAL|FREE":[1,39200]},"언발 스트라이프 롱 슬리브":{"CHARCOAL|L":[1,32160]}},"2026-10-05":{"플로우 오버사이즈 레더 자켓":{"BLACK|L":[1,59400]},"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[3,108390]},"클라우드 후드 패딩 자켓":{"IVORY|FREE":[1,47280]},"에센셜 배색 트랙 팬츠":{"BLACK|L":[1,35510],"BLACK|M":[1,37390]}},"2026-10-06":{"버튼 모크넥 롱 슬리브":{"GRAY|FREE":[2,59330]},"플로우 오버사이즈 레더 자켓":{"BLACK|L":[1,70570]},"컴포트 하프 집업 후리스":{"BLACK|FREE":[1,52580]}},"2026-10-07":{"클라우드 후드 패딩 자켓":{"IVORY|FREE":[1,47280]}},"2026-10-08":{"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[1,41640]},"커브드 볼륨 카고 팬츠":{"BLACK|L":[1,40230]},"스터드 커브드 밴딩 팬츠":{"BLACK|L":[1,47060],"BLACK|M":[1,47570]},"언발 스트라이프 롱 슬리브":{"CHARCOAL|L":[1,33820]},"버튼 모크넥 롱 슬리브":{"GRAY|FREE":[2,59480],"DARK GRAY|FREE":[1,26570]},"크롭 비건 봄버 자켓":{"BLACK|M":[1,60980]}},"2026-10-09":{"에센셜 배색 트랙 팬츠":{"BLACK|L":[1,37550]},"버튼 모크넥 롱 슬리브":{"DARK GRAY|FREE":[1,28060]},"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[1,49680]}},"2026-10-10":{"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[2,83000]},"버튼 모크넥 롱 슬리브":{"GRAY|FREE":[1,30170]}},"2026-10-11":{"커브드 볼륨 카고 팬츠":{"BLACK|L":[1,40380]},"스터드 커브드 밴딩 팬츠":{"BLACK|M":[1,46290]},"크롭 비건 봄버 자켓":{"BLACK|L":[2,138950]},"에센셜 배색 트랙 팬츠":{"BLACK|M":[1,39830],"BLACK|L":[1,41600]}},"2026-10-12":{"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[3,121790]},"에센셜 배색 트랙 팬츠":{"BLACK|L":[1,40540]}},"2026-10-13":{"오버 사이즈 하이넥 후드 집업":{"GRAY|FREE":[1,41400]},"스터드 커브드 밴딩 팬츠":{"BLACK|M":[1,42460]}}}}}};
+const MONTHS=Object.keys(DM).sort().map(function(k){return [k,(k.slice(5)*1)+'월'];});
+let curMonth=MONTHS[MONTHS.length-1][0];
+let D=DM[curMonth];
+let curDay=D.days[D.days.length-1];
+const PLATS=D.platforms;
+const TABS=['전체통합'].concat(PLATS);
+let cur='전체통합';
+const PCH={'무신사':'#17150F'};
+function curSrc(){return cur==='전체통합'?D.combined:D.byPlat[cur];}
+function won(n){return '₩'+Math.round(n).toLocaleString('en-US');}
+function dlab(d){var wd=['일','월','화','수','목','금','토'];var dt=new Date(d);return (dt.getMonth()+1)+'/'+dt.getDate()+'('+wd[dt.getDay()]+')';}
+function scopeLabel(){return cur==='전체통합'?'전채널':cur;}
+function dailyChart(src){
+  var days=D.days;var max=Math.max.apply(null,days.map(function(d){return (src.dayTotals[d]||{amt:0}).amt;}))||1;
+  var W=1080,H=240,PL=54,PR=12,PT=12,PB=28,n=days.length;
+  var bw=Math.min(60,(W-PL-PR)/n*0.6);var gap=(W-PL-PR)/n;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
+  for(var g=0;g<=4;g++){var yy=PT+(H-PT-PB)*g/4;var val=max*(1-g/4);s+='<line x1="'+PL+'" y1="'+yy+'" x2="'+(W-PR)+'" y2="'+yy+'" stroke="#D6CDBB"/><text x="'+(PL-8)+'" y="'+(yy+4)+'" fill="#827B6A" font-size="10" text-anchor="end">'+Math.round(val/1000)+'K</text>';}
+  days.forEach(function(d,i){var v=(src.dayTotals[d]||{amt:0}).amt;var hh=(H-PT-PB)*(v/max);var x=PL+gap*i+gap/2-bw/2;var y=H-PB-hh;
+    s+='<rect class="hb" data-t="'+dlab(d)+'" data-v="'+won(v)+'" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(hh,1)+'" rx="4" fill="'+(d==curDay?'#2743E0':'#17150F')+'"/>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(H-PB+14)+'" fill="#827B6A" font-size="10" text-anchor="middle">'+dlab(d)+'</text>';
+    if(v>0)s+='<text x="'+(x+bw/2)+'" y="'+(y-5)+'" fill="#4A453A" font-size="10" text-anchor="middle">'+Math.round(v/1000)+'K</text>';});
+  return s+'</svg>';
+}
+function topBars(top){
+  var max=Math.max.apply(null,top.map(function(t){return t.amt;}))||1;var rows=top.slice(0,20);
+  var W=1080,rh=30,H=rows.length*rh+8,PL=4,barX=180,PR=78;var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
+  rows.forEach(function(t,i){var yy=i*rh+6;var w=(W-barX-PR)*(t.amt/max);var nm=t.name;
+    s+='<text x="'+PL+'" y="'+(yy+15)+'" fill="#a8a398" font-size="11.5">'+(i+1)+'. '+(nm.length>15?nm.slice(0,15)+'…':nm)+'</text>';
+    s+='<rect class="hb" data-t="'+nm+'" data-v="'+won(t.amt)+' · '+t.qty+'장" x="'+barX+'" y="'+(yy+3)+'" width="'+Math.max(w,2)+'" height="16" rx="4" fill="'+(i==0?'#2743E0':'#17150F')+'"/>';
+    s+='<text x="'+(barX+w+8)+'" y="'+(yy+15)+'" fill="#4A453A" font-size="11">'+won(t.amt)+'</text>';});
+  return s+'</svg>';
+}
+function topTable(top,tot){
+  var h='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
+  top.slice(0,20).forEach(function(t,i){h+='<tr class="'+(i==0?'r1':'')+'" data-prod="'+String(t.name).replace(/"/g,'&quot;')+'"><td class="n"><span class="rank">'+(i+1)+'</span>'+t.name+'</td><td>'+t.qty+'</td><td>'+won(t.amt)+'</td><td>'+(t.amt/tot*100).toFixed(1)+'%</td></tr>';});
+  return h+'</table>';
+}
+function dayTopTable(){
+  var dt=(curSrc().dayTop||{})[curDay]||[];
+  if(!dt.length)return '<div class="cs">이 날 판매 없음</div>';
+  var tot=dt.reduce(function(s,t){return s+t.amt;},0)||1;
+  var h='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
+  dt.forEach(function(t,i){h+='<tr class="'+(i==0?'r1':'')+'" data-prod="'+String(t.name).replace(/"/g,'&quot;')+'"><td class="n"><span class="rank">'+(i+1)+'</span>'+t.name+'</td><td>'+t.qty+'</td><td>'+won(t.amt)+'</td><td>'+(t.amt/tot*100).toFixed(1)+'%</td></tr>';});
+  return h+'</table>';
+}
+function render(){
+  document.querySelectorAll('.mtab').forEach(function(b,i){b.classList.toggle('on',MONTHS[i][0]==curMonth);});
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.t==cur);});
+  var src=curSrc();var nd=D.days.length;
+  var kpis=[['총 실결제금액',won(src.periodAmt),'기간 '+nd+'일 합계'],['총 판매량',src.periodQty.toLocaleString()+'장',''],['주문 건수',src.periodOrders.toLocaleString()+'건',''],['일평균 매출',won(Math.round(src.periodAmt/nd)),'']];
+  if(src.cancelAmt)kpis.push(['취소·환불','-'+won(src.cancelAmt),src.cancelCnt+'건 · 실결제 제외분']);
+  document.getElementById('kpis').innerHTML=kpis.map(function(k){return '<div class="kpi"><div class="lab">'+k[0]+'</div><div class="val">'+k[1]+'</div><div class="sub2">'+k[2]+'</div></div>';}).join('');
+  var h='';
+  h+='<div class="card"><h3>일별 매출 추이</h3><div class="cs">'+scopeLabel()+' 일별 실결제금액</div>'+dailyChart(src)+'</div>';
+  h+='<div class="grid"><div class="card"><h3>TOP 상품</h3><div class="cs">'+scopeLabel()+' · 실결제금액</div>'+topBars(src.top)+'</div>';
+  h+='<div class="card"><h3>TOP 상품 표</h3><div class="cs">수량 · 실결제 · 비중</div>'+topTable(src.top,src.periodAmt)+'</div></div>';
+  h+='<div class="card"><h3>일별 TOP 상품</h3><div class="cs">날짜 선택</div><div class="daychips" id="daychips">'+D.days.map(function(d){return '<button class="daychip'+(d==curDay?' on':'')+'" data-day="'+d+'">'+dlab(d)+'</button>';}).join('')+'</div><div id="dayTopTable">'+dayTopTable()+'</div></div>';
+  document.getElementById('views').innerHTML=h;
+  bindTips();mark();
+}
+function bindTips(){
+  document.querySelectorAll('.hb').forEach(function(el){
+    el.addEventListener('mousemove',function(e){showTip(e,'<b>'+el.dataset.t+'</b><br>'+el.dataset.v);});
+    el.addEventListener('mouseleave',hideTip);});
+  document.querySelectorAll('.daychip').forEach(function(b){b.addEventListener('click',function(){curDay=b.dataset.day;document.querySelectorAll('.daychip').forEach(function(x){x.classList.toggle('on',x.dataset.day==curDay);});document.getElementById('dayTopTable').innerHTML=dayTopTable();mark();});});
+}
+var tip;function showTip(e,html){if(!tip){tip=document.createElement('div');tip.style.cssText='position:fixed;z-index:70;background:#17150F;border:none;border-radius:0;padding:7px 10px;font-size:12px;color:#EFEADC;pointer-events:none';document.body.appendChild(tip);}tip.innerHTML=html;tip.style.display='block';tip.style.left=Math.min(e.clientX+12,innerWidth-160)+'px';tip.style.top=(e.clientY+12)+'px';}
+function hideTip(){if(tip)tip.style.display='none';}
+var BP=COL.byPlat,pop;
+function ensurePop(){if(!pop){pop=document.createElement('div');pop.className='colorpop';pop.hidden=true;document.body.appendChild(pop);}}
+function platList(){return cur==='전체통합'?PLATS:[cur];}
+var ALLPROD={};(function(){PLATS.forEach(function(p){var c=BP[p]&&BP[p].colors;if(c)Object.keys(c).forEach(function(k){ALLPROD[k]=1;});});})();
+function md(d){var p=d.split('-');return (p[1]*1)+'/'+(p[2]*1);}
+function getMap(prod,pk,dk,daily){
+  var out={},any=false,mdays=D.days,d=curDay;
+  function acc(s){if(s)Object.keys(s).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=s[k][0];out[k][1]+=s[k][1];any=true;});}
+  platList().forEach(function(p){var dm=BP[p]&&BP[p][dk];if(!dm)return;if(daily){acc(dm[d]&&dm[d][prod]);}else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}});
+  return any?out:null;
+}
+function bars(obj,cls){var ents=Object.keys(obj).map(function(k){return [k,obj[k]];}).sort(function(a,b){return b[1][0]-a[1][0];});var tot=ents.reduce(function(s,e){return s+e[1][0];},0)||1;var h='';ents.forEach(function(e){var pct=Math.round(e[1][0]/tot*100);h+='<div class="crow"><div class="cline"><span>'+e[0]+'</span><span class="cq">'+e[1][0]+'장 · '+pct+'%</span></div><div class="cbarwrap"><div class="cbar '+cls+'" style="width:'+pct+'%"></div></div></div>';});return h;}
+function sectionDaily(tr){var el=tr;while(el&&el!==document.body){if(el.querySelector){var hh=el.querySelector('h3');if(hh)return /일별/.test(hh.textContent);}el=el.parentElement;}return false;}
+function showColor(name,daily,x,y){ensurePop();var cd=getMap(name,'colors','dayColors',daily);var sd=getMap(name,'sizes','daySizes',daily);var jd=getMap(name,'combos','dayCombos',daily);
+  var mr=D.days;var mrange=mr.length?(md(mr[0])+'~'+md(mr[mr.length-1])):'';
+  var label=scopeLabel()+' · '+(daily?('일별 · '+md(curDay)):((curMonth.slice(5)*1)+'월 · '+mrange));var h='<span class="cpclose">✕</span><h4>'+name+'</h4>';
+  if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cs">데이터 없음</div>';}
+  else{var tot=Object.keys(cd).reduce(function(s,k){return s+cd[k][0];},0)||1;h+='<div class="cpsub">'+label+' · 총 '+tot+'장</div><div class="seclab">컬러별</div>'+bars(cd,'');
+    if(jd){var jo={},any=false;Object.keys(jd).forEach(function(k){var p=k.split('|');if(p[1]!=='FREE'&&p[1]!=='(미분류)'){jo[p[0]+' · '+p[1]]=jd[k];any=true;}});if(any)h+='<div class="seclab">컬러 × 사이즈</div>'+bars(jo,'jbar');}
+    if(sd){var real={},has=false;Object.keys(sd).forEach(function(k){if(k!=='(미분류)'){real[k]=sd[k];if(k!=='FREE')has=true;}});if(has)h+='<div class="seclab">사이즈별</div>'+bars(real,'sbar');}
+    pop.innerHTML=h;}
+  pop.hidden=false;var pw=pop.offsetWidth,ph=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(x+12,innerWidth-pw-12))+'px';pop.style.top=Math.max(8,Math.min(y+12,innerHeight-ph-12))+'px';
+  pop.querySelector('.cpclose').onclick=function(ev){ev.stopPropagation();pop.hidden=true;};}
+function prodOf(tr){if(tr.dataset&&tr.dataset.prod)return tr.dataset.prod;var td=tr.querySelector('td');return td?td.textContent.replace(/^\d+\s*/,'').trim():'';}
+function mark(){document.querySelectorAll('#views table tr').forEach(function(tr){if(ALLPROD[prodOf(tr)])tr.classList.add('clk');});}
+document.addEventListener('click',function(e){ensurePop();if(pop.contains(e.target))return;var tr=e.target.closest('tr');if(tr){var nm=prodOf(tr);if(ALLPROD[nm]){showColor(nm,sectionDaily(tr),e.clientX,e.clientY);return;}}pop.hidden=true;});
+document.getElementById('months').innerHTML=MONTHS.map(function(m){return '<div class="mtab'+(m[0]==curMonth?' on':'')+'" data-m="'+m[0]+'">'+m[1]+'</div>';}).join('');
+document.querySelectorAll('.mtab').forEach(function(b){b.addEventListener('click',function(){curMonth=b.dataset.m;D=DM[curMonth];curDay=D.days[D.days.length-1];render();});});
+document.getElementById('tabs').innerHTML=TABS.map(function(t){return '<div class="tab'+(t==cur?' on':'')+'" data-t="'+t+'">'+t+'</div>';}).join('');
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){cur=b.dataset.t;render();});});
+(function(){var dd=D.days;document.getElementById('daterange').textContent='2026.'+dd[0].slice(5).replace('-','.')+' – '+dd[dd.length-1].slice(5).replace('-','.')+' · '+PLATS.join('·')+' · 실결제금액 기준 · 취소·환불 제외 · 상품 클릭 → 컬러/사이즈별';})();
+render();
+</script></body></html>
