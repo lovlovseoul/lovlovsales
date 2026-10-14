@@ -43,7 +43,7 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.01em}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:right;padding:8px 8px;border-bottom:1px solid var(--line)}
 th{color:var(--text-3);font-weight:600;font-size:11px}
-td{color:var(--text-1);font-weight:500}
+td{color:var(--text-1);font-weight:600}
 td.n,th.n{text-align:left}
 tr:last-child td{border-bottom:none}
 .rank{color:var(--text-3);width:22px;display:inline-block;font-weight:600}
@@ -228,7 +228,7 @@ function topBars(top,barcol){
   rows.forEach((t,i)=>{
     const yy=i*rh+6; const w=(W-barX-PR)*(t.amt/max);
     const nm=t.name.replace(/_\(\dcolor\)/,'');
-    s+=`<text x="${PL}" y="${yy+15}" fill="var(--text-1)" font-size="11.5" font-weight="500">${i+1}. ${nm.length>13?nm.slice(0,13)+'…':nm}</text>`;
+    s+=`<text x="${PL}" y="${yy+15}" fill="var(--text-1)" font-size="11.5" font-weight="600">${i+1}. ${nm.length>13?nm.slice(0,13)+'…':nm}</text>`;
     s+=`<rect class="hb" data-t="${nm}" data-v="${won(t.amt)} · ${t.qty}장" x="${barX}" y="${yy+3}" width="${Math.max(w,2)}" height="16" rx="4" fill="${i==0?'#EA5529':barcol}"/>`;
     s+=`<text x="${barX+w+8}" y="${yy+15}" fill="var(--text-3)" font-size="11">${Math.round(t.amt/1000)}K</text>`;
   });
