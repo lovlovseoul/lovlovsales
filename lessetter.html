@@ -110,8 +110,8 @@ function render(){
   document.querySelectorAll('.mtab').forEach(function(b,i){b.classList.toggle('on',MONTHS[i][0]==curMonth);});
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.t==cur);});
   var src=curSrc();var nd=D.days.length;
-  var kpis=[['총 실결제금액',won(src.periodAmt),'기간 '+nd+'일 합계'],['총 판매량',src.periodQty.toLocaleString()+'장',''],['주문 건수',src.periodOrders.toLocaleString()+'건',''],['객단가',won(Math.round(src.periodAmt/Math.max(src.periodOrders,1))),'주문당 평균'],['일평균 매출',won(Math.round(src.periodAmt/nd)),'']];
-  if(src.cancelAmt)kpis.push(['취소·환불','-'+won(src.cancelAmt),src.cancelCnt+'건 · 실결제 제외분']);
+  var kpis=[['총 실결제금액 (Revenue)',won(src.periodAmt),'기간 '+nd+'일 합계'],['총 판매량 (Units)',src.periodQty.toLocaleString()+'장',''],['주문 건수 (Orders)',src.periodOrders.toLocaleString()+'건',''],['객단가 (AOV)',won(Math.round(src.periodAmt/Math.max(src.periodOrders,1))),'주문당 평균'],['일평균 매출 (Daily Avg)',won(Math.round(src.periodAmt/nd)),'']];
+  if(src.cancelAmt)kpis.push(['취소·환불 (Refunds)','-'+won(src.cancelAmt),src.cancelCnt+'건 · 실결제 제외분']);
   document.getElementById('kpis').innerHTML=kpis.map(function(k){return '<div class="kpi"><div class="lab">'+k[0]+'</div><div class="val">'+k[1]+'</div><div class="sub2">'+k[2]+'</div></div>';}).join('');
   var h='';
   h+='<div class="card"><h3>일별 매출 추이</h3><div class="cs">'+scopeLabel()+' 일별 실결제금액</div>'+dailyChart(src)+'</div>';
