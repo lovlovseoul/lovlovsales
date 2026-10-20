@@ -127,6 +127,7 @@ function render(){
     ['총 실결제금액',won(src.periodAmt),'기간 '+nd+'일 합계'],
     ['총 판매량',src.periodQty.toLocaleString()+'장',''],
     ['주문 건수',src.periodOrders.toLocaleString()+'건',''],
+    ['객단가',won(Math.round(src.periodAmt/Math.max(src.periodOrders,1))),'주문당 평균'],
     ['일평균 매출',won(Math.round(src.periodAmt/nd)),'']
   ];
   if(src.cancelAmt!=null){kpis.push(['취소·환불','-'+won(src.cancelAmt),src.cancelCnt+'건 · 실결제 제외분']);}
