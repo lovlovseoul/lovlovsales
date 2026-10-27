@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>레세터 반품 대시보드</title>
+<style>
+:root{
+  --surface-0:#F4F5F7;--surface-1:#FFFFFF;--surface-2:#FAFBFC;--line:#E7E9ED;--line-2:#DCDFE4;
+  --text-1:#1A1D21;--text-2:#5B6470;--text-3:#9AA3AD;--accent:#EA5529;--accent-soft:#FDEEE9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface-0);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:28px 26px 70px;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto}
+header{margin-bottom:6px}
+h1{font-size:23px;font-weight:700;letter-spacing:-.01em}
+.sub{color:var(--text-2);font-size:12.5px;margin-top:6px;line-height:1.6}
+.tabs{display:flex;gap:7px;margin:18px 0 6px;flex-wrap:wrap}
+.tab{padding:8px 15px;border-radius:999px;background:var(--surface-1);color:var(--text-2);border:1px solid var(--line-2);cursor:pointer;font-size:12.5px;font-weight:600;transition:.15s}
+.tab:hover{border-color:var(--text-3)}
+.tab.on{background:var(--text-1);color:#fff;border-color:var(--text-1)}
+.tab.dis{opacity:.45;cursor:not-allowed}
+.months{display:inline-flex;gap:4px;flex-wrap:wrap;margin:14px 0 2px;background:var(--surface-1);padding:4px;border:1px solid var(--line);border-radius:12px}
+.mtab{padding:8px 20px;border-radius:8px;background:none;color:var(--text-2);border:none;cursor:pointer;font-size:14px;font-weight:600;transition:.15s}
+.mtab.on{background:var(--accent);color:#fff}
+.scope{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px}
+.chip{padding:6px 11px;border-radius:8px;background:var(--surface-1);color:var(--text-2);border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:600;transition:.12s}
+.chip:hover{border-color:var(--text-3)}
+.chip.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:17px 19px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.kpi .lab{color:var(--text-2);font-size:12px;font-weight:500}
+.kpi .val{font-size:24px;font-weight:700;margin-top:8px;letter-spacing:-.01em}
+.kpi .sub2{color:var(--text-3);font-size:11px;margin-top:5px}
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:12px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card h3{font-size:14px;font-weight:700;margin-bottom:2px}
+.card .cs{color:var(--text-3);font-size:11.5px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:right;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--text-3);font-weight:600;font-size:11px}
+td{color:var(--text-1);font-weight:600}
+td.n,th.n{text-align:left}
+tr:last-child td{border-bottom:none}
+.rank{color:var(--text-3);width:22px;display:inline-block;font-weight:600}
+tr.clk{cursor:pointer}tr.clk:hover{background:#F4F5F7}
+.rsn{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;color:#fff}
+.crow{margin:8px 0}
+.cline{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;font-weight:500}
+.cq{color:var(--text-2);white-space:nowrap;padding-left:10px}
+.cbarwrap{height:7px;background:#EEF0F3;border-radius:4px;overflow:hidden}
+.cbar{height:100%;border-radius:4px}
+.det{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:9px 12px;margin:8px 0;font-size:12.5px;color:var(--text-1);line-height:1.5}
+.det .dm{color:var(--text-2);font-size:11px;margin-bottom:3px;font-weight:500}
+svg text{font-family:inherit}
+.tip{position:fixed;pointer-events:none;background:#1A1D21;border:none;border-radius:8px;padding:8px 11px;font-size:12px;color:#fff;opacity:0;transition:opacity .1s;z-index:10;white-space:nowrap;box-shadow:0 6px 18px rgba(16,24,40,.18)}
+.pop{position:fixed;z-index:60;background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:16px 16px 14px;min-width:270px;max-width:360px;max-height:82vh;overflow:auto;box-shadow:0 10px 30px rgba(16,24,40,.14);font-size:13px}
+.pop h4{font-size:14px;margin:0 22px 2px 0;font-weight:700}.pop .psub{font-size:11px;color:var(--text-3);margin-bottom:10px}
+.pop .seclab{font-size:10.5px;letter-spacing:.02em;color:var(--text-3);margin:12px 0 6px}
+.pop .pclose{position:absolute;top:9px;right:12px;cursor:pointer;color:var(--text-3)}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}body{padding:20px 14px 56px}}
+.brandrow{display:flex;justify-content:flex-end;gap:7px;margin-bottom:16px}.brandrow a{text-decoration:none;font-size:12.5px;font-weight:600;padding:7px 15px;border-radius:999px;border:1px solid var(--line-2);color:var(--text-2);background:#fff;transition:.15s}.brandrow a.on{background:var(--text-1);color:#fff;border-color:var(--text-1)}
+</style></head>
+<body><div class="wrap">
+<div class="brandrow"><a href="returns.html">로브로브</a><a href="returns_lessetter.html" class="on">레세터</a></div>
+<header>
+<h1>레세터 반품 대시보드</h1>
+<div class="sub" id="sub"></div>
+</header>
+<div class="tabs" id="chans"></div>
+<div class="months" id="months"></div>
+<div class="scope" id="scope"></div>
+<div class="kpis" id="kpis"></div>
+<div id="views"></div>
+</div>
+<div class="tip" id="tip"></div>
+<div class="pop" id="pop" hidden></div>
+<script>
+const RD={"무신사":{"months":["2026-10"],"all":{"days":["2026-10-14","2026-10-16","2026-10-21","2026-10-26"],"period":{"qty":6,"amt":296360,"cnt":5,"reason":{"단순변심":{"qty":5,"amt":252680},"사이즈불만족":{"qty":1,"amt":43680}},"top":[{"name":"크롭 비건 봄버 자켓","qty":2,"amt":131390,"reason":{"단순변심":2},"opt":{"BLACK":2},"det":[]},{"name":"스터드 커브드 밴딩 팬츠","qty":2,"amt":81060,"reason":{"단순변심":2},"opt":{"BLACK":2},"det":[]},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":43680,"reason":{"사이즈불만족":1},"opt":{"GRAY":1},"det":[]},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40230,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}],"dayTotals":{"2026-10-14":{"qty":1,"amt":65480,"cnt":1},"2026-10-16":{"qty":3,"amt":121290,"cnt":2},"2026-10-21":{"qty":1,"amt":43680,"cnt":1},"2026-10-26":{"qty":1,"amt":65910,"cnt":1}}},"byDay":{"2026-10-14":{"qty":1,"amt":65480,"cnt":1,"reason":{"단순변심":{"qty":1,"amt":65480}},"top":[{"name":"크롭 비건 봄버 자켓","qty":1,"amt":65480,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}]},"2026-10-16":{"qty":3,"amt":121290,"cnt":2,"reason":{"단순변심":{"qty":3,"amt":121290}},"top":[{"name":"스터드 커브드 밴딩 팬츠","qty":2,"amt":81060,"reason":{"단순변심":2},"opt":{"BLACK":2},"det":[]},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40230,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}]},"2026-10-21":{"qty":1,"amt":43680,"cnt":1,"reason":{"사이즈불만족":{"qty":1,"amt":43680}},"top":[{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":43680,"reason":{"사이즈불만족":1},"opt":{"GRAY":1},"det":[]}]},"2026-10-26":{"qty":1,"amt":65910,"cnt":1,"reason":{"단순변심":{"qty":1,"amt":65910}},"top":[{"name":"크롭 비건 봄버 자켓","qty":1,"amt":65910,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}]}}},"byMonth":{"2026-10":{"days":["2026-10-14","2026-10-16","2026-10-21","2026-10-26"],"period":{"qty":6,"amt":296360,"cnt":5,"reason":{"단순변심":{"qty":5,"amt":252680},"사이즈불만족":{"qty":1,"amt":43680}},"top":[{"name":"크롭 비건 봄버 자켓","qty":2,"amt":131390,"reason":{"단순변심":2},"opt":{"BLACK":2},"det":[]},{"name":"스터드 커브드 밴딩 팬츠","qty":2,"amt":81060,"reason":{"단순변심":2},"opt":{"BLACK":2},"det":[]},{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":43680,"reason":{"사이즈불만족":1},"opt":{"GRAY":1},"det":[]},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40230,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}],"dayTotals":{"2026-10-14":{"qty":1,"amt":65480,"cnt":1},"2026-10-16":{"qty":3,"amt":121290,"cnt":2},"2026-10-21":{"qty":1,"amt":43680,"cnt":1},"2026-10-26":{"qty":1,"amt":65910,"cnt":1}}},"byDay":{"2026-10-14":{"qty":1,"amt":65480,"cnt":1,"reason":{"단순변심":{"qty":1,"amt":65480}},"top":[{"name":"크롭 비건 봄버 자켓","qty":1,"amt":65480,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}]},"2026-10-16":{"qty":3,"amt":121290,"cnt":2,"reason":{"단순변심":{"qty":3,"amt":121290}},"top":[{"name":"스터드 커브드 밴딩 팬츠","qty":2,"amt":81060,"reason":{"단순변심":2},"opt":{"BLACK":2},"det":[]},{"name":"커브드 볼륨 카고 팬츠","qty":1,"amt":40230,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}]},"2026-10-21":{"qty":1,"amt":43680,"cnt":1,"reason":{"사이즈불만족":{"qty":1,"amt":43680}},"top":[{"name":"오버 사이즈 하이넥 후드 집업","qty":1,"amt":43680,"reason":{"사이즈불만족":1},"opt":{"GRAY":1},"det":[]}]},"2026-10-26":{"qty":1,"amt":65910,"cnt":1,"reason":{"단순변심":{"qty":1,"amt":65910}},"top":[{"name":"크롭 비건 봄버 자켓","qty":1,"amt":65910,"reason":{"단순변심":1},"opt":{"BLACK":1},"det":[]}]}}}},"sales":{"2026-10":{"에센셜 배색 트랙 팬츠":{"qty":14,"amt":573130},"스터드 커브드 밴딩 팬츠":{"qty":9,"amt":390860},"오버 사이즈 하이넥 후드 집업":{"qty":71,"amt":2741270},"버튼 모크넥 롱 슬리브":{"qty":60,"amt":1729370},"슬림핏 보트넥 스트라이프 롱 슬리브":{"qty":1,"amt":39200},"언발 스트라이프 롱 슬리브":{"qty":7,"amt":211460},"플로우 오버사이즈 레더 자켓":{"qty":16,"amt":1063390},"컴포트 하프 집업 후리스":{"qty":2,"amt":85080},"클라우드 후드 패딩 자켓":{"qty":4,"amt":204790},"크롭 비건 봄버 자켓":{"qty":37,"amt":2385350},"커브드 볼륨 카고 팬츠":{"qty":13,"amt":501760}}},"salesCover":{"2026-10":["2026-10-01","2026-10-27"],"all":["2026-10-01","2026-10-27"]},"salesLife":{"에센셜 배색 트랙 팬츠":{"qty":14,"amt":573130},"스터드 커브드 밴딩 팬츠":{"qty":9,"amt":390860},"오버 사이즈 하이넥 후드 집업":{"qty":71,"amt":2741270},"버튼 모크넥 롱 슬리브":{"qty":60,"amt":1729370},"슬림핏 보트넥 스트라이프 롱 슬리브":{"qty":1,"amt":39200},"언발 스트라이프 롱 슬리브":{"qty":7,"amt":211460},"플로우 오버사이즈 레더 자켓":{"qty":16,"amt":1063390},"컴포트 하프 집업 후리스":{"qty":2,"amt":85080},"클라우드 후드 패딩 자켓":{"qty":4,"amt":204790},"크롭 비건 봄버 자켓":{"qty":37,"amt":2385350},"커브드 볼륨 카고 팬츠":{"qty":13,"amt":501760}},"salesRecent":{"버튼 모크넥 롱 슬리브":46,"크롭 비건 봄버 자켓":30,"플로우 오버사이즈 레더 자켓":9,"오버 사이즈 하이넥 후드 집업":52,"스터드 커브드 밴딩 팬츠":3,"커브드 볼륨 카고 팬츠":10,"언발 스트라이프 롱 슬리브":5,"컴포트 하프 집업 후리스":1,"에센셜 배색 트랙 팬츠":1,"클라우드 후드 패딩 자켓":3},"salesLifeCover":["2026-10-01","2026-10-27"],"amtBasis":"환불금액"}};
+const CHANS=["무신사"];
+const REASON_COLORS={"단순변심":"#6b7f99","사이즈불만족":"#d98b3a","색상불만족":"#9b6bd0","상품불량":"#d0524a","상품파손":"#8f2f2f","타사대비 가격불만":"#3f9e8c","기타":"#777"};
+const RORDER=["단순변심","사이즈불만족","색상불만족","상품불량","상품파손","타사대비 가격불만","기타"];
+let curChan=CHANS[0];
+let curMonth="전체"; // "전체" | "2026-08" | "2026-09"
+let scope="전체"; // "전체" or a date string
+let topSort="구성비"; // 구성비 | 생애반품률 | 불량률
+const MINSALE=10; // (레거시)
+const LIFE_MIN=30; // 생애 반품률 표본 하한
+const MLAB=m=>m==="전체"?"전체 누적":((+m.slice(5))+"월");
+function MD(){const C=RD[curChan];return curMonth==="전체"?C.all:C.byMonth[curMonth];}
+function salesKey(){return curMonth==="전체"?"all":curMonth;}
+function salesCov(){var c=(RD[curChan].salesCover||{})[salesKey()];return c||['',''];}
+function scopeLabel(){return scope==="전체"?MLAB(curMonth):md(scope);}
+const won=n=>"₩"+Math.round(n||0).toLocaleString('en-US');
+const rc=r=>REASON_COLORS[r]||"#777";
+const md=d=>{var p=d.split('-');return (+p[1])+"/"+(+p[2]);};
+function reasonsSorted(obj){return RORDER.filter(r=>obj[r]).concat(Object.keys(obj).filter(r=>RORDER.indexOf(r)<0));}
+
+function scopeData(){
+  const M=MD();
+  if(scope==="전체") return M.period;
+  return M.byDay[scope];
+}
+function render(){
+  const C=RD[curChan];
+  if(!C.months||C.months.indexOf(curMonth)<0){ curMonth=(C.months&&C.months.length)?C.months[C.months.length-1]:'전체'; }
+  const M=MD();
+  const allDays=C.all.days;
+  // sub
+  document.getElementById('sub').innerHTML=(allDays.length?allDays[0].replace(/-/g,'.')+' ~ '+allDays[allDays.length-1].replace(/-/g,'.'):'')+(curChan==='무신사'?' · 무신사 · 환불금액 기준 · 환불완료일 기준 · 출고 전 취소 제외':' · 판매가 기준 · 반품완료일 기준')+' · 상품 클릭→사유·옵션·고객사유';
+  // chans
+  document.getElementById('chans').innerHTML=['무신사'].map(c=>{
+    const has=RD[c]; return '<div class="tab'+(c===curChan?' on':'')+(has?'':' dis')+'" data-c="'+c+'">'+c+(has?'':' (준비중)')+'</div>';
+  }).join('');
+  document.querySelectorAll('#chans .tab').forEach(b=>{b.onclick=()=>{if(!RD[b.dataset.c])return;curChan=b.dataset.c;curMonth="전체";scope="전체";render();};});
+  // month tabs
+  let mt=(C.months||[]).map(m=>'<div class="mtab'+(m===curMonth?' on':'')+'" data-m="'+m+'">'+MLAB(m)+'</div>').join('');
+  document.getElementById('months').innerHTML=mt;
+  document.querySelectorAll('#months .mtab').forEach(b=>{b.onclick=()=>{curMonth=b.dataset.m;scope="전체";render();};});
+  // scope chips (선택 월의 날짜만)
+  let sc='<div class="chip'+(scope==="전체"?' on':'')+'" data-s="전체">'+MLAB(curMonth)+' 전체</div>';
+  sc+=M.days.map(d=>'<div class="chip'+(scope===d?' on':'')+'" data-s="'+d+'">'+md(d)+'</div>').join('');
+  document.getElementById('scope').innerHTML=sc;
+  document.querySelectorAll('#scope .chip').forEach(b=>{b.onclick=()=>{scope=b.dataset.s;render();};});
+  const S=scopeData();
+  renderKPI(S,M);
+  let h='';
+  h+=reasonCard(S);
+  if(scope==="전체") h+=trendCard(M);
+  h+=topCard(S);
+  h+=detailCard(S);
+  document.getElementById('views').innerHTML=h;
+  bindTop(S);
+}
+function renderKPI(S,C){
+  const nd=C.days.length||1;
+  let k=[['반품 수량',(S.qty||0)+'장',''],['반품 금액',won(S.amt),curChan==='무신사'?'환불금액 기준':'판매가 기준'],['반품 건수',(S.cnt||0)+'건','주문 기준']];
+  if(scope==="전체") k.push(['일평균 반품',(S.qty/nd).toFixed(1)+'장 · '+won(Math.round(S.amt/nd)),'완료 '+nd+'일 평균(주말제외)']);
+  else k.push(['최다 사유',topReason(S.reason),'']);
+  document.getElementById('kpis').innerHTML=k.map(x=>'<div class="kpi"><div class="lab">'+x[0]+'</div><div class="val">'+x[1]+'</div><div class="sub2">'+x[2]+'</div></div>').join('');
+}
+function topReason(obj){var e=reasonsSorted(obj).map(r=>[r,obj[r].qty]).sort((a,b)=>b[1]-a[1]);return e.length?e[0][0]+' ('+e[0][1]+')':'-';}
+function reasonCard(S){
+  const obj=S.reason||{}; const tot=Object.keys(obj).reduce((s,r)=>s+obj[r].qty,0)||1;
+  const ents=reasonsSorted(obj).map(r=>[r,obj[r]]).sort((a,b)=>b[1].qty-a[1].qty);
+  let rows=ents.map(e=>{const pct=Math.round(e[1].qty/tot*100);
+    return '<div class="crow"><div class="cline"><span><span class="rsn" style="background:'+rc(e[0])+'">'+e[0]+'</span></span><span class="cq">'+e[1].qty+'장 · '+won(e[1].amt)+' · '+pct+'%</span></div><div class="cbarwrap"><div class="cbar" style="width:'+pct+'%;background:'+rc(e[0])+'"></div></div></div>';}).join('');
+  return '<div class="card"><h3>반품 사유별</h3><div class="cs">'+scopeLabel()+' · 수량 기준</div>'+rows+'</div>';
+}
+function dRange(a,b){var out=[];var pa=a.split('-').map(Number),pb=b.split('-').map(Number);var d=new Date(pa[0],pa[1]-1,pa[2]),e=new Date(pb[0],pb[1]-1,pb[2]);while(d<=e){out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
+function isWeekend(d){var p=d.split('-').map(Number);var w=new Date(p[0],p[1]-1,p[2]).getDay();return w===0||w===6;}
+function trendCard(C){
+  const dd0=C.days; if(!dd0.length) return '';
+  const days=dRange(dd0[0],dd0[dd0.length-1]);  // 연속 날짜(빈 날 0 채움)
+  const dt=C.period.dayTotals;
+  const max=Math.max(1,...days.map(d=>dt[d]?dt[d].qty:0));
+  const W=Math.max(340,days.length*46), H=180, pad=26, bw=Math.min(30,(W-pad*2)/days.length*0.6);
+  let bars='';
+  days.forEach((d,ix)=>{const v=dt[d]?dt[d].qty:0; const we=isWeekend(d); const x=pad+(W-pad*2)*(ix+0.5)/days.length; const bh=(H-46)*v/max; const y=H-24-bh;
+    if(we)bars+='<rect x="'+(x-(W-pad*2)/days.length/2)+'" y="6" width="'+((W-pad*2)/days.length)+'" height="'+(H-30)+'" fill="rgba(16,24,40,.04)"></rect>';
+    bars+='<rect x="'+(x-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+Math.max(0,bh)+'" rx="3" fill="'+(we?'var(--text-3)':'var(--accent)')+'" class="tb" data-t="'+md(d)+'" data-v="'+v+'장 · '+won(dt[d]?dt[d].amt:0)+'"></rect>';
+    bars+='<text x="'+x+'" y="'+(H-11)+'" fill="'+(we?'var(--text-3)':'var(--text-3)')+'" font-size="10" text-anchor="middle">'+md(d)+'</text>';
+    if(we)bars+='<text x="'+x+'" y="'+(H-1)+'" fill="var(--text-3)" font-size="8" text-anchor="middle">주말</text>';
+    if(v)bars+='<text x="'+x+'" y="'+(y-4)+'" fill="var(--text-2)" font-size="10" text-anchor="middle">'+v+'</text>';});
+  return '<div class="card"><h3>일별 반품 추이</h3><div class="cs">반품완료일 · 일별 수량(막대) · 빈 날 0 포함 · 주말 음영(물류 미근무) · 마우스 올리면 금액</div><div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+bars+'</svg></div></div>';
+}
+function lifeSalesOf(name){var s=((RD[curChan].salesLife||{}))[name];return s?s.qty:0;}
+function allRetMap(){var m={};((((RD[curChan].all||{}).period||{}).top)||[]).forEach(function(t){var d=0;for(var r in t.reason){if(r==="상품불량"||r==="상품파손"||r==="오배송")d+=t.reason[r];}m[t.name]={qty:t.qty,def:d};});return m;}
+function lifeRate(name,AR){var sq=lifeSalesOf(name);if(sq<LIFE_MIN)return null;return (AR[name]||{qty:0}).qty/sq*100;}
+function defRate(name,AR){var sq=lifeSalesOf(name);if(sq<LIFE_MIN)return null;return (AR[name]||{def:0}).def/sq*100;}
+function colBand(v,yel,red){if(v==null)return 'var(--text-3)';return v>=red?'#d0524a':(v>=yel?'#d98b3a':'var(--text-2)');}
+function matFlag(name){var life=lifeSalesOf(name);var rec=((RD[curChan].salesRecent||{}))[name]||0;return (life>=LIFE_MIN&&rec/life>0.45)?' <span style="font-size:9px;color:var(--text-3)">⏳유입중</span>':'';}
+function topCard(S){
+  var AR=allRetMap(); var totAmt=S.amt||1;
+  var items=(S.top||[]).map(function(t,oi){return {t:t,oi:oi};});
+  if(topSort==="생애반품률") items.sort(function(a,b){var ra=lifeRate(a.t.name,AR),rb=lifeRate(b.t.name,AR);return (rb==null?-1:rb)-(ra==null?-1:ra);});
+  else if(topSort==="불량률") items.sort(function(a,b){var ra=defRate(a.t.name,AR),rb=defRate(b.t.name,AR);return (rb==null?-1:rb)-(ra==null?-1:ra);});
+  else items.sort(function(a,b){return b.t.amt-a.t.amt;});
+  var list=items.slice(0,15);
+  var btns=['구성비','생애반품률','불량률'].map(function(m){return '<span class="chip'+(m===topSort?' on':'')+'" data-sort="'+m+'" style="padding:4px 10px;font-size:11px">'+m+'순</span>';}).join(' ');
+  var rows=list.map(function(o){
+    var t=o.t; var sq=lifeSalesOf(t.name); var lr=lifeRate(t.name,AR); var dr=defRate(t.name,AR); var ar=AR[t.name]||{qty:0};
+    var share=(t.amt/totAmt*100);
+    var rmix=reasonsSorted(t.reason).slice(0,3).map(function(r){return '<span class="rsn" style="background:'+rc(r)+';font-size:9.5px;padding:1px 5px">'+r+' '+t.reason[r]+'</span>';}).join(' ');
+    var lrTxt = sq<LIFE_MIN ? '<span style="color:var(--text-3)">표본적음</span>' : '<b style="color:'+colBand(lr,20,30)+'">'+lr.toFixed(1)+'%</b><span style="color:var(--text-3);font-size:10px"> '+ar.qty+'/'+sq+'</span>'+matFlag(t.name);
+    var drTxt = sq<LIFE_MIN ? '<span style="color:var(--text-3)">-</span>' : '<b style="color:'+colBand(dr,3,5)+'">'+dr.toFixed(1)+'%</b>';
+    return '<tr class="clk" data-i="'+o.oi+'"><td class="n"><span class="rank"></span>'+t.name+'</td><td>'+t.qty+'장</td><td>'+won(t.amt)+'</td><td>'+share.toFixed(0)+'%</td><td>'+lrTxt+'</td><td>'+drTxt+'</td><td class="n" style="text-align:left">'+rmix+'</td></tr>';}).join('');
+  var rk=0; rows=rows.replace(/<span class="rank"><\/span>/g,function(){rk++;return '<span class="rank">'+rk+'</span>';});
+  var lcov=(RD[curChan].salesLifeCover||['','']);
+  return '<div class="card"><h3>반품 TOP 상품</h3><div class="cs">'+scopeLabel()+' 반품 · <b style="color:var(--text-2)">'+topSort+'순</b> · 구성비=이 기간 반품액 중 비중 · <b>생애반품률</b>=제품 누적반품÷누적판매('+lcov[0].slice(5)+'~'+lcov[1].slice(5)+', '+LIFE_MIN+'장↑) · <b>불량률</b>=불량+파손+오배송만 · 생애 🟠20%/🔴 30%, 불량 🟠3%/🔴 5% · ⏳=반품유입중(신상) · 행 클릭→상세</div><div style="overflow-x:auto"><table><tr><th class="n">순위 · 상품</th><th>기간반품</th><th>반품액</th><th>구성비</th><th>생애 반품률</th><th>불량률</th><th class="n" style="text-align:left">주요 사유</th></tr>'+rows+'</table></div>'+
+    '<div style="margin-top:10px;display:flex;gap:6px">'+btns+'</div></div>';
+}
+function detailCard(S){
+  let dets=[];
+  (S.top||[]).forEach(t=>{(t.det||[]).forEach(d=>dets.push(Object.assign({name:t.name},d)));});
+  dets.sort((a,b)=>a.date<b.date?1:-1);
+  if(!dets.length) return '';
+  let h=dets.map(d=>'<div class="det"><div class="dm">'+md(d.date)+' · '+d.name+' · '+d.opt+' · <span class="rsn" style="background:'+rc(d.reason)+';font-size:9.5px">'+d.reason+'</span></div>'+esc(d.text)+'</div>').join('');
+  return '<div class="card"><h3>고객 사유 상세 (불량·파손)</h3><div class="cs">'+scopeLabel()+' · 고객이 직접 입력한 사유 '+dets.length+'건</div>'+h+'</div>';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+function bindTop(S){
+  document.querySelectorAll('#views [data-sort]').forEach(b=>{b.onclick=e=>{e.stopPropagation();topSort=b.dataset.sort;render();};});
+  document.querySelectorAll('#views tr.clk').forEach(tr=>{tr.onclick=e=>{showPop(S.top[+tr.dataset.i],e);};});
+  document.querySelectorAll('#views .tb').forEach(el=>{
+    el.addEventListener('mousemove',e=>showTip(e,'<b>'+el.dataset.t+'</b><br>'+el.dataset.v));
+    el.addEventListener('mouseleave',hideTip);});
+}
+function bars2(obj,colorFn){
+  const ents=Object.keys(obj).map(k=>[k,obj[k]]).sort((a,b)=>b[1]-a[1]);
+  const tot=ents.reduce((s,e)=>s+e[1],0)||1;
+  return ents.map(e=>{const pct=Math.round(e[1]/tot*100);return '<div class="crow"><div class="cline"><span>'+e[0]+'</span><span class="cq">'+e[1]+'장 · '+pct+'%</span></div><div class="cbarwrap"><div class="cbar" style="width:'+pct+'%;background:'+(colorFn?colorFn(e[0]):'var(--accent)')+'"></div></div></div>';}).join('');
+}
+function showPop(t,e){
+  const pop=document.getElementById('pop');
+  let h='<span class="pclose" onclick="document.getElementById(\'pop\').hidden=true">✕</span><h4>'+t.name+'</h4><div class="psub">'+scopeLabel()+' · 반품 '+t.qty+'장 · '+won(t.amt)+'</div>';
+  h+='<div class="seclab">사유별</div>'+bars2(t.reason,rc);
+  h+='<div class="seclab">옵션별</div>'+bars2(t.opt,null);
+  if(t.det&&t.det.length){h+='<div class="seclab">고객 사유상세</div>'+t.det.map(d=>'<div class="det"><div class="dm">'+md(d.date)+' · '+d.opt+' · '+d.reason+'</div>'+esc(d.text)+'</div>').join('');}
+  pop.innerHTML=h; pop.hidden=false;
+  const pw=pop.offsetWidth,ph=pop.offsetHeight;
+  pop.style.left=Math.max(8,Math.min((e.clientX||100)+12,innerWidth-pw-12))+'px';
+  pop.style.top=Math.max(8,Math.min((e.clientY||100)+12,innerHeight-ph-12))+'px';
+}
+document.addEventListener('click',e=>{const pop=document.getElementById('pop');if(!pop.hidden&&!pop.contains(e.target)&&!e.target.closest('tr.clk'))pop.hidden=true;});
+const tip=document.getElementById('tip');
+function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px';}
+function hideTip(){tip.style.opacity=0;}
+render();
+</script>
+</body></html>
