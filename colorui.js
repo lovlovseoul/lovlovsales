@@ -19,7 +19,7 @@
     '.colorpop .jbar{background:#16A34A}'+
     '.colorpop .cempty{font-size:12px;color:#9AA3AD;padding:4px 0}'+
     '.colorpop .cpclose{position:absolute;top:9px;right:11px;cursor:pointer;color:#9AA3AD;font-size:13px}'+
-    'tr.clk{cursor:pointer}tr.clk:hover{background:#F4F5F7}';
+    '.colorpop.wide{max-width:560px}'+'.colorpop .pbar{background:#7C3AED}'+'.colorpop .mx{border-collapse:collapse;width:100%;font-size:11.5px;margin-top:2px}'+'.colorpop .mx th{font-weight:600;color:#5B6470;padding:4px 6px;border-bottom:1px solid #DCDFE4;text-align:right;white-space:nowrap}'+'.colorpop .mx th:first-child,.colorpop .mx td:first-child{text-align:left}'+'.colorpop .mx td{padding:4px 6px;border-bottom:1px solid #F0F1F3;text-align:right;white-space:nowrap}'+'.colorpop .mx tr.tot td{font-weight:600;border-top:1px solid #DCDFE4}'+'.colorpop .mx .z{color:#C5CAD1}'+'.colorpop .mx .pc{display:block;font-size:10px;color:#9AA3AD;font-weight:400}'+'.colorpop .mxwrap{overflow-x:auto}'+'tr.clk{cursor:pointer}tr.clk:hover{background:#F4F5F7}';
     document.head.appendChild(st);
     var pop=document.createElement('div');pop.className='colorpop';pop.hidden=true;document.body.appendChild(pop);
     function clean(n){return n.replace(/^\d+\s*/,'').replace(/\s*NEW\s*$/,'').trim();}
@@ -40,6 +40,34 @@
         else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}
       });
       return any?out:null;
+    }
+    function getMapP(prod,dayKey,daily,fw,p){
+      var out={},any=false,d=curD(),mdays=mdays_(),dm=BP[p]&&BP[p][dayKey]; if(!dm)return null;
+      function acc(x){if(x)Object.keys(x).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=x[k][0];out[k][1]+=x[k][1];any=true;});}
+      if(fw){Object.keys(dm).forEach(function(dd){if(dd>='2026-08-28')acc(dm[dd]&&dm[dd][prod]);});}
+      else if(daily){acc(dm[d]&&dm[d][prod]);}
+      else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}
+      return any?out:null;
+    }
+    function chanMatrix(name,daily,fw,cd,sd){
+      var useSize=false, dk='dayColors', lab='컬러';
+      if(Object.keys(cd).length<=1 && sd){var rk=Object.keys(sd).filter(function(k){return k!=='FREE'&&k!=='(미분류)';}); if(rk.length>1){useSize=true;dk='daySizes';lab='사이즈';}}
+      var rows=useSize?Object.keys(sd).filter(function(k){return k!=='(미분류)';}):Object.keys(cd);
+      var per={},ptot={};
+      PLATS.forEach(function(p){var m=getMapP(name,dk,daily,fw,p); if(m){per[p]=m; ptot[p]=Object.keys(m).reduce(function(s,k){return s+m[k][0];},0);}});
+      var pl=Object.keys(ptot).filter(function(p){return ptot[p]>0;}).sort(function(a,b){return ptot[b]-ptot[a];});
+      if(!pl.length)return '';
+      var all=pl.reduce(function(s,p){return s+ptot[p];},0)||1;
+      var cobj={}; pl.forEach(function(p){cobj[p]=[ptot[p],0];});
+      var h='<div class="seclab">채널별</div>'+bars(cobj,'pbar');
+      if(pl.length<2) return h;
+      var rt={}; rows.forEach(function(r){rt[r]=pl.reduce(function(s,p){return s+((per[p][r]||[0])[0]);},0);});
+      rows=rows.filter(function(r){return rt[r]>0;}).sort(function(a,b){return rt[b]-rt[a];});
+      h+='<div class="seclab">채널 × '+lab+' (장)</div><div class="mxwrap"><table class="mx"><tr><th>'+lab+'</th>';
+      pl.forEach(function(p){h+='<th>'+p+'</th>';}); h+='<th>합계</th></tr>';
+      rows.forEach(function(r){h+='<tr><td>'+r+'</td>'; pl.forEach(function(p){var q=(per[p][r]||[0])[0]; h+= q?'<td>'+q+'</td>':'<td class="z">·</td>';}); h+='<td><b>'+rt[r]+'</b></td></tr>';});
+      h+='<tr class="tot"><td>합계</td>'; pl.forEach(function(p){h+='<td>'+ptot[p]+'<span class="pc">'+Math.round(ptot[p]/all*100)+'%</span></td>';}); h+='<td>'+all+'</td></tr></table></div>';
+      return h;
     }
     function bars(obj,cls){
       var ents=Object.keys(obj).map(function(k){return [k,obj[k]];}).sort(function(a,b){return b[1][0]-a[1][0];});
@@ -72,6 +100,8 @@
           Object.keys(sd).forEach(function(k){ if(k!=='(미분류)'){ real[k]=sd[k]; if(k!=='FREE') hasReal=true; } });
           if(hasReal){ h+='<div class="seclab">사이즈별</div>'+bars(real,'sbar'); }
         }
+        var wide=false; if(fw||platList().length>1){var mxh=chanMatrix(name,daily,fw,cd,sd); if(mxh){h+=mxh; wide=mxh.indexOf('<table')>=0;}}
+        pop.classList.toggle('wide',wide);
         pop.innerHTML=h;
       }
       pop.hidden=false;
