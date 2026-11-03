@@ -19,7 +19,7 @@
     '.colorpop .jbar{background:#16A34A}'+
     '.colorpop .cempty{font-size:12px;color:#9AA3AD;padding:4px 0}'+
     '.colorpop .cpclose{position:absolute;top:9px;right:11px;cursor:pointer;color:#9AA3AD;font-size:13px}'+
-    '.colorpop.wide{max-width:560px}'+'.colorpop .pbar{background:#7C3AED}'+'.colorpop .mx{border-collapse:collapse;width:100%;font-size:11.5px;margin-top:2px}'+'.colorpop .mx th{font-weight:600;color:#5B6470;padding:4px 6px;border-bottom:1px solid #DCDFE4;text-align:right;white-space:nowrap}'+'.colorpop .mx th:first-child,.colorpop .mx td:first-child{text-align:left}'+'.colorpop .mx td{padding:4px 6px;border-bottom:1px solid #F0F1F3;text-align:right;white-space:nowrap}'+'.colorpop .mx tr.tot td{font-weight:600;border-top:1px solid #DCDFE4}'+'.colorpop .mx .z{color:#C5CAD1}'+'.colorpop .mx .pc{display:block;font-size:10px;color:#9AA3AD;font-weight:400}'+'.colorpop .mxwrap{overflow-x:auto}'+'tr.clk{cursor:pointer}tr.clk:hover{background:#F4F5F7}';
+    '.colorpop.wide{max-width:560px}'+'.chcell{min-width:150px;text-align:left!important}'+'.chbar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:#EEF0F3;margin-bottom:3px;max-width:180px}'+'.chbar span{display:block;height:100%}'+'.chtxt{font-size:11px;color:#5B6470;white-space:nowrap}'+'.chtxt b{font-weight:600}'+'th.chh{text-align:left!important}'+'#views .card{overflow-x:auto}'+'@media(max-width:600px){.chcell{min-width:110px}.chbar{max-width:120px}}'+'.colorpop .pbar{background:#7C3AED}'+'.colorpop .mx{border-collapse:collapse;width:100%;font-size:11.5px;margin-top:2px}'+'.colorpop .mx th{font-weight:600;color:#5B6470;padding:4px 6px;border-bottom:1px solid #DCDFE4;text-align:right;white-space:nowrap}'+'.colorpop .mx th:first-child,.colorpop .mx td:first-child{text-align:left}'+'.colorpop .mx td{padding:4px 6px;border-bottom:1px solid #F0F1F3;text-align:right;white-space:nowrap}'+'.colorpop .mx tr.tot td{font-weight:600;border-top:1px solid #DCDFE4}'+'.colorpop .mx .z{color:#C5CAD1}'+'.colorpop .mx .pc{display:block;font-size:10px;color:#9AA3AD;font-weight:400}'+'.colorpop .mxwrap{overflow-x:auto}'+'tr.clk{cursor:pointer}tr.clk:hover{background:#F4F5F7}';
     document.head.appendChild(st);
     var pop=document.createElement('div');pop.className='colorpop';pop.hidden=true;document.body.appendChild(pop);
     function clean(n){return n.replace(/^\d+\s*/,'').replace(/\s*NEW\s*$/,'').trim();}
@@ -112,7 +112,27 @@
     }
     function hide(){pop.hidden=true;}
     function prodOf(tr){if(!tr)return '';if(tr.dataset&&tr.dataset.prod)return tr.dataset.prod;var td=tr.querySelector('td');return td?clean(td.textContent):'';}
-    function mark(){var rows=document.querySelectorAll('#views table tr');for(var i=0;i<rows.length;i++){if(ALLPROD[prodOf(rows[i])])rows[i].classList.add('clk');}}
+    var SHORT={'W컨셉':'W','29CM':'29CM','롯데온':'롯데','자사몰':'자사','지그재그':'지그','무신사':'무신사','퀸잇':'퀸잇'};
+    function pcol(p){try{if(typeof PCH!=='undefined'&&PCH[p])return PCH[p];}catch(e){}return '#9AA3AD';}
+    function chanCell(prod,daily,fw){
+      var arr=[],tot=0;
+      PLATS.forEach(function(p){var m=getMapP(prod,'dayColors',daily,fw,p);if(!m)return;var q=Object.keys(m).reduce(function(s,k){return s+m[k][0];},0);if(q>0){arr.push([p,q]);tot+=q;}});
+      if(!tot)return '<span class="chtxt">-</span>';
+      arr.sort(function(a,b){return b[1]-a[1];});
+      var bar='<div class="chbar">'+arr.map(function(e){return '<span style="width:'+(e[1]/tot*100)+'%;background:'+pcol(e[0])+'"></span>';}).join('')+'</div>';
+      var txt=arr.slice(0,3).map(function(e){return '<b>'+SHORT[e[0]]+'</b> '+e[1];}).join(' · ')+(arr.length>3?' · 외 '+(arr.length-3):'');
+      var tip=arr.map(function(e){return e[0]+' '+e[1]+'장 ('+Math.round(e[1]/tot*100)+'%)';}).join(', ');
+      return '<div title="'+tip+'">'+bar+'<span class="chtxt">'+txt+'</span></div>';
+    }
+    function mark(){
+      var rows=document.querySelectorAll('#views table tr');var all=curPlat()==='전체통합';
+      for(var i=0;i<rows.length;i++){var tr=rows[i];var nm=prodOf(tr);if(!ALLPROD[nm])continue;tr.classList.add('clk');
+        if(!all||tr.querySelector('td.chcell'))continue;
+        var fw=!!(tr.closest&&tr.closest('#fw26card'));var daily=fw?false:sectionDaily(tr);
+        var td=document.createElement('td');td.className='chcell';td.innerHTML=chanCell(nm,daily,fw);tr.appendChild(td);
+        var tb=tr.closest('table');var hr=tb&&tb.querySelector('tr');if(hr&&hr.querySelector('th')&&!hr.querySelector('th.chh')){var th=document.createElement('th');th.className='chh';th.textContent='채널별';hr.appendChild(th);}
+      }
+    }
     document.addEventListener('click',function(e){
       if(pop.contains(e.target))return;
       var tr=e.target.closest('tr');
