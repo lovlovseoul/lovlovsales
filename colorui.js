@@ -31,11 +31,11 @@
     // 선택 스코프(플랫폼/일별)에서 상품의 {키:[q,a]} 병합
     function mdays_(){try{if(typeof curMonth!=='undefined'&&typeof DM!=='undefined'&&DM[curMonth])return DM[curMonth].days;}catch(e){}return days;}
     function getMap(prod,periodKey,dayKey,daily,fw){
-      var out={},any=false,pl=fw?PLATS:platList(),d=curD(),mdays=mdays_();
+      var out={},any=false,pl=(fw===true)?PLATS:platList(),d=curD(),mdays=mdays_();
       function acc(s){if(s)Object.keys(s).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=s[k][0];out[k][1]+=s[k][1];any=true;});}
       pl.forEach(function(p){
         var dm=BP[p]&&BP[p][dayKey]; if(!dm)return;
-        if(fw){Object.keys(dm).forEach(function(dd){if(dd>='2026-08-28')acc(dm[dd]&&dm[dd][prod]);});}
+        if(fw){var fs=(fw===true?'2026-08-28':fw);Object.keys(dm).forEach(function(dd){if(dd>=fs)acc(dm[dd]&&dm[dd][prod]);});}
         else if(daily){acc(dm[d]&&dm[d][prod]);}
         else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}
       });
@@ -44,7 +44,7 @@
     function getMapP(prod,dayKey,daily,fw,p){
       var out={},any=false,d=curD(),mdays=mdays_(),dm=BP[p]&&BP[p][dayKey]; if(!dm)return null;
       function acc(x){if(x)Object.keys(x).forEach(function(k){if(!out[k])out[k]=[0,0];out[k][0]+=x[k][0];out[k][1]+=x[k][1];any=true;});}
-      if(fw){Object.keys(dm).forEach(function(dd){if(dd>='2026-08-28')acc(dm[dd]&&dm[dd][prod]);});}
+      if(fw){var fs=(fw===true?'2026-08-28':fw);Object.keys(dm).forEach(function(dd){if(dd>=fs)acc(dm[dd]&&dm[dd][prod]);});}
       else if(daily){acc(dm[d]&&dm[d][prod]);}
       else{mdays.forEach(function(dd){acc(dm[dd]&&dm[dd][prod]);});}
       return any?out:null;
@@ -54,7 +54,7 @@
       if(Object.keys(cd).length<=1 && sd){var rk=Object.keys(sd).filter(function(k){return k!=='FREE'&&k!=='(미분류)';}); if(rk.length>1){useSize=true;dk='daySizes';lab='사이즈';}}
       var rows=useSize?Object.keys(sd).filter(function(k){return k!=='(미분류)';}):Object.keys(cd);
       var per={},ptot={};
-      PLATS.forEach(function(p){var m=getMapP(name,dk,daily,fw,p); if(m){per[p]=m; ptot[p]=Object.keys(m).reduce(function(s,k){return s+m[k][0];},0);}});
+      ((fw===true)?PLATS:platList()).forEach(function(p){var m=getMapP(name,dk,daily,fw,p); if(m){per[p]=m; ptot[p]=Object.keys(m).reduce(function(s,k){return s+m[k][0];},0);}});
       var pl=Object.keys(ptot).filter(function(p){return ptot[p]>0;}).sort(function(a,b){return ptot[b]-ptot[a];});
       if(!pl.length)return '';
       var all=pl.reduce(function(s,p){return s+ptot[p];},0)||1;
@@ -86,7 +86,7 @@
       var cd=getMap(name,'colors','dayColors',daily,fw);
       var sd=getMap(name,'sizes','daySizes',daily,fw);
       var jd=getMap(name,'combos','dayCombos',daily,fw);
-      var mdys=mdays_();var mrange=mdys.length?(mdys[0].slice(5).replace('-','/')+'~'+mdys[mdys.length-1].slice(5).replace('-','/')):range;var label=fw?('전채널 · 8/28~ 누적'):(scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+mrange)));
+      var mdys=mdays_();var mrange=mdys.length?(mdys[0].slice(5).replace('-','/')+'~'+mdys[mdys.length-1].slice(5).replace('-','/')):range;var label=fw?(fw===true?'전채널 · 8/28~ 누적':(scopeLabel()+' · '+fw.slice(5).replace('-','/').replace(/^0/,'')+'~ 누적')):(scopeLabel()+' · '+(daily?('일별 · '+md(curD())+' 기준'):('기간 총 · '+mrange)));
       var h='<span class="cpclose">✕</span><h4>'+name+'</h4>';
       if(!cd){pop.innerHTML=h+'<div class="cpsub">'+label+'</div><div class="cempty">이 조건 데이터가 없어요<br>(컬러 집계 '+range+' 커버)</div>';}
       else{
@@ -100,7 +100,7 @@
           Object.keys(sd).forEach(function(k){ if(k!=='(미분류)'){ real[k]=sd[k]; if(k!=='FREE') hasReal=true; } });
           if(hasReal){ h+='<div class="seclab">사이즈별</div>'+bars(real,'sbar'); }
         }
-        var wide=false; if(fw||platList().length>1){var mxh=chanMatrix(name,daily,fw,cd,sd); if(mxh){h+=mxh; wide=mxh.indexOf('<table')>=0;}}
+        var wide=false; if(fw===true||platList().length>1){var mxh=chanMatrix(name,daily,fw,cd,sd); if(mxh){h+=mxh; wide=mxh.indexOf('<table')>=0;}}
         pop.classList.toggle('wide',wide);
         pop.innerHTML=h;
       }
@@ -124,11 +124,34 @@
       var tip=arr.map(function(e){return e[0]+' '+e[1]+'장 ('+Math.round(e[1]/tot*100)+'%)';}).join(', ');
       return '<div title="'+tip+'">'+bar+'<span class="chtxt">'+txt+'</span></div>';
     }
+    var N2START='2026-09-28';
+    function fwOf(tr){if(!tr.closest)return false;if(tr.closest('#fw26card'))return true;if(tr.closest('.card[data-new2]'))return N2START;return false;}
+    function renderNew2(){
+      var h3s=document.querySelectorAll('#views .card h3'),card=null;
+      for(var i=0;i<h3s.length;i++){if(/2차 신상 판매현황/.test(h3s[i].textContent)){card=h3s[i].closest('.card');break;}}
+      if(!card||card.getAttribute('data-new2')===curPlat())return;
+      var set={};try{NEWSET.forEach(function(n){set[n]=1;});}catch(e){}
+      set['스노우블룸 집업']=1;set['마이 시어링 무스탕']=1;
+      var pl=platList(),items=[];
+      Object.keys(set).forEach(function(prod){var q=0,a=0;pl.forEach(function(p){var dc=BP[p]&&BP[p].dayColors;if(dc)Object.keys(dc).forEach(function(d){if(d>=N2START&&dc[d][prod]){var cd=dc[d][prod];Object.keys(cd).forEach(function(k){q+=cd[k][0];a+=cd[k][1];});}});});if(q>0)items.push({name:prod,qty:q,amt:a});});
+      items.sort(function(x,y){return y.amt-x.amt;});
+      var tot=items.reduce(function(s,e){return s+e.amt;},0),totQ=items.reduce(function(s,e){return s+e.qty;},0);
+      var all=curPlat()==='전체통합';
+      var h='<h3>26FW 2차 신상 판매현황 <span class="new">NEW</span></h3><div class="cs">'+(all?'전채널 합산':curPlat())+' · 9/28 오픈 후 누적 · 2차 신상만</div>';
+      if(!items.length){h+='<div class="cs" style="padding:12px 2px">2차 신상 판매 내역 없음</div>';}
+      else{
+        h+='<div style="font-size:15px;font-weight:700;color:var(--text);margin:2px 0 10px">총 '+totQ+'장 · '+won(tot)+'</div>';
+        h+='<table><tr><th class="n">순위 · 상품</th><th>수량</th><th>실결제</th><th>비중</th></tr>';
+        items.forEach(function(e,idx){h+='<tr class="'+(idx==0?'r1':'')+'" data-prod="'+String(e.name).replace(/"/g,'&quot;')+'"><td class="n"><span class="rank">'+(idx+1)+'</span>'+e.name+'</td><td>'+e.qty+'</td><td>'+won(e.amt)+'</td><td>'+(e.amt/(tot||1)*100).toFixed(1)+'%</td></tr>';});
+        h+='</table>';
+      }
+      card.setAttribute('data-new2',curPlat());card.innerHTML=h;
+    }
     function mark(){
       var rows=document.querySelectorAll('#views table tr');var all=curPlat()==='전체통합';
       for(var i=0;i<rows.length;i++){var tr=rows[i];var nm=prodOf(tr);if(!ALLPROD[nm])continue;tr.classList.add('clk');
         if(!all||tr.querySelector('td.chcell'))continue;
-        var fw=!!(tr.closest&&tr.closest('#fw26card'));var daily=fw?false:sectionDaily(tr);
+        var fw=fwOf(tr);var daily=fw?false:sectionDaily(tr);
         var td=document.createElement('td');td.className='chcell';td.innerHTML=chanCell(nm,daily,fw);tr.appendChild(td);
         var tb=tr.closest('table');var hr=tb&&tb.querySelector('tr');if(hr&&hr.querySelector('th')&&!hr.querySelector('th.chh')){var th=document.createElement('th');th.className='chh';th.textContent='채널별';hr.appendChild(th);}
       }
@@ -136,7 +159,7 @@
     document.addEventListener('click',function(e){
       if(pop.contains(e.target))return;
       var tr=e.target.closest('tr');
-      if(tr){var nm=prodOf(tr);if(ALLPROD[nm]){var fw=!!(tr.closest&&tr.closest('#fw26card'));show(nm,fw?false:sectionDaily(tr),e.clientX,e.clientY,fw);return;}}
+      if(tr){var nm=prodOf(tr);if(ALLPROD[nm]){var fw=fwOf(tr);show(nm,fw?false:sectionDaily(tr),e.clientX,e.clientY,fw);return;}}
       hide();
     });
     // ===== 26FW 신상 판매 섹션 (전채널 합산) =====
@@ -164,7 +187,8 @@
       mark();
     }
     var v=document.getElementById('views');
-    if(v){new MutationObserver(function(){mark();if(!document.getElementById('fw26card'))renderFW26();}).observe(v,{childList:true,subtree:true});}
+    if(v){new MutationObserver(function(){renderNew2();mark();if(!document.getElementById('fw26card'))renderFW26();}).observe(v,{childList:true,subtree:true});}
+    renderNew2();
     mark();
     renderFW26();
   }).catch(function(){});
