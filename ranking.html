@@ -131,14 +131,22 @@ const v='?v='+Date.now();
 try{ LATEST=await fetch('rank_latest.json'+v).then(r=>r.json()); }catch(e){$('take').textContent='랭킹 데이터를 불러오지 못했어요.';return;}
 LD=LATEST.filter(r=>!r.snap).map(r=>r.date).sort().pop()||(LATEST[0]||{}).date||'';
 try{ DATES=await fetch('rank_dates.json'+v).then(r=>r.ok?r.json():[]); }catch(e){DATES=[]}
-DATES=[...new Set([...(Array.isArray(DATES)?DATES:[]),LD])].filter(Boolean).sort();
+const ARCH=new Set(Array.isArray(DATES)?DATES:[]);const SHA={};
+try{ // 매일 갱신 때마다 GitHub에 남는 rank_latest.json 커밋 기록으로 지난 날짜 랭킹을 찾음
+  for(let pg=1;pg<=3;pg++){const cs=await fetch('https://api.github.com/repos/lovlovseoul/lovlovsales/commits?path=rank_latest.json&per_page=100&page='+pg).then(r=>r.ok?r.json():[]);
+    for(const c of cs){const kd=new Date(new Date(c.commit.committer.date).getTime()+9*3600e3).toISOString().slice(0,10);if(!SHA[kd])SHA[kd]=c.sha}
+    if(cs.length<100)break}
+}catch(e){}
+DATES=[...new Set([...ARCH,...Object.keys(SHA),LD])].filter(Boolean).sort();
 L=LATEST;CURD=LD;DAY[LD]=LATEST;
 async function ensureH(){ if(H) return H; try{H=await fetch('rank_history.json'+v).then(r=>r.json())}catch(e){H=[]} return H; }
 async function loadDate(d){
   if(!d) return;
   let use=d;
   if(!DATES.includes(d)){ const earlier=DATES.filter(x=>x<d); use=earlier.length?earlier[earlier.length-1]:DATES[0]; }
-  if(!DAY[use]){ $('dinfo').textContent='불러오는 중…'; try{DAY[use]=await fetch('rankday_'+use+'.json'+v).then(r=>{if(!r.ok)throw 0;return r.json()})}catch(e){ $('dinfo').textContent=use+' 기록 파일을 못 불러왔어요.'; return; } }
+  if(!DAY[use]){ $('dinfo').textContent='불러오는 중…';
+    const url=ARCH.has(use)?'rankday_'+use+'.json'+v:(SHA[use]?`https://raw.githubusercontent.com/lovlovseoul/lovlovsales/${SHA[use]}/rank_latest.json`:null);
+    try{ if(!url)throw 0; DAY[use]=await fetch(url).then(r=>{if(!r.ok)throw 0;return r.json()}) }catch(e){ $('dinfo').textContent=use+' 기록을 못 불러왔어요.'; return; } }
   L=DAY[use];CURD=use;
   $('dinfo').innerHTML=(use!==d?`${d}은 기록이 없어서 그 전 기록일 <b>${use}</b>을 보여줘요 · `:'')+(use===LD?'오늘(최신) 랭킹':`<b>${use}</b> 기록을 보는 중`)+` · 기록 ${DATES.length}일 (${DATES[0]} ~ ${DATES[DATES.length-1]})`;
   render();
