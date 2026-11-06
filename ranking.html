@@ -156,7 +156,7 @@ function render(){
   let cl=PL.filter(r=>r.cat===c&&inView(r));
   const nNew=cl.filter(r=>r.status==='신규').length,nOwn=cl.filter(own).length;
   $('take').innerHTML=`<b>${esc(first.date||'')}</b> ${first.snap?'스냅샷':'일간 랭킹'} · <b>${esc(p)} ${esc(c)}</b> ${dm()?'디자이너 브랜드':'전체 브랜드'} TOP100 · 신규 진입 <b>${nNew}</b>개 · 로브로브·레세터 <b>${nOwn}</b>개`;
-  $('snapnote').textContent=first.snap?`${p} 순위는 ${first.date}에 크롬으로 한 번 받아 둔 스냅샷이에요 (매일 자동 갱신은 무신사만). 디자이너 브랜드만 담겨 있어요.`:'무신사는 매일 오전 자동 갱신 · 디자이너 브랜드 순위는 SPA·스포츠·아웃도어·골프·라이선스 캐주얼·수입 명품을 뺀 뒤 다시 매긴 순위예요.';
+  $('snapnote').textContent=first.snap?(p==='지그재그'?`지그재그는 ${first.date}에 크롬으로 받아 둔 스냅샷이에요 (매일 자동 갱신은 무신사만). 카테고리별 '스토어타입: 브랜드패션' + 인기순 상위 상품에서 SPA·스포츠 브랜드를 뺀 순위라, 스토어타입이 '쇼핑몰'인 상품은 빠져 있어요.`:`${p} 순위는 ${first.date}에 크롬으로 한 번 받아 둔 스냅샷이에요 (매일 자동 갱신은 무신사만). 디자이너 브랜드만 담겨 있어요.`):'무신사는 매일 오전 자동 갱신 · 디자이너 브랜드 순위는 SPA·스포츠·아웃도어·골프·라이선스 캐주얼·수입 명품을 뺀 뒤 다시 매긴 순위예요.';
   $('mainNote').textContent=(dm()?'배지는 디자이너 브랜드 안 순위와 전날 대비 변동':'배지는 플랫폼 전체 순위와 전날 대비 변동')+' · 가격은 할인 적용가 · 카드를 누르면 상품 페이지가 열려요';
   let ml=ST.own?cl.filter(own):cl.slice();ml.sort(sorters[ST.sort]||sorters.rank);
   $('main').innerHTML=ml.map(r=>tile(r)).join('');
