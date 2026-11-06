@@ -188,7 +188,7 @@ function render(){
   document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===ST.mode));
   $('dayctl').hidden=ST.mode!=='day';$('psel').hidden=ST.mode==='day';
   if(ST.mode==='day'){const d=ST.dateUsed||LD,i=DATES.indexOf(d);$('dpick').value=d;$('dpick').min=DATES[0];$('dpick').max=LD;$('dprev').disabled=i<=0;$('dnext').disabled=i>=DATES.length-1;$('dlatest').classList.toggle('on',d===LD);
-    $('dinfo').innerHTML=(ST.date!==d?`${ST.date}은 기록이 없어 그 전 기록일 <b>${d}</b> · `:'')+(d===LD?'최신 랭킹':`<b>${d}</b> 기록`)+` · 기록 ${DATES.length}일 (${DATES[0]} ~ ${LD})`}
+    $('dinfo').innerHTML=(ST.date!==d?`${ST.date}은 기록이 없어 그 전 기록일 <b>${d}</b> · `:'')+(d===LD?'최신 랭킹':`<b>${d}</b> 기록`)+(D&&D.T?' · 업데이트 '+Object.entries(D.T).map(([k,v])=>`${k} <b>${v}</b>`).join(' / '):'')+` · 기록 ${DATES.length}일 (${DATES[0]} ~ ${LD})`}
   else if(ST.mode==='week'){$('psel').innerHTML=wkKeys.slice().reverse().map(k=>`<option value="${k}"${k===ST.week?' selected':''}>${wkLabel(k)}</option>`).join('');$('dinfo').textContent='기간 안 매일 순위를 점수로 합산 (1위 100점 … 100위 1점)'}
   else{$('psel').innerHTML=(IDX.months||[]).slice().reverse().map(k=>`<option value="${k}"${k===ST.month?' selected':''}>${k.replace('-','년 ')}월</option>`).join('');$('dinfo').textContent='기간 안 매일 순위를 점수로 합산 (1위 100점 … 100위 1점)'}
   if(!D){$('take').textContent='이 기간 데이터가 없어요.';$('main').innerHTML='';return}
@@ -206,10 +206,11 @@ function render(){
   const hasPrev=!zz&&!isPeriod()&&!!D.prevDate&&((lists()[key]||[])[0]||[]).length>2;
   let rows=entries(key);
   const label=`${ST.plat}${ST.plat==='무신사'?' '+ST.sec:''} · ${ST.cat}${ST.sub!=='전체'?' > '+ST.sub:''}`;
-  const per=zz?`${ZZ.date} 스냅샷`:ST.mode==='day'?`${ST.dateUsed} 일간`:ST.mode==='week'?`주간 ${wkLabel(ST.week)}`:`${ST.month.replace('-','년 ')}월 월간 (기록 ${D.days.length}일)`;
+  const tt=zz?ZZ.time:(ST.mode==='day'&&D.T?D.T[ST.plat]:null);
+  const per=zz?`${ZZ.date}${tt?' '+tt+' 기준':''} 스냅샷`:ST.mode==='day'?`${ST.dateUsed}${tt?' '+tt+' 기준':''} 일간`:ST.mode==='week'?`주간 ${wkLabel(ST.week)}`:`${ST.month.replace('-','년 ')}월 월간 (기록 ${D.days.length}일)`;
   const nOwn=rows.filter(r=>isOwn(r.p)).length;
   $('take').innerHTML=`<b>${esc(per)}</b> · <b>${esc(label)}</b> ${ST.des?'디자이너 브랜드':'플랫폼 순위'} TOP100 · 여성 · 로브로브·레세터 <b>${nOwn}</b>개`;
-  $('note').textContent=zz?'지그재그는 11/6에 크롬으로 한 번 받아 둔 스냅샷이에요 (스토어타입 브랜드패션 + 인기순, SPA·스포츠 제외). 날짜·기간을 바꿔도 이 스냅샷이 보여요.'
+  $('note').textContent=zz?`지그재그는 11/6${ZZ.time?' '+ZZ.time:''}에 크롬으로 한 번 받아 둔 스냅샷이에요 (스토어타입 브랜드패션 + 인기순, SPA·스포츠 제외). 날짜·기간을 바꿔도 이 스냅샷이 보여요.`
     :ST.plat==='무신사'?'무신사 여성 · 일간 랭킹 (신상·전체·급상승) · 매일 오전 자동 수집':`${ST.plat} 여성 · 일간 베스트 · 매일 오전 자동 수집`;
   $('mainH').textContent=isPeriod()&&!zz?'기간 랭킹 TOP100':'랭킹 TOP100';
   $('mainNote').textContent=(isPeriod()&&!zz?'배지는 기간 점수 순위 · 카드 아래는 점수·평균 순위·최고 순위·순위권 일수':(ST.des?'배지는 디자이너 브랜드 안 순위 · 변동은 플랫폼 순위 기준':'배지는 플랫폼 순위와 전날 대비 변동'))+' · 가격은 할인 적용가 · 카드를 누르면 상품 페이지가 열려요';
