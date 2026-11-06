@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>여성의류 랭킹 트래커</title><!-- v2 -->
+<title>여성의류 랭킹 트래커</title>
 <style>
-:root{
-  --surface-0:#F4F5F7;--surface-1:#FFFFFF;--surface-2:#FAFBFC;--line:#E7E9ED;--line-2:#DCDFE4;
-  --text-1:#1A1D21;--text-2:#5B6470;--text-3:#9AA3AD;--accent:#EA5529;--accent-soft:#FDEEE9;--up:#1F8A5B;--down:#D64545;--own:#F2A93B;
-}
+:root{--surface-0:#F4F5F7;--surface-1:#FFFFFF;--surface-2:#FAFBFC;--line:#E7E9ED;--line-2:#DCDFE4;--text-1:#1A1D21;--text-2:#5B6470;--text-3:#9AA3AD;--accent:#EA5529;--accent-soft:#FDEEE9;--up:#1F8A5B;--down:#D64545;--own:#F2A93B}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--surface-0);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:28px 26px 70px;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body{background:var(--surface-0);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:24px 26px 70px;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .wrap{max-width:1180px;margin:0 auto}
-header{margin-bottom:6px}
 h1{font-size:23px;font-weight:700;letter-spacing:-.01em}
 .sub{color:var(--text-2);font-size:12.5px;margin-top:6px;line-height:1.6}
 .sub b{color:var(--text-1)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:14px 0 0;padding:10px 12px;background:var(--surface-1);border:1px solid var(--line);border-radius:12px}
+.seg{display:inline-flex;gap:3px;background:var(--surface-0);border:1px solid var(--line);border-radius:9px;padding:3px}
+.seg button{font:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:7px;border:none;background:none;color:var(--text-2);cursor:pointer}
+.seg button.on{background:var(--text-1);color:#fff}
+.bar input[type=date],.bar select{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--text-1)}
+.bar .nb{font:inherit;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--text-2);cursor:pointer}
+.bar .nb:disabled{opacity:.4;cursor:default}
+.bar .nb.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.di{font-size:12px;color:var(--text-3)}.di b{color:var(--accent)}
 .months{display:inline-flex;gap:4px;flex-wrap:wrap;margin:14px 0 2px;background:var(--surface-1);padding:4px;border:1px solid var(--line);border-radius:12px}
 .mtab{padding:8px 20px;border-radius:8px;background:none;color:var(--text-2);border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
 .mtab.on{background:var(--accent);color:#fff}
-.scope{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 10px}
+.secs{display:flex;gap:6px;margin:12px 0 0}
+.secs button{font:inherit;font-size:13px;font-weight:700;padding:7px 16px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text-2);cursor:pointer}
+.secs button.on{background:var(--text-1);color:#fff;border-color:var(--text-1)}
+.scope{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0}
 .chip{padding:6px 11px;border-radius:8px;background:var(--surface-1);color:var(--text-2);border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
-.chip:hover{border-color:var(--text-3)}
 .chip.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
-.ctrl{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;margin:4px 0 14px}
+.subs{display:flex;gap:4px 14px;flex-wrap:wrap;margin:10px 0 0;padding:9px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px}
+.subs button{font:inherit;font-size:12.5px;border:none;background:none;color:var(--text-3);cursor:pointer;padding:2px 0}
+.subs button.on{color:var(--text-1);font-weight:700}
+.ctrl{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;margin:12px 0}
 .ctrl input[type=search]{flex:1 1 240px;min-width:0;font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface-1);color:var(--text-1)}
 .ctrl label{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--text-2);cursor:pointer}
 .note{color:var(--text-3);font-size:11.5px;margin:0 0 12px;line-height:1.5}
@@ -47,10 +57,10 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.01em}
 .pr .cu{font-size:11px;color:var(--text-3);text-decoration:line-through}
 .pr .dc{font-size:13px;font-weight:700;color:var(--accent)}
 .pr .fi{font-size:13px;font-weight:700}
-.meta{font-size:11px;color:var(--text-3)}
+.meta{font-size:11px;color:var(--text-3);line-height:1.4}
 .up{color:var(--up)}.down{color:var(--down)}.nw{color:var(--accent)}.mu{color:var(--text-3)}
 .list{display:flex;flex-direction:column}
-.li{display:grid;grid-template-columns:42px 2.4rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);color:var(--text-1);text-decoration:none;font-size:12px}
+.li{display:grid;grid-template-columns:42px 2.6rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);color:var(--text-1);text-decoration:none;font-size:12px}
 .li:last-child{border-bottom:none}
 .li img,.li .nii{width:42px;height:50px;object-fit:cover;border-radius:5px;background:var(--surface-2);display:block}
 .li .rk{text-align:center;font-weight:700;line-height:1.2}
@@ -62,61 +72,51 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.01em}
 .li .p i{font-style:normal;color:var(--accent);font-weight:700;margin-right:4px}
 .li.own{background:#FFF6E8}
 .bars{display:flex;flex-direction:column;gap:7px}
-.bar{display:grid;grid-template-columns:minmax(0,8.5rem) 1fr 2rem;gap:8px;align-items:center;font-size:12px}
-.bar .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar .trk{height:9px;background:var(--surface-0);border-radius:5px;overflow:hidden}
-.bar .fill{height:100%;background:var(--text-3);border-radius:5px}
-.bar.own .fill{background:var(--own)}
-.bar .n{text-align:right;font-weight:600}
+.bar2{display:grid;grid-template-columns:minmax(0,8.5rem) 1fr 2rem;gap:8px;align-items:center;font-size:12px}
+.bar2 .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar2 .trk{height:9px;background:var(--surface-0);border-radius:5px;overflow:hidden}
+.bar2 .fill{display:block;height:100%;background:var(--text-3);border-radius:5px}
+.bar2.own .fill{background:var(--own)}
+.bar2 .n{text-align:right;font-weight:600}
 .empty{color:var(--text-3);font-size:12px;padding:8px 0}
 #trend svg{width:100%;height:auto;display:block}
 #trend text{font-size:11px;fill:var(--text-3)}
-@media(max-width:820px){body{padding:20px 14px 56px}}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}.sitenav{display:inline-flex;gap:3px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:3px}.sitenav a{text-decoration:none;font-size:13px;font-weight:700;padding:7px 16px;border-radius:7px;color:var(--text-2)}.sitenav a:hover{color:var(--text-1)}.sitenav a.on{background:var(--text-1);color:#fff}
-.datebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:14px 0 0;padding:10px 12px;background:var(--surface-1);border:1px solid var(--line);border-radius:12px}
-.datebar .lb{font-size:12.5px;font-weight:700;color:var(--text-2)}
-.datebar input[type=date]{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--text-1)}
-.datebar button{font:inherit;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--text-2);cursor:pointer}
-.datebar button:disabled{opacity:.4;cursor:default}
-.datebar button.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
-.datebar .di{font-size:12px;color:var(--text-3)}
-.datebar .di b{color:var(--accent)}
+@media(max-width:820px){body{padding:18px 14px 56px}}
 </style></head>
 <body><div class="wrap">
-<header>
-<h1>여성의류 랭킹 트래커</h1>
-<div class="sub" id="take">불러오는 중…</div>
-</header>
-<div class="datebar"><span class="lb">조회 날짜</span><button id="dprev" title="이전 기록일">◀</button><input type="date" id="dpick" aria-label="조회 날짜"><button id="dnext" title="다음 기록일">▶</button><button id="dlatest">최신</button><span class="di" id="dinfo"></span></div>
-<div class="months" id="plats"></div>
-<div class="scope" id="cats"></div>
-<div class="ctrl">
-  <input type="search" id="q" placeholder="브랜드·상품명 검색 (이 플랫폼 전체 카테고리)" aria-label="브랜드·상품명 검색">
-  <label><input type="checkbox" id="own"> 로브로브·레세터만</label>
-  <label><input type="checkbox" id="allb"> SPA·스포츠·명품 포함 전체 순위</label>
+<header><h1>여성의류 랭킹 트래커</h1><div class="sub" id="take">불러오는 중…</div></header>
+<div class="bar">
+  <div class="seg" id="modes"><button data-m="day">일간</button><button data-m="week">주간</button><button data-m="month">월간</button></div>
+  <span id="dayctl"><button class="nb" id="dprev" title="이전 기록일">◀</button> <input type="date" id="dpick" aria-label="조회 날짜"> <button class="nb" id="dnext" title="다음 기록일">▶</button> <button class="nb" id="dlatest">최신</button></span>
+  <select id="psel" aria-label="기간 선택" hidden></select>
+  <span class="di" id="dinfo"></span>
 </div>
-<p class="note" id="snapnote"></p>
-
+<div class="months" id="plats"></div>
+<div class="secs" id="secs"></div>
+<div class="scope" id="cats"></div>
+<div class="subs" id="subs" hidden></div>
+<div class="ctrl">
+  <input type="search" id="q" placeholder="브랜드·상품명 검색 (이 플랫폼 모든 카테고리)" aria-label="브랜드·상품명 검색">
+  <label><input type="checkbox" id="own"> 로브로브·레세터만</label>
+  <label><input type="checkbox" id="des"> 디자이너 브랜드만 (SPA·스포츠·명품 제외)</label>
+</div>
+<p class="note" id="note"></p>
 <section class="card" id="searchCard" hidden>
-  <h3>검색 결과</h3><div class="cs">검색어가 들어간 상품의 현재 순위 · 이 플랫폼 모든 카테고리</div>
+  <h3>검색 결과</h3><div class="cs" id="searchCs"></div>
   <div class="tiles" id="searchTiles"></div><div class="empty" id="searchEmpty"></div>
-  <h3 style="margin-top:18px">순위 추이</h3><div class="cs">검색 결과 상위 5개 · 위로 갈수록 높은 순위</div>
+  <h3 style="margin-top:18px">순위 추이</h3><div class="cs">검색 결과 상위 5개 · 이 달 날짜별 순위 · 위로 갈수록 높은 순위</div>
   <div id="trend"></div>
 </section>
-
 <section class="card">
   <div class="chead">
-    <div><h3>카테고리 랭킹 TOP100</h3><div class="cs" id="mainNote"></div></div>
-    <div class="sorts" id="sorts">
-      <button class="chip on" data-s="rank">순위순</button><button class="chip" data-s="rise">상승폭순</button><button class="chip" data-s="price">가격 낮은순</button><button class="chip" data-s="dc">할인율 높은순</button>
-    </div>
+    <div><h3 id="mainH">랭킹 TOP100</h3><div class="cs" id="mainNote"></div></div>
+    <div class="sorts" id="sorts"><button class="chip" data-s="rank">순위순</button><button class="chip" data-s="rise">상승폭순</button><button class="chip" data-s="price">가격 낮은순</button><button class="chip" data-s="dc">할인율 높은순</button></div>
   </div>
   <div class="tiles" id="main"></div><div class="empty" id="mainEmpty"></div>
 </section>
-
 <div class="grid3">
-  <section class="card"><h3>급상승 TOP 10</h3><div class="cs">전날보다 순위가 가장 많이 오른 상품</div><div class="list" id="risers"></div><div class="empty" id="risersEmpty"></div></section>
-  <section class="card"><h3>신규 진입</h3><div class="cs">전날 순위권에 없던 상품</div><div class="list" id="news"></div><div class="empty" id="newsEmpty"></div></section>
+  <section class="card"><h3 id="c1h">급상승 TOP 10</h3><div class="cs" id="c1s"></div><div class="list" id="c1"></div><div class="empty" id="c1e"></div></section>
+  <section class="card"><h3 id="c2h">신규 진입</h3><div class="cs" id="c2s"></div><div class="list" id="c2"></div><div class="empty" id="c2e"></div></section>
   <section class="card"><h3>브랜드 점유</h3><div class="cs">지금 보는 TOP100 안의 브랜드별 상품 수 · 상위 12개</div><div class="bars" id="brands"></div></section>
 </div>
 </div>
@@ -126,118 +126,154 @@ const $=id=>document.getElementById(id);
 const fmt=n=>n==null?'–':Number(n).toLocaleString('ko-KR');
 const won=n=>n==null||n===''?'–':'₩'+fmt(n);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let L=[],H=null,LATEST=[],DATES=[],LD='',CURD='';const DAY={};
 const v='?v='+Date.now();
-try{ LATEST=await fetch('rank_latest.json'+v).then(r=>r.json()); }catch(e){$('take').textContent='랭킹 데이터를 불러오지 못했어요.';return;}
-LD=LATEST.filter(r=>!r.snap).map(r=>r.date).sort().pop()||(LATEST[0]||{}).date||'';
-try{ DATES=await fetch('rank_dates.json'+v).then(r=>r.ok?r.json():[]); }catch(e){DATES=[]}
-const ARCH=new Set(Array.isArray(DATES)?DATES:[]);const SHA={};
-try{ // 매일 갱신 때마다 GitHub에 남는 rank_latest.json 커밋 기록으로 지난 날짜 랭킹을 찾음
-  for(let pg=1;pg<=3;pg++){const cs=await fetch('https://api.github.com/repos/lovlovseoul/lovlovsales/commits?path=rank_latest.json&per_page=100&page='+pg).then(r=>r.ok?r.json():[]);
-    for(const c of cs){const kd=new Date(new Date(c.commit.committer.date).getTime()+9*3600e3).toISOString().slice(0,10);if(!SHA[kd])SHA[kd]=c.sha}
-    if(cs.length<100)break}
-}catch(e){}
-DATES=[...new Set([...ARCH,...Object.keys(SHA),LD])].filter(Boolean).sort();
-L=LATEST;CURD=LD;DAY[LD]=LATEST;
-async function ensureH(){ if(H) return H; try{H=await fetch('rank_history.json'+v).then(r=>r.json())}catch(e){H=[]} return H; }
-async function loadDate(d){
-  if(!d) return;
-  let use=d;
-  if(!DATES.includes(d)){ const earlier=DATES.filter(x=>x<d); use=earlier.length?earlier[earlier.length-1]:DATES[0]; }
-  if(!DAY[use]){ $('dinfo').textContent='불러오는 중…';
-    const url=ARCH.has(use)?'rankday_'+use+'.json'+v:(SHA[use]?`https://raw.githubusercontent.com/lovlovseoul/lovlovsales/${SHA[use]}/rank_latest.json`:null);
-    try{ if(!url)throw 0; DAY[use]=await fetch(url).then(r=>{if(!r.ok)throw 0;return r.json()}) }catch(e){ $('dinfo').textContent=use+' 기록을 못 불러왔어요.'; return; } }
-  L=DAY[use];CURD=use;
-  $('dinfo').innerHTML=(use!==d?`${d}은 기록이 없어서 그 전 기록일 <b>${use}</b>을 보여줘요 · `:'')+(use===LD?'오늘(최신) 랭킹':`<b>${use}</b> 기록을 보는 중`)+` · 기록 ${DATES.length}일 (${DATES[0]} ~ ${DATES[DATES.length-1]})`;
+const IMG={ms_:'https://image.msscdn.net/images/goods_img/',wc_:'https://product-image.wconcept.co.kr/productimg/image/','29_':'https://img.29cm.co.kr/',zz_:'https://cf.product-image.s.zigzag.kr/original/'};
+const URL_={ms_:'https://www.musinsa.com/products/',wc_:'https://www.wconcept.co.kr/Product/','29_':'https://www.29cm.co.kr/products/',zz_:'https://zigzag.kr/catalog/products/'};
+const PL_ORDER=['무신사','29CM','W컨셉','지그재그'];
+const SEC_ORDER=['신상','전체','급상승'];
+const CAT_ORDER={'무신사':['전체','상의','아우터','바지','원피스/스커트'],'W컨셉':['전체','아우터','원피스','블라우스','셔츠','티셔츠','니트','스커트','팬츠','데님'],'29CM':['전체','상의','바지','아우터','스커트','원피스','니트웨어','셋업','단독','해외브랜드'],'지그재그':['아우터','상의','니트','바지','스커트','원피스']};
+const SUB_ORDER={'상의':['전체','긴소매 티셔츠','맨투맨/스웨트','셔츠/블라우스','후드 티셔츠','반소매 티셔츠','피케/카라 티셔츠','니트/스웨터','민소매 티셔츠','기타 상의'],'아우터':['전체','후드 집업','블루종/MA-1','레더/라이더스 재킷','슈트/블레이저 재킷','카디건','경량 패딩/패딩 베스트','사파리/헌팅 재킷','트러커 재킷','스타디움 재킷','나일론/코치 재킷','트레이닝 재킷','아노락 재킷','플리스/뽀글이','환절기 코트','베스트','무스탕/퍼','겨울 싱글 코트','겨울 더블 코트','겨울 기타 코트','숏패딩/헤비 아우터','롱패딩/헤비 아우터','기타 아우터'],'바지':['전체','데님 팬츠','트레이닝/조거 팬츠','코튼 팬츠','슈트 팬츠/슬랙스','숏 팬츠','레깅스','점프 슈트/오버올','기타 하의'],'원피스/스커트':['전체','미니원피스','미디원피스','맥시원피스','미니스커트','미디스커트','롱스커트']};
+const ord=(arr,ref)=>arr.slice().sort((a,b)=>{const i=ref?ref.indexOf(a):-1,j=ref?ref.indexOf(b):-1;return (i<0?99:i)-(j<0?99:j)});
+const OWN=['로브로브','lovlov','레세터','lessetter'];
+let IDX;try{IDX=await fetch('rank_index.json'+v).then(r=>r.json())}catch(e){$('take').textContent='랭킹 데이터를 불러오지 못했어요.';return}
+const DATES=IDX.dates||[];const LD=DATES[DATES.length-1];
+const CACHE={};
+const get=async f=>{if(!CACHE[f])CACHE[f]=fetch(f+v).then(r=>{if(!r.ok)throw 0;return r.json()}).catch(()=>null);return CACHE[f]};
+const ST={mode:'day',date:LD,week:null,month:null,plat:'무신사',sec:'전체',cat:null,sub:'전체',q:'',own:false,des:false,sort:'rank'};
+try{const s=JSON.parse(localStorage.getItem('rk2')||'{}');for(const k of ['plat','sec','cat','sub','own','des','sort'])if(k in s)ST[k]=s[k]}catch(e){}
+const save=()=>{try{localStorage.setItem('rk2',JSON.stringify({plat:ST.plat,sec:ST.sec,cat:ST.cat,sub:ST.sub,own:ST.own,des:ST.des,sort:ST.sort}))}catch(e){}};
+const wkKeys=Object.keys(IDX.weeks||{}).sort();ST.week=wkKeys[wkKeys.length-1];ST.month=(IDX.months||[]).slice(-1)[0];
+let D=null,ZZ=null;
+const pre=pid=>pid.slice(0,3);
+const prod=(pid)=>(D&&D.P[pid])||(ZZ&&ZZ.P[pid])||null;
+const isOwn=p=>p&&OWN.some(o=>(p[0]||'').toLowerCase().includes(o));
+const imgOf=(pid,p)=>p&&p[5]?IMG[pre(pid)]+p[5]+(pre(pid)==='zz_'?'?width=400&height=400&quality=80&format=jpeg':''):'';
+async function load(){
+  if(!ZZ&&IDX.zz)ZZ=await get('rank_zz.json');
+  if(ST.mode==='day'){let d=ST.date;if(!DATES.includes(d)){const e=DATES.filter(x=>x<=d);d=e.length?e[e.length-1]:DATES[0]}ST.dateUsed=d;D=await get('rankday_'+d+'.json')}
+  else if(ST.mode==='week')D=await get('rankwk_'+ST.week+'.json');
+  else D=await get('rankmo_'+ST.month+'.json');
   render();
 }
-const ST={plat:null,cat:null,q:'',own:false,allb:false,sort:'rank'};
-try{Object.assign(ST,JSON.parse(localStorage.getItem('rk_state')||'{}'));}catch(e){}
-ST.q='';
-const save=()=>{try{localStorage.setItem('rk_state',JSON.stringify({plat:ST.plat,cat:ST.cat,own:ST.own,allb:ST.allb,sort:ST.sort}))}catch(e){}};
-const plats=()=>[...new Set(L.map(r=>r.platform))];
-const cats=p=>[...new Set(L.filter(r=>r.platform===p).map(r=>r.cat))];
-const cur=()=>{const P=plats();const p=P.includes(ST.plat)?ST.plat:P[0];const cs=cats(p);return{p,c:cs.includes(ST.cat)?ST.cat:cs[0]}};
-const dm=()=>!ST.allb;
-const num=v=>v==null||v===''?null:Number(v);
-const inView=r=>dm()?num(r.drank)!==null:num(r.rank)<=100;
-const RK=r=>dm()?num(r.drank):num(r.rank);
-const CHG=r=>num(dm()?r.dchange:r.change);
-const BEST=r=>dm()?(r.dbest7??r.drank):r.best7;
-const own=r=>r.own===true;
-const chg=r=>{if(r.status==='신규')return['NEW','nw'];const c=CHG(r);if(!c)return['–','mu'];return c>0?['▲'+c,'up']:['▼'+(-c),'down']};
-const img=(r,cls)=>r.img?`<img src="${esc(r.img)}" alt="" loading="lazy" referrerpolicy="no-referrer"${cls?` class="${cls}"`:''} onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'${cls?'nii':'ni'}',textContent:'${cls?'':'이미지 없음'}'}))">`:`<span class="${cls?'nii':'ni'}"></span>`;
-const tile=(r,meta)=>{const[ct,cc]=chg(r);const cu=num(r.cust),fi=num(r.price),dc=num(r.sale);
-  return `<a class="tile${own(r)?' own':''}" href="${esc(r.url)}" target="_blank" rel="noopener"><div class="ph">${img(r)}<div class="badge"><span class="no">${RK(r)}</span>${ct!=='–'?`<span class="ch ${cc}">${ct}</span>`:''}</div>${r.soldout?'<span class="sold">품절</span>':''}</div>
-  <div class="br">${esc(r.brand)}</div><div class="nm">${esc(r.name)}</div>
-  <div class="pr">${cu&&fi&&cu>fi?`<span class="cu">${won(cu)}</span>`:''}${dc?`<span class="dc">${dc}%</span>`:''}<span class="fi">${won(fi)}</span></div>
-  <div class="meta">${meta??((dm()&&r.platform==='무신사'?`무신사 전체 ${r.rank}위 · `:'')+(r.snap?'스냅샷':`7일 최고 ${BEST(r)}위 · ${r.days}일째`))}</div></a>`};
-const line=r=>{const[ct,cc]=chg(r);const dc=num(r.sale);
-  return `<a class="li${own(r)?' own':''}" href="${esc(r.url)}" target="_blank" rel="noopener">${img(r,'t')}<div class="rk">${RK(r)}<small class="${cc}">${ct}</small></div><div class="tx"><b>${esc(r.brand)}</b><span>${esc(r.name)}</span></div><div class="p">${dc?`<i>${dc}%</i>`:''}${won(r.price)}</div></a>`};
-const sorters={rank:(a,b)=>RK(a)-RK(b),rise:(a,b)=>(CHG(b)??-999)-(CHG(a)??-999)||RK(a)-RK(b),price:(a,b)=>(num(a.price)??1e12)-(num(b.price)??1e12),dc:(a,b)=>(num(b.sale)??0)-(num(a.sale)??0)||RK(a)-RK(b)};
-function render(){
-  const{p,c}=cur();save();
-  const di=DATES.indexOf(CURD);$('dpick').value=CURD;$('dpick').min=DATES[0]||'';$('dpick').max=DATES[DATES.length-1]||'';$('dprev').disabled=di<=0;$('dnext').disabled=di<0||di>=DATES.length-1;$('dlatest').classList.toggle('on',CURD===LD);
-  $('plats').innerHTML=plats().map(x=>`<button class="mtab${x===p?' on':''}" data-p="${esc(x)}">${esc(x)}</button>`).join('');
-  $('cats').innerHTML=cats(p).map(x=>`<button class="chip${x===c?' on':''}" data-c="${esc(x)}">${esc(x)}</button>`).join('');
-  $('own').checked=ST.own;$('allb').checked=ST.allb;
-  document.querySelectorAll('#sorts .chip').forEach(b=>b.classList.toggle('on',b.dataset.s===ST.sort));
-  const PL=L.filter(r=>r.platform===p), first=PL[0]||{};
-  let cl=PL.filter(r=>r.cat===c&&inView(r));
-  const nNew=cl.filter(r=>r.status==='신규').length,nOwn=cl.filter(own).length;
-  $('take').innerHTML=`<b>${esc(first.date||'')}</b> ${first.snap?'스냅샷':'일간 랭킹'} · <b>${esc(p)} ${esc(c)}</b> ${dm()?'디자이너 브랜드':'전체 브랜드'} TOP100 · 신규 진입 <b>${nNew}</b>개 · 로브로브·레세터 <b>${nOwn}</b>개`;
-  $('snapnote').textContent=first.snap?(p==='지그재그'?`지그재그는 ${first.date}에 크롬으로 받아 둔 스냅샷이에요 (매일 자동 갱신은 무신사만). 카테고리별 '스토어타입: 브랜드패션' + 인기순 상위 상품에서 SPA·스포츠 브랜드를 뺀 순위라, 스토어타입이 '쇼핑몰'인 상품은 빠져 있어요.`:`${p} 순위는 ${first.date}에 크롬으로 한 번 받아 둔 스냅샷이에요 (매일 자동 갱신은 무신사만). 디자이너 브랜드만 담겨 있어요.`):'무신사는 매일 오전 자동 갱신 · 디자이너 브랜드 순위는 SPA·스포츠·아웃도어·골프·라이선스 캐주얼·수입 명품을 뺀 뒤 다시 매긴 순위예요.';
-  $('mainNote').textContent=(dm()?'배지는 디자이너 브랜드 안 순위와 전날 대비 변동':'배지는 플랫폼 전체 순위와 전날 대비 변동')+' · 가격은 할인 적용가 · 카드를 누르면 상품 페이지가 열려요';
-  let ml=ST.own?cl.filter(own):cl.slice();ml.sort(sorters[ST.sort]||sorters.rank);
-  $('main').innerHTML=ml.map(r=>tile(r)).join('');
-  $('mainEmpty').textContent=ml.length?'':(ST.own?'이 카테고리 TOP100에 로브로브·레세터 상품이 없어요.':'이 카테고리 데이터가 없어요.');
-  const ris=cl.filter(r=>(CHG(r)??0)>0).sort((a,b)=>CHG(b)-CHG(a)).slice(0,10);
-  $('risers').innerHTML=ris.map(line).join('');
-  $('risersEmpty').textContent=first.snap?'스냅샷 한 번뿐이라 변동은 없어요.':first.status==='첫 수집'?'수집 첫날이라 내일부터 표시돼요.':(ris.length?'':'오른 상품이 없어요.');
-  const nw=cl.filter(r=>r.status==='신규').sort((a,b)=>RK(a)-RK(b));
-  $('news').innerHTML=nw.map(line).join('');
-  $('newsEmpty').textContent=first.snap?'스냅샷 한 번뿐이라 신규 진입은 없어요.':first.status==='첫 수집'?'수집 첫날이라 내일부터 표시돼요.':(nw.length?'':'새로 들어온 상품이 없어요.');
-  const bm=new Map();cl.forEach(r=>{const o=bm.get(r.brand)||{b:r.brand,n:0,own:own(r)};o.n++;bm.set(r.brand,o)});
-  const bl=[...bm.values()].sort((a,b)=>b.n-a.n).slice(0,12),mx=bl[0]?bl[0].n:1;
-  $('brands').innerHTML=bl.map(x=>`<div class="bar${x.own?' own':''}"><span class="lab">${esc(x.b)}</span><span class="trk"><span class="fill" style="display:block;width:${x.n/mx*100}%"></span></span><span class="n">${x.n}</span></div>`).join('');
-  // search
-  const q=ST.q.trim().toLowerCase();$('searchCard').hidden=!q;
-  if(q){
-    let m=PL.filter(r=>inView(r)&&(r.brand+' '+r.name).toLowerCase().includes(q));if(ST.own)m=m.filter(own);
-    m.sort((a,b)=>RK(a)-RK(b)||a.cat.localeCompare(b.cat));
-    $('searchTiles').innerHTML=m.slice(0,60).map(r=>tile(r,r.cat+(r.snap?' · 스냅샷':' · 7일 최고 '+BEST(r)+'위'))).join('');
-    $('searchEmpty').textContent=m.length?'':'검색어가 들어간 상품이 순위권 안에 없어요.';
-    ensureH().then(()=>drawTrend(m));
-  }
+const lists=()=>{const all={...(D?D.L:{})};if(ZZ)for(const k in ZZ.L)all[k]=ZZ.L[k];return all};
+const parse=k=>{const [pl,sec,cat,sub]=k.split('|');return{pl,sec,cat,sub}};
+function struct(){const S={};for(const k of Object.keys(lists())){const o=parse(k);((S[o.pl]??={})[o.sec]??={});(S[o.pl][o.sec][o.cat]??=[]).push(o.sub)}return S}
+const isPeriod=()=>ST.mode!=='day';
+function entries(key){
+  const raw=lists()[key]||[];const zz=key.startsWith('지그재그');
+  let rows=raw.map(e=>{const p=prod(e[0]);if(!p)return null;
+    if(isPeriod()&&!zz)return{pid:e[0],p,rank:0,pts:e[1],days:e[2],best:e[3],avg:e[4],ranks:e[5]};
+    return{pid:e[0],p,rank:e[1],orank:e[1],prev:e[2]??null}}).filter(Boolean);
+  if(isPeriod()&&!zz)rows.forEach((r,i)=>r.rank=i+1);
+  if(ST.des){rows=rows.filter(r=>r.p[7]);rows.forEach((r,i)=>{r.prank=r.rank;r.rank=i+1})}
+  return rows.slice(0,100);
 }
-function drawTrend(m){
-  const box=$('trend');const seen=new Set(),pick=[];
-  for(const r of m){if(!seen.has(r.key)){seen.add(r.key);pick.push(r)}if(pick.length===5)break}
-  const S=pick.map(r=>({r,pts:H.filter(h=>h.platform===r.platform&&h.cat===r.cat&&h.id===r.id&&(!dm()||h.drank!=null)).map(h=>({d:h.date,v:Number(dm()?h.drank:h.rank)})).sort((a,b)=>a.d<b.d?-1:1)})).filter(s=>s.pts.length);
+function chgOf(r,hasPrev){if(isPeriod()||r.prev===undefined)return null;if(r.prev===null)return hasPrev?['NEW','nw']:null;const c=r.prev-(r.prank??r.orank);if(!c)return['–','mu'];return c>0?['▲'+c,'up']:['▼'+(-c),'down']}
+const img=(r,cls)=>{const u=imgOf(r.pid,r.p);return u?`<img src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer"${cls?` class="${cls}"`:''} onerror="this.style.visibility='hidden'">`:`<span class="${cls?'nii':'ni'}"></span>`};
+function metaOf(r,extra){
+  if(isPeriod()&&r.pts!=null)return `${extra||''}점수 ${fmt(r.pts)} · 평균 ${r.avg}위 · 최고 ${r.best}위 · ${r.days}일`;
+  return (extra||'')+(ST.des&&r.prank?`플랫폼 ${r.prank}위`:(r.prev?`전날 ${r.prev}위`:''));
+}
+function tile(r,hasPrev,extra){const p=r.p;const ch=chgOf(r,hasPrev);const cu=p[3],fi=p[2],dc=p[4];
+  return `<a class="tile${isOwn(p)?' own':''}" href="${esc(URL_[pre(r.pid)]+r.pid.slice(3))}" target="_blank" rel="noopener"><div class="ph">${img(r)}<div class="badge"><span class="no">${r.rank}</span>${ch&&ch[0]!=='–'?`<span class="ch ${ch[1]}">${ch[0]}</span>`:''}</div>${p[6]?'<span class="sold">품절</span>':''}</div>
+  <div class="br">${esc(p[0])}</div><div class="nm">${esc(p[1])}</div>
+  <div class="pr">${cu&&fi&&cu>fi?`<span class="cu">${won(cu)}</span>`:''}${dc?`<span class="dc">${dc}%</span>`:''}<span class="fi">${won(fi)}</span></div>
+  <div class="meta">${metaOf(r,extra)}</div></a>`}
+function line(r,right){const p=r.p;const ch=chgOf(r,true);
+  return `<a class="li${isOwn(p)?' own':''}" href="${esc(URL_[pre(r.pid)]+r.pid.slice(3))}" target="_blank" rel="noopener">${img(r,'t')}<div class="rk">${r.rank}${ch?`<small class="${ch[1]}">${ch[0]}</small>`:''}</div><div class="tx"><b>${esc(p[0])}</b><span>${esc(p[1])}</span></div><div class="p">${right??((p[4]?`<i>${p[4]}%</i>`:'')+won(p[2]))}</div></a>`}
+const wkLabel=k=>{const w=IDX.weeks[k];if(!w)return k;const f=s=>`${+s.slice(5,7)}/${+s.slice(8)}`;return `${f(w[0])}(월)~${f(w[1])}(일) · 기록 ${w[2].length}일`};
+function render(){
+  save();
+  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===ST.mode));
+  $('dayctl').hidden=ST.mode!=='day';$('psel').hidden=ST.mode==='day';
+  if(ST.mode==='day'){const d=ST.dateUsed||LD,i=DATES.indexOf(d);$('dpick').value=d;$('dpick').min=DATES[0];$('dpick').max=LD;$('dprev').disabled=i<=0;$('dnext').disabled=i>=DATES.length-1;$('dlatest').classList.toggle('on',d===LD);
+    $('dinfo').innerHTML=(ST.date!==d?`${ST.date}은 기록이 없어 그 전 기록일 <b>${d}</b> · `:'')+(d===LD?'최신 랭킹':`<b>${d}</b> 기록`)+` · 기록 ${DATES.length}일 (${DATES[0]} ~ ${LD})`}
+  else if(ST.mode==='week'){$('psel').innerHTML=wkKeys.slice().reverse().map(k=>`<option value="${k}"${k===ST.week?' selected':''}>${wkLabel(k)}</option>`).join('');$('dinfo').textContent='기간 안 매일 순위를 점수로 합산 (1위 100점 … 100위 1점)'}
+  else{$('psel').innerHTML=(IDX.months||[]).slice().reverse().map(k=>`<option value="${k}"${k===ST.month?' selected':''}>${k.replace('-','년 ')}월</option>`).join('');$('dinfo').textContent='기간 안 매일 순위를 점수로 합산 (1위 100점 … 100위 1점)'}
+  if(!D){$('take').textContent='이 기간 데이터가 없어요.';$('main').innerHTML='';return}
+  const S=struct();const plats=PL_ORDER.filter(p=>S[p]);if(!plats.includes(ST.plat))ST.plat=plats[0];
+  const secs=Object.keys(S[ST.plat]).sort((a,b)=>SEC_ORDER.indexOf(a)-SEC_ORDER.indexOf(b));if(!secs.includes(ST.sec))ST.sec=secs.includes('전체')?'전체':secs[0];
+  const cats=ord(Object.keys(S[ST.plat][ST.sec]),CAT_ORDER[ST.plat]);if(!cats.includes(ST.cat))ST.cat=cats[0];
+  const subs=ord(S[ST.plat][ST.sec][ST.cat],SUB_ORDER[ST.cat]);if(!subs.includes(ST.sub))ST.sub='전체';
+  $('plats').innerHTML=plats.map(x=>`<button class="mtab${x===ST.plat?' on':''}" data-p="${esc(x)}">${esc(x)}</button>`).join('');
+  $('secs').innerHTML=secs.length>1||ST.plat==='무신사'?secs.map(x=>`<button class="${x===ST.sec?'on':''}" data-s="${esc(x)}">${esc(x)}</button>`).join(''):'';
+  $('cats').innerHTML=cats.map(x=>`<button class="chip${x===ST.cat?' on':''}" data-c="${esc(x)}">${esc(x)}</button>`).join('');
+  $('subs').hidden=subs.length<2;$('subs').innerHTML=subs.map(x=>`<button class="${x===ST.sub?'on':''}" data-u="${esc(x)}">${esc(x)}</button>`).join('');
+  $('own').checked=ST.own;$('des').checked=ST.des;
+  document.querySelectorAll('#sorts .chip').forEach(b=>{b.classList.toggle('on',b.dataset.s===ST.sort);b.hidden=b.dataset.s==='rise'&&isPeriod()});
+  const key=`${ST.plat}|${ST.sec}|${ST.cat}|${ST.sub}`;const zz=ST.plat==='지그재그';
+  const hasPrev=!zz&&!isPeriod()&&!!D.prevDate&&((lists()[key]||[])[0]||[]).length>2;
+  let rows=entries(key);
+  const label=`${ST.plat}${ST.plat==='무신사'?' '+ST.sec:''} · ${ST.cat}${ST.sub!=='전체'?' > '+ST.sub:''}`;
+  const per=zz?`${ZZ.date} 스냅샷`:ST.mode==='day'?`${ST.dateUsed} 일간`:ST.mode==='week'?`주간 ${wkLabel(ST.week)}`:`${ST.month.replace('-','년 ')}월 월간 (기록 ${D.days.length}일)`;
+  const nOwn=rows.filter(r=>isOwn(r.p)).length;
+  $('take').innerHTML=`<b>${esc(per)}</b> · <b>${esc(label)}</b> ${ST.des?'디자이너 브랜드':'플랫폼 순위'} TOP100 · 여성 · 로브로브·레세터 <b>${nOwn}</b>개`;
+  $('note').textContent=zz?'지그재그는 11/6에 크롬으로 한 번 받아 둔 스냅샷이에요 (스토어타입 브랜드패션 + 인기순, SPA·스포츠 제외). 날짜·기간을 바꿔도 이 스냅샷이 보여요.'
+    :ST.plat==='무신사'?'무신사 여성 · 일간 랭킹 (신상·전체·급상승) · 매일 오전 자동 수집':`${ST.plat} 여성 · 일간 베스트 · 매일 오전 자동 수집`;
+  $('mainH').textContent=isPeriod()&&!zz?'기간 랭킹 TOP100':'랭킹 TOP100';
+  $('mainNote').textContent=(isPeriod()&&!zz?'배지는 기간 점수 순위 · 카드 아래는 점수·평균 순위·최고 순위·순위권 일수':(ST.des?'배지는 디자이너 브랜드 안 순위 · 변동은 플랫폼 순위 기준':'배지는 플랫폼 순위와 전날 대비 변동'))+' · 가격은 할인 적용가 · 카드를 누르면 상품 페이지가 열려요';
+  const by={rank:(a,b)=>a.rank-b.rank,rise:(a,b)=>(b.prev?b.prev-(b.prank??b.orank):-999)-(a.prev?a.prev-(a.prank??a.orank):-999)||a.rank-b.rank,price:(a,b)=>(a.p[2]??1e12)-(b.p[2]??1e12),dc:(a,b)=>(b.p[4]||0)-(a.p[4]||0)||a.rank-b.rank};
+  let ml=ST.own?rows.filter(r=>isOwn(r.p)):rows.slice();ml.sort(by[ST.sort]||by.rank);
+  $('main').innerHTML=ml.map(r=>tile(r,hasPrev)).join('');
+  $('mainEmpty').textContent=ml.length?'':(ST.own?'이 리스트에 로브로브·레세터 상품이 없어요.':'이 리스트 데이터가 없어요.');
+  if(isPeriod()&&!zz){
+    $('c1h').textContent='꾸준한 상품';$('c1s').textContent='순위권에 머문 날이 많은 순';
+    const a=rows.slice().sort((x,y)=>y.days-x.days||x.avg-y.avg).slice(0,10);$('c1').innerHTML=a.map(r=>line(r,`${r.days}일 · 평균 ${r.avg}위`)).join('');$('c1e').textContent=a.length?'':'—';
+    $('c2h').textContent='최고 순위 TOP 10';$('c2s').textContent='기간 중 가장 높이 올라간 순';
+    const b=rows.slice().sort((x,y)=>x.best-y.best||y.pts-x.pts).slice(0,10);$('c2').innerHTML=b.map(r=>line(r,`최고 ${r.best}위`)).join('');$('c2e').textContent=b.length?'':'—';
+  }else{
+    $('c1h').textContent='급상승 TOP 10';$('c1s').textContent='전날보다 순위가 가장 많이 오른 상품';
+    const a=rows.filter(r=>r.prev&&r.prev>(r.prank??r.orank)).sort((x,y)=>(y.prev-(y.prank??y.orank))-(x.prev-(x.prank??x.orank))).slice(0,10);
+    $('c1').innerHTML=a.map(r=>line(r)).join('');$('c1e').textContent=zz?'스냅샷 한 번뿐이라 변동이 없어요.':!hasPrev?'비교할 전날 기록이 없어요.':(a.length?'':'오른 상품이 없어요.');
+    $('c2h').textContent='신규 진입';$('c2s').textContent='전날 이 리스트에 없던 상품';
+    const b=hasPrev?rows.filter(r=>r.prev===null):[];$('c2').innerHTML=b.map(r=>line(r)).join('');$('c2e').textContent=zz?'스냅샷 한 번뿐이라 신규 진입이 없어요.':!hasPrev?'비교할 전날 기록이 없어요.':(b.length?'':'새로 들어온 상품이 없어요.');
+  }
+  const bm=new Map();rows.forEach(r=>{const o=bm.get(r.p[0])||{b:r.p[0],n:0,own:isOwn(r.p)};o.n++;bm.set(r.p[0],o)});
+  const bl=[...bm.values()].sort((a,b)=>b.n-a.n).slice(0,12),mx=bl[0]?bl[0].n:1;
+  $('brands').innerHTML=bl.map(x=>`<div class="bar2${x.own?' own':''}"><span class="lab">${esc(x.b)}</span><span class="trk"><span class="fill" style="width:${x.n/mx*100}%"></span></span><span class="n">${x.n}</span></div>`).join('');
+  search();
+}
+async function search(){
+  const q=ST.q.trim().toLowerCase();$('searchCard').hidden=!q;if(!q)return;
+  const L=lists();const hits=[];const seen=new Set();
+  const keys=Object.keys(L).filter(k=>k.startsWith(ST.plat+'|')).sort((a,b)=>{const A=parse(a),B=parse(b);return (A.sub==='전체'?0:1)-(B.sub==='전체'?0:1)});
+  for(const k of keys){const o=parse(k);for(const r of entries(k)){if((r.p[0]+' '+r.p[1]).toLowerCase().includes(q)&&(!ST.own||isOwn(r.p))){hits.push({...r,key:k,lab:`${ST.plat==='무신사'?o.sec+' · ':''}${o.cat}${o.sub!=='전체'?' > '+o.sub:''}`})}}}
+  hits.sort((a,b)=>a.rank-b.rank);
+  $('searchCs').textContent=`검색어가 들어간 상품의 순위 · ${ST.plat} 모든 리스트 · ${hits.length}건`;
+  $('searchTiles').innerHTML=hits.slice(0,60).map(r=>tile(r,!isPeriod()&&!!D.prevDate,r.lab+' · ')).join('');
+  $('searchEmpty').textContent=hits.length?'':'검색어가 들어간 상품이 순위권에 없어요.';
+  // 추이: 이 달 월간 파일의 날짜별 순위
+  const mk=(ST.mode==='day'?(ST.dateUsed||LD):ST.mode==='week'?IDX.weeks[ST.week][1]:ST.month+'-01').slice(0,7);
+  const M=ST.plat==='지그재그'?null:await get('rankmo_'+mk+'.json');const box=$('trend');
+  if(!M){box.innerHTML='<div class="empty">—</div>';return}
+  const pick=[];const sk=new Set();for(const h of hits){const id=h.key+'#'+h.pid;if(!sk.has(id)){sk.add(id);pick.push(h)}if(pick.length===5)break}
+  const S=pick.map(h=>{const e=(M.L[h.key]||[]).find(x=>x[0]===h.pid);const rs=e?e[5].split(','):[];return{h,pts:M.days.map((d,i)=>({d,v:rs[i]?+rs[i]:null})).filter(x=>x.v)}}).filter(s=>s.pts.length);
   if(!S.length){box.innerHTML='<div class="empty">—</div>';return}
-  const dates=[...new Set(S.flatMap(s=>s.pts.map(p=>p.d)))].sort();
-  const W=Math.max(320,box.clientWidth||700),Hh=220,ml=34,mr=12,mt=12,mb=26;
+  const dates=M.days;const W=Math.max(320,box.clientWidth||700),Hh=220,ml=34,mr=12,mt=12,mb=26;
   const ymax=Math.max(10,...S.flatMap(s=>s.pts.map(p=>p.v)));
   const x=d=>dates.length===1?(ml+W-mr)/2:ml+(W-ml-mr)*dates.indexOf(d)/(dates.length-1);
   const y=v=>mt+(Hh-mt-mb)*(v-1)/(ymax-1);
-  const C=['#EA5529','#2F6FEB','#1F8A5B','#8E44AD','#D4A017'];
-  let g='';
+  const C=['#EA5529','#2F6FEB','#1F8A5B','#8E44AD','#D4A017'];let g='';
   [1,Math.round(ymax/2),ymax].forEach(t=>{g+=`<line x1="${ml}" x2="${W-mr}" y1="${y(t)}" y2="${y(t)}" stroke="#E7E9ED"/><text x="${ml-6}" y="${y(t)+4}" text-anchor="end">${t}</text>`});
-  const step=Math.ceil(dates.length/6);dates.forEach((d,i)=>{if(i%step===0||i===dates.length-1)g+=`<text x="${x(d)}" y="${Hh-6}" text-anchor="middle">${d.slice(5).replace('-','/')}</text>`});
-  S.forEach((s,i)=>{const pts=s.pts.map(p=>`${x(p.d)},${y(p.v)}`).join(' ');g+=`<polyline fill="none" stroke="${C[i]}" stroke-width="2" stroke-linejoin="round" points="${pts}"/>`+s.pts.map(p=>`<circle cx="${x(p.d)}" cy="${y(p.v)}" r="3" fill="${C[i]}"/>`).join('')});
-  box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}">${g}</svg><div class="note" style="margin-top:6px">${S.map((s,i)=>`<span style="color:${C[i]}">●</span> ${esc(s.r.brand)} ${esc(s.r.name.slice(0,18))} (${esc(s.r.cat)})`).join(' &nbsp;·&nbsp; ')}</div>`;
+  const step=Math.ceil(dates.length/8);dates.forEach((d,i)=>{if(i%step===0||i===dates.length-1)g+=`<text x="${x(d)}" y="${Hh-6}" text-anchor="middle">${+d.slice(5,7)}/${+d.slice(8)}</text>`});
+  S.forEach((s,i)=>{g+=`<polyline fill="none" stroke="${C[i]}" stroke-width="2" stroke-linejoin="round" points="${s.pts.map(p=>`${x(p.d)},${y(p.v)}`).join(' ')}"/>`+s.pts.map(p=>`<circle cx="${x(p.d)}" cy="${y(p.v)}" r="3" fill="${C[i]}"/>`).join('')});
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}">${g}</svg><div class="note" style="margin-top:6px">${S.map((s,i)=>`<span style="color:${C[i]}">●</span> ${esc(s.h.p[0])} ${esc(s.h.p[1].slice(0,16))} (${esc(s.h.lab)})`).join(' &nbsp;·&nbsp; ')}</div>`;
 }
-$('plats').onclick=e=>{const b=e.target.closest('[data-p]');if(b){ST.plat=b.dataset.p;ST.cat=null;render()}};
-$('cats').onclick=e=>{const b=e.target.closest('[data-c]');if(b){ST.cat=b.dataset.c;render()}};
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b){ST.mode=b.dataset.m;if(ST.sort==='rise')ST.sort='rank';load()}};
+$('psel').onchange=e=>{if(ST.mode==='week')ST.week=e.target.value;else ST.month=e.target.value;load()};
+$('dpick').onchange=e=>{ST.date=e.target.value||LD;load()};
+$('dprev').onclick=()=>{const i=DATES.indexOf(ST.dateUsed);if(i>0){ST.date=DATES[i-1];load()}};
+$('dnext').onclick=()=>{const i=DATES.indexOf(ST.dateUsed);if(i<DATES.length-1){ST.date=DATES[i+1];load()}};
+$('dlatest').onclick=()=>{ST.date=LD;load()};
+$('plats').onclick=e=>{const b=e.target.closest('[data-p]');if(b){ST.plat=b.dataset.p;ST.cat=null;ST.sub='전체';render()}};
+$('secs').onclick=e=>{const b=e.target.closest('[data-s]');if(b){ST.sec=b.dataset.s;render()}};
+$('cats').onclick=e=>{const b=e.target.closest('[data-c]');if(b){ST.cat=b.dataset.c;ST.sub='전체';render()}};
+$('subs').onclick=e=>{const b=e.target.closest('[data-u]');if(b){ST.sub=b.dataset.u;render()}};
 $('sorts').onclick=e=>{const b=e.target.closest('[data-s]');if(b){ST.sort=b.dataset.s;render()}};
 $('own').onchange=e=>{ST.own=e.target.checked;render()};
-$('allb').onchange=e=>{ST.allb=e.target.checked;render()};
-let t;$('q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{ST.q=e.target.value;render()},250)};
-$('dpick').onchange=e=>loadDate(e.target.value);
-$('dprev').onclick=()=>{const i=DATES.indexOf(CURD);if(i>0)loadDate(DATES[i-1])};
-$('dnext').onclick=()=>{const i=DATES.indexOf(CURD);if(i>=0&&i<DATES.length-1)loadDate(DATES[i+1])};
-$('dlatest').onclick=()=>loadDate(LD);
-loadDate(LD);
+$('des').onchange=e=>{ST.des=e.target.checked;render()};
+let t;$('q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{ST.q=e.target.value;search()},250)};
+load();
 })();
 </script>
 </body></html>
