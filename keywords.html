@@ -81,7 +81,7 @@ const v='?v='+Date.now();
 const LISTS=[['무신사|인기','무신사','인기 검색어','#1A1D21'],['무신사|급상승','무신사','급상승 검색어','#5B6470'],['29CM|인기','29CM','인기 검색어','#EA5529'],['W컨셉|인기','W컨셉','인기 검색어','#2563EB'],['지그재그|인기','지그재그','인기 검색어','#8B5CF6']];
 const PLATS=['무신사','29CM','W컨셉','지그재그'];
 const SURL={'무신사':'https://www.musinsa.com/search/goods?keyword=','29CM':'https://www.29cm.co.kr/store/search?keyword=','W컨셉':'https://display.wconcept.co.kr/search?keyword=','지그재그':'https://zigzag.kr/search?keyword='};
-const NOTE={'무신사|인기':'여성 · 실시간 순위를 수집 시각에 저장','무신사|급상승':'여성 · 실시간 순위를 수집 시각에 저장','29CM|인기':'전체 고객 기준 · 하루 단위','W컨셉|인기':'전체 고객 기준 · 상위 10개만 공개','지그재그|인기':'매일 새벽 갱신'};
+const NOTE={'무신사|인기':'여성 · 실시간 순위 (밤 수집 시각 기준)','무신사|급상승':'여성 · 실시간 순위 (밤 수집 시각 기준)','29CM|인기':'전체 고객 기준 · 하루 단위 · 오전 수집','W컨셉|인기':'전체 고객 기준 · 상위 10개만 공개 · 밤 수집','지그재그|인기':'매일 새벽 갱신 · 오전 수집'};
 const OWN=['로브로브','lovlov','레세터','lessetter'];
 const norm=s=>String(s).toLowerCase().replace(/\s+/g,'');
 const isOwn=k=>OWN.some(o=>norm(k).includes(o));
