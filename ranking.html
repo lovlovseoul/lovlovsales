@@ -142,6 +142,9 @@ const ord=(arr,ref)=>arr.slice().sort((a,b)=>{const i=ref?ref.indexOf(a):-1,j=re
 const OWN=['로브로브','lovlov','레세터','lessetter'];
 let IDX;try{IDX=await fetch('rank_index.json'+v).then(r=>r.json())}catch(e){$('take').textContent='랭킹 데이터를 불러오지 못했어요.';return}
 const DATES=IDX.dates||[];const LD=DATES[DATES.length-1];
+// 주간·월간은 플랫폼이 공개하는 주간·월간 랭킹을 그대로 받은 파일 (rankpw_/rankpm_<날짜>.json, 밤 수집)
+const PDATES=IDX.pdates||[];const PER_NAME={day:'일간',week:'주간',month:'월간'};
+const DL=()=>ST.mode==='day'?DATES:PDATES;const LDm=()=>{const l=DL();return l[l.length-1]};
 const CACHE={};
 const get=async f=>{if(!CACHE[f])CACHE[f]=fetch(f+v).then(r=>{if(!r.ok)throw 0;return r.json()}).catch(()=>null);return CACHE[f]};
 const ST={mode:'day',date:LD,week:null,month:null,plat:'무신사',sec:'전체',cat:null,sub:'전체',q:'',own:false,des:false,sort:'rank'};
@@ -155,15 +158,14 @@ const isOwn=p=>p&&OWN.some(o=>(p[0]||'').toLowerCase().includes(o));
 const imgOf=(pid,p)=>p&&p[5]?IMG[pre(pid)]+p[5]+(pre(pid)==='zz_'?'?width=400&height=400&quality=80&format=jpeg':''):'';
 async function load(){
   if(!ZZ&&IDX.zz)ZZ=await get('rank_zz.json');
-  if(ST.mode==='day'){let d=ST.date;if(!DATES.includes(d)){const e=DATES.filter(x=>x<=d);d=e.length?e[e.length-1]:DATES[0]}ST.dateUsed=d;D=await get('rankday_'+d+'.json')}
-  else if(ST.mode==='week')D=await get('rankwk_'+ST.week+'.json');
-  else D=await get('rankmo_'+ST.month+'.json');
+  const L_=DL();let d=ST.date;if(!L_.includes(d)){const e=L_.filter(x=>x<=d);d=e.length?e[e.length-1]:L_[L_.length-1]}ST.dateUsed=d;
+  D=d?await get((ST.mode==='day'?'rankday_':ST.mode==='week'?'rankpw_':'rankpm_')+d+'.json'):null;
   render();
 }
 const lists=()=>{const all={...(D?D.L:{})};if(ZZ)for(const k in ZZ.L)all[k]=ZZ.L[k];return all};
 const parse=k=>{const [pl,sec,cat,sub]=k.split('|');return{pl,sec,cat,sub}};
 function struct(){const S={};for(const k of Object.keys(lists())){const o=parse(k);((S[o.pl]??={})[o.sec]??={});(S[o.pl][o.sec][o.cat]??=[]).push(o.sub)}return S}
-const isPeriod=()=>ST.mode!=='day';
+const isPeriod=()=>false;   // 예전 누적 점수 방식은 안 씀 (주간·월간도 플랫폼 순위 그대로)
 function entries(key){
   const raw=lists()[key]||[];const zz=key.startsWith('지그재그');
   let rows=raw.map(e=>{const p=prod(e[0]);if(!p)return null;
@@ -190,12 +192,10 @@ const wkLabel=k=>{const w=IDX.weeks[k];if(!w)return k;const f=s=>`${+s.slice(5,7
 function render(){
   save();
   document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===ST.mode));
-  $('dayctl').hidden=ST.mode!=='day';$('psel').hidden=ST.mode==='day';
-  if(ST.mode==='day'){const d=ST.dateUsed||LD,i=DATES.indexOf(d);$('dpick').value=d;$('dpick').min=DATES[0];$('dpick').max=LD;$('dprev').disabled=i<=0;$('dnext').disabled=i>=DATES.length-1;$('dlatest').classList.toggle('on',d===LD);
-    $('dinfo').innerHTML=(ST.date!==d?`${ST.date}은 기록이 없어 그 전 기록일 <b>${d}</b> · `:'')+(d===LD?'최신 랭킹':`<b>${d}</b> 기록`)+(D&&D.T?' · 업데이트 '+Object.entries(D.T).map(([k,v])=>`${k} <b>${v}</b>`).join(' / '):'')+` · 기록 ${DATES.length}일 (${DATES[0]} ~ ${LD})`}
-  else if(ST.mode==='week'){$('psel').innerHTML=wkKeys.slice().reverse().map(k=>`<option value="${k}"${k===ST.week?' selected':''}>${wkLabel(k)}</option>`).join('');$('dinfo').textContent='기간 안 매일 순위를 점수로 합산 (1위 100점 … 100위 1점)'}
-  else{$('psel').innerHTML=(IDX.months||[]).slice().reverse().map(k=>`<option value="${k}"${k===ST.month?' selected':''}>${k.replace('-','년 ')}월</option>`).join('');$('dinfo').textContent='기간 안 매일 순위를 점수로 합산 (1위 100점 … 100위 1점)'}
-  if(!D){$('take').textContent='이 기간 데이터가 없어요.';$('main').innerHTML='';return}
+  $('dayctl').hidden=false;$('psel').hidden=true;
+  {const L_=DL(),LL=LDm(),d=ST.dateUsed||LL,i=L_.indexOf(d);$('dpick').value=d||'';$('dpick').min=L_[0]||'';$('dpick').max=LL||'';$('dprev').disabled=i<=0;$('dnext').disabled=i<0||i>=L_.length-1;$('dlatest').classList.toggle('on',!!d&&d===LL);
+    $('dinfo').innerHTML=!d?'':(ST.date&&d<ST.date&&ST.date<=LL?`${ST.date}은 기록이 없어 그 전 기록일 <b>${d}</b> · `:'')+(d===LL?`최신 ${PER_NAME[ST.mode]} 랭킹`:`<b>${d}</b> ${PER_NAME[ST.mode]} 기록`)+(D&&D.T?' · 업데이트 '+Object.entries(D.T).map(([k,v])=>`${k} <b>${v}</b>`).join(' / '):'')+` · 기록 ${L_.length}일 (${L_[0]} ~ ${LL})`}
+  if(!D){$('take').textContent=ST.mode==='day'?'이 날 데이터가 없어요.':`아직 플랫폼 ${PER_NAME[ST.mode]} 랭킹 기록이 없어요 (밤 23:40 수집부터 쌓여요).`;$('main').innerHTML='';return}
   const S=struct();const plats=PL_ORDER.filter(p=>S[p]);if(!plats.includes(ST.plat))ST.plat=plats[0];
   const secs=Object.keys(S[ST.plat]).sort((a,b)=>SEC_ORDER.indexOf(a)-SEC_ORDER.indexOf(b));if(!secs.includes(ST.sec))ST.sec=secs.includes('전체')?'전체':secs[0];
   const cats=ord(Object.keys(S[ST.plat][ST.sec]),CAT_ORDER[ST.plat]);if(!cats.includes(ST.cat))ST.cat=cats[0];
@@ -210,11 +210,12 @@ function render(){
   const hasPrev=!zz&&!isPeriod()&&!!D.prevDate&&((lists()[key]||[])[0]||[]).length>2;
   let rows=entries(key);
   const label=`${ST.plat}${ST.plat==='무신사'?' '+ST.sec:''} · ${ST.cat}${ST.sub!=='전체'?' > '+ST.sub:''}`;
-  const tt=zz?ZZ.time:(ST.mode==='day'&&D.T?D.T[ST.plat]:null);
-  const per=zz?`${ZZ.date}${tt?' '+tt+' 기준':''} 스냅샷`:ST.mode==='day'?`${ST.dateUsed}${tt?' '+tt+' 기준':''} 일간`:ST.mode==='week'?`주간 ${wkLabel(ST.week)}`:`${ST.month.replace('-','년 ')}월 월간 (기록 ${D.days.length}일)`;
+  const tt=zz?ZZ.time:(D.T?D.T[ST.plat]:null);
+  const per=zz?`${ZZ.date}${tt?' '+tt+' 기준':''} 스냅샷`:`${ST.dateUsed}${tt?' '+tt+' 기준':''} ${PER_NAME[ST.mode]}`;
   const nOwn=rows.filter(r=>isOwn(r.p)).length;
   $('take').innerHTML=`<b>${esc(per)}</b> · <b>${esc(label)}</b> ${ST.des?'디자이너 브랜드':'플랫폼 순위'} TOP100 · 여성 · 로브로브·레세터 <b>${nOwn}</b>개`;
   $('note').textContent=zz?`지그재그는 11/6${ZZ.time?' '+ZZ.time:''}에 크롬으로 한 번 받아 둔 스냅샷이에요 (스토어타입 브랜드패션 + 인기순, SPA·스포츠 제외). 날짜·기간을 바꿔도 이 스냅샷이 보여요.`
+    :ST.mode!=='day'?`${ST.plat} 여성 · 플랫폼이 공개하는 ${PER_NAME[ST.mode]} 랭킹 그대로 (집계 기간은 플랫폼 기준) · 매일 밤 수집 · 변동은 전 기록일 ${PER_NAME[ST.mode]} 순위 대비`
     :ST.plat==='무신사'?'무신사 여성 · 일간 랭킹 (신상·전체·급상승) · 하루 중 계속 바뀌어서 오전·밤 두 번 수집 (밤 값이 그날 최종, 11/7까지는 오전 값)':`${ST.plat} 여성 · 일간 베스트 · 하루 중 계속 바뀌어서 오전·밤 두 번 수집 (밤 값이 그날 최종)`;
   $('mainH').textContent=isPeriod()&&!zz?'기간 랭킹 TOP100':'랭킹 TOP100';
   $('mainNote').textContent=(isPeriod()&&!zz?'배지는 기간 점수 순위 · 카드 아래는 점수·평균 순위·최고 순위·순위권 일수':(ST.des?'배지는 디자이너 브랜드 안 순위 · 변동은 플랫폼 순위 기준':'배지는 플랫폼 순위와 전날 대비 변동'))+' · 가격은 할인 적용가 · 카드를 누르면 상품 페이지가 열려요';
@@ -249,7 +250,7 @@ async function search(){
   $('searchTiles').innerHTML=hits.slice(0,60).map(r=>tile(r,!isPeriod()&&!!D.prevDate,r.lab+' · ')).join('');
   $('searchEmpty').textContent=hits.length?'':'검색어가 들어간 상품이 순위권에 없어요.';
   // 추이: 이 달 월간 파일의 날짜별 순위
-  const mk=(ST.mode==='day'?(ST.dateUsed||LD):ST.mode==='week'?IDX.weeks[ST.week][1]:ST.month+'-01').slice(0,7);
+  const mk=(ST.dateUsed||LD).slice(0,7);
   const M=ST.plat==='지그재그'?null:await get('rankmo_'+mk+'.json');const box=$('trend');
   if(!M){box.innerHTML='<div class="empty">—</div>';return}
   const pick=[];const sk=new Set();for(const h of hits){const id=h.key+'#'+h.pid;if(!sk.has(id)){sk.add(id);pick.push(h)}if(pick.length===5)break}
@@ -265,12 +266,12 @@ async function search(){
   S.forEach((s,i)=>{g+=`<polyline fill="none" stroke="${C[i]}" stroke-width="2" stroke-linejoin="round" points="${s.pts.map(p=>`${x(p.d)},${y(p.v)}`).join(' ')}"/>`+s.pts.map(p=>`<circle cx="${x(p.d)}" cy="${y(p.v)}" r="3" fill="${C[i]}"/>`).join('')});
   box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}">${g}</svg><div class="note" style="margin-top:6px">${S.map((s,i)=>`<span style="color:${C[i]}">●</span> ${esc(s.h.p[0])} ${esc(s.h.p[1].slice(0,16))} (${esc(s.h.lab)})`).join(' &nbsp;·&nbsp; ')}</div>`;
 }
-$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b){ST.mode=b.dataset.m;if(ST.sort==='rise')ST.sort='rank';load()}};
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b){ST.mode=b.dataset.m;ST.date=LDm();if(ST.sort==='rise')ST.sort='rank';load()}};
 $('psel').onchange=e=>{if(ST.mode==='week')ST.week=e.target.value;else ST.month=e.target.value;load()};
-$('dpick').onchange=e=>{ST.date=e.target.value||LD;load()};
-$('dprev').onclick=()=>{const i=DATES.indexOf(ST.dateUsed);if(i>0){ST.date=DATES[i-1];load()}};
-$('dnext').onclick=()=>{const i=DATES.indexOf(ST.dateUsed);if(i<DATES.length-1){ST.date=DATES[i+1];load()}};
-$('dlatest').onclick=()=>{ST.date=LD;load()};
+$('dpick').onchange=e=>{ST.date=e.target.value||LDm();load()};
+$('dprev').onclick=()=>{const L_=DL(),i=L_.indexOf(ST.dateUsed);if(i>0){ST.date=L_[i-1];load()}};
+$('dnext').onclick=()=>{const L_=DL(),i=L_.indexOf(ST.dateUsed);if(i<L_.length-1){ST.date=L_[i+1];load()}};
+$('dlatest').onclick=()=>{ST.date=LDm();load()};
 $('plats').onclick=e=>{const b=e.target.closest('[data-p]');if(b){ST.plat=b.dataset.p;ST.cat=null;ST.sub='전체';render()}};
 $('secs').onclick=e=>{const b=e.target.closest('[data-s]');if(b){ST.sec=b.dataset.s;render()}};
 $('cats').onclick=e=>{const b=e.target.closest('[data-c]');if(b){ST.cat=b.dataset.c;ST.sub='전체';render()}};
