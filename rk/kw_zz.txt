@@ -1,0 +1,3 @@
+const W=ms=>new Promise(r=>setTimeout(r,ms));await W(2500);const t=document.body.innerText.split('\n').map(s=>s.trim()).filter(Boolean);const i=t.indexOf('인기 검색어');const out=[];
+for(let k=i+2;i>=0&&k<t.length-1&&out.length<50;k+=2){if(!/^\d+$/.test(t[k]))break;out.push([t[k+1],+t[k]])}
+JSON.stringify({p:'지그재그',stamp:i>=0?t[i+1]:'',time:new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'}),list:out})

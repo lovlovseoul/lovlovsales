@@ -1,0 +1,15 @@
+const CAT="__CAT__";const W=ms=>new Promise(r=>setTimeout(r,ms));
+const lab=t=>[...document.querySelectorAll('label')].filter(e=>e.textContent.trim()===t).pop();
+await W(1200);const pl=lab('일간');if(pl&&!pl.querySelector('input')?.checked)pl.click();await W(800);
+const cl=lab(CAT);if(!cl){({CAT,err:'no label'})}else{cl.click();await W(2200);window.scrollTo(0,0);
+const ids=()=>{const s=[];const seen=new Set();for(const a of document.querySelectorAll('a[href*="/product/catalog/"]')){const m=a.href.match(/catalog\/(\d+)/);if(m&&!seen.has(m[1])){seen.add(m[1]);s.push([m[1],a])}}return s};
+for(let i=0;i<25;i++){if(ids().length>=100)break;window.scrollBy(0,3000);await W(450)}
+const num=s=>s?Number(String(s).replace(/[^\d]/g,''))||null:null;const out=[];
+for(const [id,a] of ids().slice(0,100)){let c=a;for(let k=0;k<6;k++){c=c.parentElement;if(c.querySelector('a[href*="/store/brand/"]'))break}
+ const brand=c.querySelector('a[href*="/store/brand/"]')?.getAttribute('title')||'';const name=c.querySelector('a[href*="/product/catalog/"][title]')?.getAttribute('title')||'';
+ const L=c.innerText.split('\n').map(s=>s.trim()).filter(Boolean);const pi=L.findIndex(s=>/^\d+%[\d,]+$/.test(s));let price,cust,sale=0;
+ if(pi>=0){const m=L[pi].match(/^(\d+)%([\d,]+)$/);sale=+m[1];price=num(m[2]);cust=num(L[pi-1])||price}else{const q=L.find(s=>/^[\d,]{4,}$/.test(s));price=num(q);cust=price}
+ const im=c.querySelector('img[src*="img.29cm.co.kr"]');const img=im?(im.currentSrc||im.src).replace(/^https:\/\/img\.29cm\.co\.kr\//,'').split('?')[0]:'';
+ out.push([out.length+1,id,brand,name,price,cust,sale,img,0])}
+const D=JSON.parse(sessionStorage.getItem('__rk')||'{}');D[CAT]=out;sessionStorage.setItem('__rk',JSON.stringify(D));
+({CAT,per:[...document.querySelectorAll('input:checked')].map(i=>i.parentElement.textContent.trim()).join('/'),n:out.length})}

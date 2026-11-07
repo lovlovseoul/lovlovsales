@@ -1,0 +1,4 @@
+const W=ms=>new Promise(r=>setTimeout(r,ms));await W(2500);const inp=document.querySelector('input[type=search],header input');if(inp){inp.focus();inp.click()}await W(1500);
+const h=[...document.querySelectorAll('*')].find(e=>e.childElementCount===0&&e.textContent.trim()==='인기 검색어');let c=h;for(let i=0;i<5&&c;i++){c=c.parentElement;if(c&&c.querySelectorAll('li,a,button').length>=10)break}
+const L=c?c.innerText.split('\n').map(s=>s.trim()).filter(Boolean):[];const out=[];for(let k=1;k<L.length-1;k+=2){if(!/^\d+$/.test(L[k]))break;out.push([L[k+1],+L[k]])}
+document.activeElement&&document.activeElement.blur();JSON.stringify({p:'W컨셉',stamp:'',time:new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'}),list:out})

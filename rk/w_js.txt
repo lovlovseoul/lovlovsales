@@ -1,0 +1,10 @@
+const CAT="__CAT__";const W=ms=>new Promise(r=>setTimeout(r,ms));await W(2500);
+const per=[...document.querySelectorAll('*')].filter(e=>e.childElementCount===0&&/^(실시간|일간|주간|월간)$/.test(e.textContent.trim())).map(e=>e.textContent.trim())[0]||'?';
+for(let i=0;i<20;i++){if(document.querySelectorAll('img[src*="productimg/image/img"]').length>=130)break;window.scrollBy(0,3000);await W(350)}
+const seen=new Map();const num=s=>s?Number(String(s).replace(/[^\d]/g,''))||null:null;
+for(const im of document.querySelectorAll('img[src*="productimg/image/img"]')){const m=im.src.match(/image\/(img\d+\/\d+\/(\d+)_[^?]+)/);if(!m)continue;const id=m[2];if(seen.has(id))continue;let c=im;for(let i=0;i<8;i++){c=c.parentElement;if(c.innerText&&c.innerText.split('\n').length>=4)break}
+ const L=c.innerText.split('\n').map(s=>s.trim()).filter(Boolean);const i=L.findIndex(s=>/^\d+%$/.test(s));let cust,price,sale=0;
+ if(i>0){cust=num(L[i-1]);price=num(L[i+1]);sale=num(L[i])}else{price=num(L[2]);cust=price}
+ seen.set(id,[seen.size+1,id,L[0]||'',L[1]||'',price,cust,sale,m[1],0]);if(seen.size>=100)break}
+const D=JSON.parse(sessionStorage.getItem('__rk')||'{}');D[CAT]=[...seen.values()];sessionStorage.setItem('__rk',JSON.stringify(D));
+({CAT,per,n:seen.size,gender:new URL(location.href).searchParams.get('gender'),sub:new URL(location.href).searchParams.get('displaySubCategoryType')})
