@@ -78,8 +78,9 @@ td .c{display:inline-block;min-width:34px;padding:2px 6px;border-radius:6px;font
   <p class="note">무신사는 하루 한 번(새벽) 갱신, W컨셉·29CM는 오전·밤 두 번 수집해서 밤 값이 그날 최종이에요. 지그재그는 11/6 스냅샷 한 번뿐이라 날짜와 상관없이 따로 보여줘요.</p>
 </section>
 <section class="card">
-  <h3>일별 최고 기록</h3>
-  <div class="cs">기록일마다 그날 가장 높이 오른 상품 · 순위권 상품 수 · TOP10 상품 수 · 최신이 위</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>최고 기록</h3>
+  <div class="cs">기간마다 가장 높이 오른 상품 · 하루 중 다시 받아 순위가 덮어써져도 그 전에 더 높았던 순위로 기록 · 최신이 위</div></div>
+  <div class="seg" id="per"><button data-p="d">일별</button><button data-p="w">주별</button><button data-p="m">월별</button></div></div>
   <div class="tw" id="daylog"></div>
 </section>
 <section class="card">
@@ -104,7 +105,8 @@ const imgOf=(pid,p)=>p&&p[5]?IMG[pre(pid)]+p[5]+(pre(pid)==='zz_'?'?width=400&he
 let IDX;try{IDX=await fetch('rank_index.json'+v).then(r=>r.json())}catch(e){$('take').textContent='랭킹 데이터를 불러오지 못했어요.';return}
 const DATES=IDX.dates||[];const LD=DATES[DATES.length-1];
 const CACHE={};const get=f=>CACHE[f]??=fetch(f+v).then(r=>r.ok?r.json():null).catch(()=>null);
-const ST={b:'all',date:LD};
+const ST={b:'all',date:LD,per:'d'};
+try{const p=localStorage.getItem('own1p');if(p)ST.per=p}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('own1')||'{}');if(s.b)ST.b=s.b}catch(e){}
 const ZZ=IDX.zz?await get('rank_zz.json'):null;
 const want=b=>ST.b==='all'?(has(b,LOV)||has(b,LES)):ST.b==='lov'?has(b,LOV):has(b,LES);
@@ -114,16 +116,23 @@ function collect(D,allowPrev){
   const M=new Map();if(!D)return M;
   for(const [k,lst] of Object.entries(D.L)){const plat=k.split('|')[0];
     for(const e of lst){const p=D.P[e[0]];if(!p||!want(p[0]))continue;
-      const o=M.get(e[0])||{pid:e[0],p,plat,hits:[]};o.hits.push({k,lab:label(k),rank:e[1],prev:allowPrev&&e.length>2?e[2]:undefined});M.set(e[0],o)}}
-  for(const o of M.values()){o.hits.sort((a,b)=>a.rank-b.rank);o.best=o.hits[0].rank}
+      const o=M.get(e[0])||{pid:e[0],p,plat,hits:[]};o.hits.push({k,lab:label(k),rank:e[1],eff:e[1],prev:allowPrev&&e.length>2?e[2]:undefined});M.set(e[0],o)}}
+  // H: 같은 날 다시 받아 덮어쓸 때 그 전에 더 높았던 순위 (HT=그 전 수집 시각)
+  for(const [k,hk] of Object.entries(D.H||{})){const plat=k.split('|')[0];
+    for(const [pid,b] of Object.entries(hk)){const p=D.P[pid];if(!p||!want(p[0]))continue;
+      const o=M.get(pid)||{pid,p,plat,hits:[]};let h=o.hits.find(x=>x.k===k);
+      if(!h){h={k,lab:label(k),rank:null,eff:b};o.hits.push(h)}
+      if(b<(h.rank??999)){h.peak=b;h.pt=(D.HT||{})[plat]||'';h.eff=b}M.set(pid,o)}}
+  for(const o of M.values()){o.hits.sort((a,b)=>a.eff-b.eff);o.best=o.hits[0].eff;o.peakBest=o.hits[0].peak!=null}
   return M;
 }
-function chg(h){if(h.prev===undefined)return'';if(h.prev===null)return' <span class="nw">NEW</span>';const c=h.prev-h.rank;if(!c)return' <span class="mu">–</span>';return c>0?` <span class="up">▲${c}</span>`:` <span class="down">▼${-c}</span>`}
+function pk(h){return h.peak==null?'':h.rank==null?` <span class="mu">(${esc(h.pt)} ${h.peak}위 → 지금 순위권 밖)</span>`:` <span class="mu">(${esc(h.pt)}엔 ${h.peak}위)</span>`}
+function chg(h){if(h.rank==null)return'';if(h.prev===undefined)return'';if(h.prev===null)return' <span class="nw">NEW</span>';const c=h.prev-h.rank;if(!c)return' <span class="mu">–</span>';return c>0?` <span class="up">▲${c}</span>`:` <span class="down">▼${-c}</span>`}
 function item(o){const p=o.p;const u=URL_[pre(o.pid)]+o.pid.slice(3);const im=imgOf(o.pid,p);
   return `<div class="it"><a class="ph" href="${esc(u)}" target="_blank" rel="noopener">${im?`<img src="${esc(im)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`:''}</a>
   <div><div class="br">${esc(p[0])}</div><a class="nm" href="${esc(u)}" target="_blank" rel="noopener">${esc(p[1])}</a>
   <div class="pr">${p[4]?`<b>${p[4]}%</b> `:''}₩${fmt(p[2])}${p[6]?' · 품절':''}</div>
-  <div class="pl">${o.hits.map(h=>`<span class="pill${h.rank<=10?' top':''}">${esc(h.lab)} <b>${h.rank}위</b>${chg(h)}</span>`).join('')}</div></div></div>`}
+  <div class="pl">${o.hits.map(h=>`<span class="pill${h.eff<=10?' top':''}">${esc(h.lab)} ${h.rank!=null?`<b>${h.rank}위</b>`:''}${chg(h)}${pk(h)}</span>`).join('')}</div></div></div>`}
 async function render(){
   try{localStorage.setItem('own1',JSON.stringify({b:ST.b}))}catch(e){}
   document.querySelectorAll('#brand button').forEach(b=>b.classList.toggle('on',b.dataset.b===ST.b));
@@ -157,15 +166,22 @@ const md=x=>`${+x.slice(5,7)}/${+x.slice(8)}`;
 async function records(){
   const ds=DATES.slice(-120);const files=await Promise.all(ds.map(x=>get('rankday_'+x+'.json')));
   const cls=n=>n<=10?'h1':n<=50?'h2':'h3';
-  const days=[];const PB=new Map();
+  const PB=new Map();const G=new Map();
+  const wkOf=d=>Object.keys(IDX.weeks||{}).find(k=>IDX.weeks[k][2].includes(d))||d;
+  const gk=d=>ST.per==='w'?wkOf(d):ST.per==='m'?d.slice(0,7):d;
   files.forEach((D,i)=>{const M=[...collect(D,false).values()];const d=ds[i];
-    const b=M.slice().sort((x,y)=>x.best-y.best||y.hits.length-x.hits.length)[0];
-    days.push({d,n:M.length,t:M.filter(o=>o.best<=10).length,b,ok:!!D});
-    for(const o of M){const r=PB.get(o.pid)||{o,best:999,d:null,lab:'',days:0};r.days++;
+    const g=G.get(gk(d))||{key:gk(d),d0:d,d1:d,days:0,ok:0,pids:new Set(),top:new Set(),b:null,bd:null};G.set(g.key,g);
+    g.d1=d;g.days++;if(D)g.ok++;
+    for(const o of M){g.pids.add(o.pid);if(o.best<=10)g.top.add(o.pid);
+      if(!g.b||o.best<g.b.best||(o.best===g.b.best&&o.hits.length>g.b.hits.length)){g.b=o;g.bd=d}
+      const r=PB.get(o.pid)||{o,best:999,d:null,lab:'',days:0};r.days++;
       if(o.best<r.best||(o.best===r.best&&d>r.d)){r.best=o.best;r.d=d;r.lab=o.hits[0].lab;r.o=o}PB.set(o.pid,r)}});
-  $('daylog').innerHTML=`<table><thead><tr><th>날짜</th><th>순위권</th><th>TOP10</th><th>최고</th><th class="n">상품</th><th>플랫폼 · 랭킹</th></tr></thead><tbody>${days.slice().reverse().map(x=>`<tr><td>${md(x.d)}</td><td>${x.ok?x.n+'개':'–'}</td><td>${x.ok?x.t+'개':'–'}</td>${x.b?`<td><span class="c ${cls(x.b.best)}">${x.b.best}</span></td><td class="n">${esc(short(x.b.p[1]))}<small>${esc(x.b.p[0])}</small></td><td>${esc(x.b.plat)} · ${esc(x.b.hits[0].lab)}</td>`:'<td></td><td class="n mu">순위권 없음</td><td></td>'}</tr>`).join('')}</tbody></table>`;
+  document.querySelectorAll('#per button').forEach(b=>b.classList.toggle('on',b.dataset.p===ST.per));
+  const plab=g=>ST.per==='d'?md(g.d0):ST.per==='w'?`${md(IDX.weeks[g.key]?IDX.weeks[g.key][0]:g.d0)}~${md(IDX.weeks[g.key]?IDX.weeks[g.key][1]:g.d1)}`:`${+g.key.slice(5)}월`;
+  const tip=o=>o&&o.peakBest?` <span class="mu">(${esc(o.hits[0].pt)} 기준)</span>`:'';
+  $('daylog').innerHTML=`<table><thead><tr><th>${ST.per==='d'?'날짜':ST.per==='w'?'주':'월'}</th>${ST.per==='d'?'':'<th>기록일</th>'}<th>순위권</th><th>TOP10</th><th>최고</th><th class="n">상품</th><th>플랫폼 · 랭킹</th>${ST.per==='d'?'':'<th>날짜</th>'}</tr></thead><tbody>${[...G.values()].reverse().map(g=>`<tr><td>${plab(g)}</td>${ST.per==='d'?'':`<td>${g.ok}일</td>`}<td>${g.ok?g.pids.size+'개':'–'}</td><td>${g.ok?g.top.size+'개':'–'}</td>${g.b?`<td><span class="c ${cls(g.b.best)}">${g.b.best}</span></td><td class="n">${esc(short(g.b.p[1]))}<small>${esc(g.b.p[0])}</small></td><td>${esc(g.b.plat)} · ${esc(g.b.hits[0].lab)}${tip(g.b)}</td>${ST.per==='d'?'':`<td>${md(g.bd)}</td>`}`:`<td></td><td class="n mu">순위권 없음</td><td></td>${ST.per==='d'?'':'<td></td>'}`}</tr>`).join('')}</tbody></table>`;
   const R=[...PB.values()].sort((a,b)=>a.best-b.best||b.days-a.days);
-  $('pb').innerHTML=R.length?`<table><thead><tr><th>최고</th><th class="n">상품</th><th>플랫폼 · 랭킹</th><th>날짜</th><th>순위권 일수</th></tr></thead><tbody>${R.map(r=>`<tr><td><span class="c ${cls(r.best)}">${r.best}</span></td><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)} · ${esc(r.lab)}</td><td>${md(r.d)}</td><td>${r.days}일</td></tr>`).join('')}</tbody></table>`:'<div class="empty">기록이 없어요.</div>';
+  $('pb').innerHTML=R.length?`<table><thead><tr><th>최고</th><th class="n">상품</th><th>플랫폼 · 랭킹</th><th>날짜</th><th>순위권 일수</th></tr></thead><tbody>${R.map(r=>`<tr><td><span class="c ${cls(r.best)}">${r.best}</span></td><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)} · ${esc(r.lab)}${tip(r.o)}</td><td>${md(r.d)}</td><td>${r.days}일</td></tr>`).join('')}</tbody></table>`:'<div class="empty">기록이 없어요.</div>';
 }
 async function hist(){
   const ds=DATES.slice(-14);const files=await Promise.all(ds.map(x=>get('rankday_'+x+'.json')));
@@ -176,6 +192,7 @@ async function hist(){
   const cls=n=>n<=10?'h1':n<=50?'h2':'h3';
   $('hist').innerHTML=`<table><thead><tr><th class="n">상품</th><th>플랫폼</th>${ds.map(x=>`<th>${+x.slice(5,7)}/${+x.slice(8)}</th>`).join('')}</tr></thead><tbody>${R.map(r=>`<tr><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)}</td>${ds.map(x=>{const c=r.cell[x];return `<td>${c?`<span class="c ${cls(c.best)}" title="${esc(c.hits[0].lab)} · ${c.hits.length}곳">${c.best}</span>`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
 }
+$('per').onclick=e=>{const b=e.target.closest('[data-p]');if(b){ST.per=b.dataset.p;try{localStorage.setItem('own1p',ST.per)}catch(x){}records()}};
 $('brand').onclick=e=>{const b=e.target.closest('[data-b]');if(b){ST.b=b.dataset.b;render()}};
 $('dpick').onchange=e=>{ST.date=e.target.value||LD;render()};
 $('dprev').onclick=()=>{const i=DATES.indexOf(ST.used);if(i>0){ST.date=DATES[i-1];render()}};
