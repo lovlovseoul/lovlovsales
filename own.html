@@ -54,6 +54,9 @@ td.n,th.n{text-align:left;white-space:normal;min-width:200px}
 td.n small{display:block;color:var(--text-3)}
 td .c{display:inline-block;min-width:34px;padding:2px 6px;border-radius:6px;font-weight:700}
 .h1{background:#FCE3C2}.h2{background:#FFF1DD}.h3{background:#F7F8FA;color:var(--text-2)}
+td .c.k{cursor:pointer}td .c.k:hover,td .c.sel{outline:2px solid var(--accent);outline-offset:1px}
+tr.dt td{background:var(--accent-soft);text-align:left;white-space:normal;font-size:12px;color:var(--text-2);line-height:1.6}
+tr.dt b{color:var(--text-1)}
 .note{color:var(--text-3);font-size:11.5px;margin:6px 0 0;line-height:1.5}
 @media(max-width:820px){body{padding:18px 16px 56px}}
 </style></head>
@@ -73,9 +76,9 @@ td .c{display:inline-block;min-width:34px;padding:2px 6px;border-radius:6px;font
 </section>
 <section class="card">
   <h3>날짜별 최고 순위</h3>
-  <div class="cs">최근 14개 기록일 · 칸은 그날 그 상품이 오른 리스트 중 가장 높은 순위 · 빈칸은 순위권 밖</div>
+  <div class="cs">최근 14개 기록일 · 칸은 그날 그 상품이 오른 리스트 중 가장 높은 순위 · 빈칸은 순위권 밖 · 숫자를 누르면 그날 오른 랭킹이 아래에 펼쳐져요</div>
   <div class="tw" id="hist"></div>
-  <p class="note">무신사는 하루 한 번(새벽) 갱신, W컨셉·29CM는 오전·밤 두 번 수집해서 밤 값이 그날 최종이에요. 지그재그는 11/6 스냅샷 한 번뿐이라 날짜와 상관없이 따로 보여줘요.</p>
+  <p class="note">무신사·W컨셉·29CM 모두 오전·밤 두 번 수집해서 밤 값이 그날 최종이에요 (11/7까지 무신사는 오전 값). 지그재그는 11/6 스냅샷 한 번뿐이라 날짜와 상관없이 따로 보여줘요.</p>
 </section>
 <section class="card">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>최고 기록</h3>
@@ -190,8 +193,24 @@ async function hist(){
   const R=[...rows.values()].sort((a,b)=>PL_ORDER.indexOf(a.o.plat)-PL_ORDER.indexOf(b.o.plat)||Object.keys(b.cell).length-Object.keys(a.cell).length||Math.min(...Object.values(a.cell).map(x=>x.best))-Math.min(...Object.values(b.cell).map(x=>x.best)));
   if(!R.length){$('hist').innerHTML='<div class="empty">기록이 없어요.</div>';return}
   const cls=n=>n<=10?'h1':n<=50?'h2':'h3';
-  $('hist').innerHTML=`<table><thead><tr><th class="n">상품</th><th>플랫폼</th>${ds.map(x=>`<th>${+x.slice(5,7)}/${+x.slice(8)}</th>`).join('')}</tr></thead><tbody>${R.map(r=>`<tr><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)}</td>${ds.map(x=>{const c=r.cell[x];return `<td>${c?`<span class="c ${cls(c.best)}" title="${esc(c.hits[0].lab)} · ${c.hits.length}곳">${c.best}</span>`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
+  $('hist').innerHTML=`<table><thead><tr><th class="n">상품</th><th>플랫폼</th>${ds.map(x=>`<th>${+x.slice(5,7)}/${+x.slice(8)}</th>`).join('')}</tr></thead><tbody>${R.map((r,ri)=>`<tr><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)}</td>${ds.map((x,xi)=>{const c=r.cell[x];return `<td>${c?`<span class="c k ${cls(c.best)}" data-r="${ri}" data-x="${xi}" title="${esc(c.hits[0].lab)} · ${c.hits.length}곳">${c.best}</span>`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
+  HR={R,ds,files};
 }
+let HR=null;
+// 날짜별 최고 순위 칸 클릭 → 그 줄 아래에 그날 오른 랭킹 전부 펼치기 (다시 누르면 닫힘)
+$('hist').onclick=async e=>{const s=e.target.closest('.c.k');if(!s||!HR)return;
+  const tr=s.closest('tr');const nx=tr.nextElementSibling;const was=s.classList.contains('sel');
+  $('hist').querySelectorAll('tr.dt').forEach(x=>x.remove());$('hist').querySelectorAll('.c.sel').forEach(x=>x.classList.remove('sel'));
+  if(was)return;
+  const r=HR.R[+s.dataset.r],x=HR.ds[+s.dataset.x],i=+s.dataset.x,c=r.cell[x];if(!c)return;
+  // 전날 순위 비교용: 그날 파일의 전날 값(e[2]) 다시 읽기
+  const D=HR.files[i];const pv=D&&D.prevDate?collect(D,true).get(r.o.pid):null;
+  const prevOf=h=>{const q=pv&&pv.hits.find(y=>y.k===h.k);return q?q.prev:undefined};
+  const parts=c.hits.map(h=>{const pr=prevOf(h);const cg=h.rank==null?'':pr===undefined?'':pr===null?' <span class="nw">NEW</span>':pr===h.rank?' <span class="mu">–</span>':pr>h.rank?` <span class="up">▲${pr-h.rank}</span>`:` <span class="down">▼${h.rank-pr}</span>`;
+    return `${esc(h.lab)} <b>${h.rank!=null?h.rank+'위':''}</b>${cg}${pk(h)}`});
+  const row=document.createElement('tr');row.className='dt';
+  row.innerHTML=`<td colspan="${HR.ds.length+2}"><b>${md(x)} ${esc(short(r.o.p[1]))}</b> — ${esc(r.o.plat)} · ${parts.join(' · ')}</td>`;
+  tr.after(row);s.classList.add('sel')};
 $('per').onclick=e=>{const b=e.target.closest('[data-p]');if(b){ST.per=b.dataset.p;try{localStorage.setItem('own1p',ST.per)}catch(x){}records()}};
 $('brand').onclick=e=>{const b=e.target.closest('[data-b]');if(b){ST.b=b.dataset.b;render()}};
 $('dpick').onchange=e=>{ST.date=e.target.value||LD;render()};
