@@ -77,6 +77,16 @@ td .c{display:inline-block;min-width:34px;padding:2px 6px;border-radius:6px;font
   <div class="tw" id="hist"></div>
   <p class="note">무신사는 하루 한 번(새벽) 갱신, W컨셉·29CM는 오전·밤 두 번 수집해서 밤 값이 그날 최종이에요. 지그재그는 11/6 스냅샷 한 번뿐이라 날짜와 상관없이 따로 보여줘요.</p>
 </section>
+<section class="card">
+  <h3>일별 최고 기록</h3>
+  <div class="cs">기록일마다 그날 가장 높이 오른 상품 · 순위권 상품 수 · TOP10 상품 수 · 최신이 위</div>
+  <div class="tw" id="daylog"></div>
+</section>
+<section class="card">
+  <h3>상품별 역대 최고 순위</h3>
+  <div class="cs">기록 전체에서 상품마다 가장 높이 오른 순위와 그 날짜·리스트 · 순위권에 든 날 수 · 최고 순위 높은 순</div>
+  <div class="tw" id="pb"></div>
+</section>
 </div>
 <script>
 (async()=>{
@@ -140,7 +150,22 @@ async function render(){
   for(const pl of PL_ORDER){const a=(byP[pl]||[]).sort((x,y)=>x.best-y.best||y.hits.length-x.hits.length);if(!a.length)continue;
     h+=`<div class="plat">${pl}${pl==='지그재그'&&ZZ?` · ${ZZ.date} 스냅샷`:''} · ${a.length}개</div><div class="items">${a.map(item).join('')}</div>`}
   $('list').innerHTML=h||`<div class="empty">이 날은 ${who} 상품이 순위권에 없어요.</div>`;
-  hist();
+  hist();records();
+}
+const short=s=>String(s||'').replace(/\[[^\]]*\]\s*/g,m=>/1\+1|pack/i.test(m)?m:'').replace(/_\(\d+color\)/i,'').trim();
+const md=x=>`${+x.slice(5,7)}/${+x.slice(8)}`;
+async function records(){
+  const ds=DATES.slice(-120);const files=await Promise.all(ds.map(x=>get('rankday_'+x+'.json')));
+  const cls=n=>n<=10?'h1':n<=50?'h2':'h3';
+  const days=[];const PB=new Map();
+  files.forEach((D,i)=>{const M=[...collect(D,false).values()];const d=ds[i];
+    const b=M.slice().sort((x,y)=>x.best-y.best||y.hits.length-x.hits.length)[0];
+    days.push({d,n:M.length,t:M.filter(o=>o.best<=10).length,b,ok:!!D});
+    for(const o of M){const r=PB.get(o.pid)||{o,best:999,d:null,lab:'',days:0};r.days++;
+      if(o.best<r.best||(o.best===r.best&&d>r.d)){r.best=o.best;r.d=d;r.lab=o.hits[0].lab;r.o=o}PB.set(o.pid,r)}});
+  $('daylog').innerHTML=`<table><thead><tr><th>날짜</th><th>순위권</th><th>TOP10</th><th>최고</th><th class="n">상품</th><th>플랫폼 · 랭킹</th></tr></thead><tbody>${days.slice().reverse().map(x=>`<tr><td>${md(x.d)}</td><td>${x.ok?x.n+'개':'–'}</td><td>${x.ok?x.t+'개':'–'}</td>${x.b?`<td><span class="c ${cls(x.b.best)}">${x.b.best}</span></td><td class="n">${esc(short(x.b.p[1]))}<small>${esc(x.b.p[0])}</small></td><td>${esc(x.b.plat)} · ${esc(x.b.hits[0].lab)}</td>`:'<td></td><td class="n mu">순위권 없음</td><td></td>'}</tr>`).join('')}</tbody></table>`;
+  const R=[...PB.values()].sort((a,b)=>a.best-b.best||b.days-a.days);
+  $('pb').innerHTML=R.length?`<table><thead><tr><th>최고</th><th class="n">상품</th><th>플랫폼 · 랭킹</th><th>날짜</th><th>순위권 일수</th></tr></thead><tbody>${R.map(r=>`<tr><td><span class="c ${cls(r.best)}">${r.best}</span></td><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)} · ${esc(r.lab)}</td><td>${md(r.d)}</td><td>${r.days}일</td></tr>`).join('')}</tbody></table>`:'<div class="empty">기록이 없어요.</div>';
 }
 async function hist(){
   const ds=DATES.slice(-14);const files=await Promise.all(ds.map(x=>get('rankday_'+x+'.json')));
@@ -149,7 +174,7 @@ async function hist(){
   const R=[...rows.values()].sort((a,b)=>PL_ORDER.indexOf(a.o.plat)-PL_ORDER.indexOf(b.o.plat)||Object.keys(b.cell).length-Object.keys(a.cell).length||Math.min(...Object.values(a.cell).map(x=>x.best))-Math.min(...Object.values(b.cell).map(x=>x.best)));
   if(!R.length){$('hist').innerHTML='<div class="empty">기록이 없어요.</div>';return}
   const cls=n=>n<=10?'h1':n<=50?'h2':'h3';
-  $('hist').innerHTML=`<table><thead><tr><th class="n">상품</th><th>플랫폼</th>${ds.map(x=>`<th>${+x.slice(5,7)}/${+x.slice(8)}</th>`).join('')}</tr></thead><tbody>${R.map(r=>`<tr><td class="n">${esc(r.o.p[1].replace(/\[[^\]]*\]\s*/g,''))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)}</td>${ds.map(x=>{const c=r.cell[x];return `<td>${c?`<span class="c ${cls(c.best)}" title="${esc(c.hits[0].lab)} · ${c.hits.length}곳">${c.best}</span>`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
+  $('hist').innerHTML=`<table><thead><tr><th class="n">상품</th><th>플랫폼</th>${ds.map(x=>`<th>${+x.slice(5,7)}/${+x.slice(8)}</th>`).join('')}</tr></thead><tbody>${R.map(r=>`<tr><td class="n">${esc(short(r.o.p[1]))}<small>${esc(r.o.p[0])}</small></td><td>${esc(r.o.plat)}</td>${ds.map(x=>{const c=r.cell[x];return `<td>${c?`<span class="c ${cls(c.best)}" title="${esc(c.hits[0].lab)} · ${c.hits.length}곳">${c.best}</span>`:''}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
 }
 $('brand').onclick=e=>{const b=e.target.closest('[data-b]');if(b){ST.b=b.dataset.b;render()}};
 $('dpick').onchange=e=>{ST.date=e.target.value||LD;render()};
