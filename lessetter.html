@@ -342,7 +342,7 @@ function badge(x,r,cv){
   if(cv<=30&&r>=0.3)return '<span class="stk-pill stk-l1">'+Math.floor(cv)+'일분</span>';
   return '<span class="stk-pill stk-ok">'+(cv>365?'1년+':Math.floor(cv)+'일분')+'</span>'}
 function openProduct(n){var q=document.getElementById('ps-q');if(!q)return;q.value=n;q.dispatchEvent(new Event('input',{bubbles:true}));setTimeout(function(){var b=document.querySelector('#ps-sug button[data-n]');if(b&&b.dataset.n===n)b.click();host.scrollIntoView({behavior:'smooth',block:'start'})},260)}
-function inbTxt(a){if(a.stale&&!a.inq)return '<span class="hint">예정일 지남·확인 필요</span>';if(!a.inq)return '<span class="stk-neg">없음</span>';var g='';if(!a.ok&&a.eta&&a.cv!=null&&a.lv<3){var od=new Date(S.asof.slice(0,10)+'T00:00:00Z');od.setUTCDate(od.getUTCDate()+Math.floor(a.cv));var gap=Math.round((new Date(a.eta+'T00:00:00Z')-od)/864e5);if(gap>0)g=' · 입고 전 '+gap+'일 품절'}if(!a.ok&&a.lv===3&&a.after!=null&&a.after<=30)g=' · 입고 후 '+Math.floor(a.after)+'일분뿐';return md(a.eta)+' '+a.inq.toLocaleString()+'장'+g}
+function inbTxt(a){if(a.stale&&!a.inq)return '<span class="hint">예정일 지남·확인 필요</span>';if(!a.inq)return '<span class="stk-neg">없음</span>';var g='';if(!a.ok&&a.eta&&a.cv!=null&&a.lv<3){var od=new Date(S.asof.slice(0,10)+'T00:00:00Z');od.setUTCDate(od.getUTCDate()+Math.floor(a.cv));var gap=Math.round((new Date(a.eta+'T00:00:00Z')-od)/864e5);if(gap>0)g=' · 입고 전 '+gap+'일 품절'}if(!a.ok&&a.lv===3&&a.after!=null&&a.after<=30)g=' · 입고 후 '+Math.floor(a.after)+'일분뿐';return (a.eta?md(a.eta):'일정 미정')+' '+a.inq.toLocaleString()+'장'+g}
 function bar(){
   var A=S.alerts.filter(function(a){return a.b===BRAND});var E=(S.errs||[]).filter(function(a){return a.b===BRAND});var c={1:0,2:0,3:0},ok=0;A.forEach(function(a){if(a.ok)ok++;else c[a.lv]++});
   var el=document.createElement('div');el.className='stk-bar';el.id='stk-bar';
@@ -375,7 +375,7 @@ function panel(){
   h+='<div class="ps-note">판매 속도는 판매 대시보드(전 플랫폼, 실결제·취소 제외) 기준, 옵션 비중은 최근 28일 컬러·사이즈 판매 비중. 2PACK은 구성 컬러에 나눠 반영. 입고 예정은 입출고 구글시트의 미입고분이에요.'+(S.inbAsof?' ('+md(S.inbAsof)+' 기준)':'')+'</div>';
   box.innerHTML=h;insert(res,box)}
 function insert(res,box){var note=res.querySelector('.ps-note');res.insertBefore(box,note||null)}
-fetch('stock.json?cb='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){S=j;Object.keys(S.P).forEach(function(k){KEY[norm(k)]=k});bar();panel();
+fetch('stock.json?cb='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){S=j;Object.keys(S.P).forEach(function(k){KEY[norm(k)]=k});try{bar()}catch(e){console.error('stock bar',e)}try{panel()}catch(e){console.error('stock panel',e)}
   var res=document.getElementById('ps-res');if(res)new MutationObserver(function(){panel()}).observe(res,{childList:true});}).catch(function(){});
 })();
 </script>
