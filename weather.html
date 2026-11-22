@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>서울 날씨 · 로브로브</title>
+<style>
+:root{
+ --bg:#F4F5F7;--card:#FFFFFF;--card-2:#FAFBFC;--line:#E7E9ED;--line-2:#DCDFE4;
+ --text-1:#1A1D21;--text-2:#5B6470;--text-3:#9AA3AD;
+ --accent:#EA5529;--accent-soft:#FDEEE9;--cold:#2563EB;--cold-soft:#E8EFFD;--warm:#EA5529;
+ --ly:#9AA3AD;--sale:#16A34A;--sale-ly:#BFE3CB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:28px 26px 70px;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto}
+.brandrow{display:flex;justify-content:flex-end;gap:7px;margin-bottom:16px}
+.brandrow a{text-decoration:none;font-size:12.5px;font-weight:600;padding:7px 15px;border-radius:999px;border:1px solid var(--line-2);color:var(--text-2);background:var(--card)}
+.brandrow a.on{background:var(--text-1);color:#fff;border-color:var(--text-1)}
+h1{font-size:23px;font-weight:700}
+.sub{color:var(--text-2);font-size:12.5px;margin-top:6px;line-height:1.6}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:12px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card h3{font-size:14px;font-weight:700}
+.card .cs{color:var(--text-3);font-size:11.5px;margin:3px 0 14px;line-height:1.5}
+.week{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+.wd{border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;background:var(--card-2)}
+.wd.today{border-color:var(--text-1);background:#fff;box-shadow:0 0 0 1px var(--text-1) inset}
+.wd.past{opacity:.6}
+.wd .d{font-size:11.5px;color:var(--text-2);font-weight:600}
+.wd .d.sat{color:#2563EB}.wd .d.sun{color:#DC2626}
+.wd .ic{font-size:22px;margin:4px 0}
+.wd .t{font-size:13px;font-weight:700}
+.wd .t .mn{color:var(--cold)}.wd .t .mx{color:var(--warm)}
+.wd .x{font-size:10.5px;color:var(--text-3);margin-top:4px;line-height:1.45}
+.wd .drop{color:var(--cold);font-weight:700}
+.vtabs{display:inline-flex;gap:4px;margin:18px 0 12px;background:var(--card);padding:4px;border:1px solid var(--line);border-radius:12px}
+.vtab{padding:8px 20px;border:none;background:none;border-radius:8px;color:var(--text-2);cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
+.vtab.on{background:var(--accent);color:#fff}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+select,.chk{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--text-1)}
+.chk{display:inline-flex;gap:6px;align-items:center;cursor:pointer;font-weight:600;color:var(--text-2)}
+.legend{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
+.lg i{width:16px;height:3px;border-radius:2px;display:inline-block}
+.lg i.dash{background:repeating-linear-gradient(90deg,var(--ly) 0 4px,transparent 4px 7px)!important}
+.lg i.box{width:10px;height:10px;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:right;padding:7px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--text-3);font-weight:600;font-size:11px;position:sticky;top:0;background:#fff}
+td{font-weight:600}
+td.l,th.l{text-align:left}
+td.c,th.c{text-align:center}
+.mn{color:var(--cold)}.mx{color:var(--warm)}
+.muted{color:var(--text-3);font-weight:500}
+.dn{color:var(--cold)}.up{color:var(--warm)}
+tr.sat td.l{color:#2563EB}tr.sun td.l{color:#DC2626}
+tr.fs td{background:#FAFAFB}
+.tblwrap{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.k{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.k .lab{font-size:11.5px;color:var(--text-2)}
+.k .val{font-size:19px;font-weight:700;margin-top:5px}
+.k .s2{font-size:11px;color:var(--text-3);margin-top:3px}
+svg text{font-family:inherit}
+.tip{position:fixed;pointer-events:none;background:var(--text-1);border-radius:8px;padding:8px 11px;font-size:12px;color:#fff;opacity:0;z-index:10;white-space:nowrap;line-height:1.55}
+.err{color:#DC2626;font-size:13px;padding:10px 0}
+.foot{color:var(--text-3);font-size:11px;margin-top:10px;line-height:1.6}
+@media(max-width:820px){body{padding:20px 14px 56px}.week{grid-template-columns:repeat(3,1fr)}.kp{grid-template-columns:repeat(2,1fr)}.vtab{padding:8px 12px}}
+</style></head>
+<body><div class="wrap">
+<div class="brandrow"><a href="sales.html">로브로브</a><a href="lessetter.html">레세터</a><a href="weather.html" class="on">날씨</a></div>
+<header>
+<h1>서울 날씨</h1>
+<div class="sub">서울(종로) 일별 기온 · 과거는 관측 재분석값, 오늘 이후는 예보 · 데이터 Open-Meteo (기상청 공식 관측값과 1~2° 차이 날 수 있음) · 요일지수 = W컨셉 일매출 요일별 평균 대비 (1.00=평균)</div>
+</header>
+
+<div class="card" style="margin-top:18px">
+<h3>이번 주</h3>
+<div class="cs">어제 ~ 7일 뒤 · ↓ 표시는 전날보다 최저기온 3° 이상 하락 · 괄호는 작년 같은 날 최저/최고</div>
+<div class="week" id="week"><div class="muted">불러오는 중…</div></div>
+</div>
+
+<div class="vtabs" id="vtabs">
+<button class="vtab on" data-v="day">일별</button><button class="vtab" data-v="wk">주별</button><button class="vtab" data-v="mon">월별</button><button class="vtab" data-v="yr">년별</button>
+</div>
+<div id="view"></div>
+<div class="foot">출처: Open-Meteo Historical Weather API(ERA5 재분석) + Forecast API, 서울 37.57N 126.97E. W컨셉 매출: ~2026-07 W컨셉 주문원본(취소 제외, 직원구매 미제외) / 2026-08~ 판매 대시보드 기준(직원·체험단 제외).</div>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+const LAT=37.5714,LON=126.9658,START='2023-08-01';
+const DOWI=[1.11,0.99,0.90,0.92,0.80,0.79,1.17]; // 월..일
+const DN=['월','화','수','목','금','토','일'];
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const P=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const add=(s,n)=>{const d=P(s);d.setDate(d.getDate()+n);return iso(d)};
+const dow=s=>(P(s).getDay()+6)%7; // 0=월
+const lyd=s=>{let y=+s.slice(0,4)-1,r=y+s.slice(4);if(s.slice(5)==='02-29')r=y+'-02-28';return r};
+const f1=x=>x==null?'–':(Math.round(x*10)/10).toFixed(1);
+const won=x=>x==null?'–':'₩'+(x/1e6).toFixed(1)+'M';
+const ICON=c=>c==null?'':c===0?'☀️':c<=2?'🌤️':c===3?'☁️':c<=48?'🌫️':c<=57?'🌦️':c<=67?'🌧️':c<=77?'🌨️':c<=82?'🌧️':c<=86?'🌨️':'⛈️';
+const WTXT=c=>c==null?'':c===0?'맑음':c<=2?'구름조금':c===3?'흐림':c<=48?'안개':c<=57?'이슬비':c<=67?'비':c<=77?'눈':c<=82?'소나기':c<=86?'눈':'뇌우';
+let D={},S={},TODAY=iso(new Date());
+const tip=document.getElementById('tip');
+function showTip(e,h){tip.innerHTML=h;tip.style.opacity=1;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8);tip.style.left=x+'px';tip.style.top=(e.clientY+14)+'px'}
+function hideTip(){tip.style.opacity=0}
+
+async function load(){
+  const yest=add(TODAY,-1);
+  const vars='temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,snowfall_sum,weather_code';
+  const ua=`https://archive-api.open-meteo.com/v1/archive?latitude=${LAT}&longitude=${LON}&start_date=${START}&end_date=${yest}&daily=${vars}&timezone=Asia%2FSeoul`;
+  const uf=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=${vars},precipitation_probability_max&past_days=7&forecast_days=9&timezone=Asia%2FSeoul`;
+  const [a,f]=await Promise.all([fetch(ua).then(r=>r.json()),fetch(uf).then(r=>r.json())]);
+  const put=(src,fc)=>{const t=src.daily.time;t.forEach((d,i)=>{const o={mx:src.daily.temperature_2m_max[i],mn:src.daily.temperature_2m_min[i],mean:src.daily.temperature_2m_mean[i],pr:src.daily.precipitation_sum[i],sn:src.daily.snowfall_sum[i],wc:src.daily.weather_code[i],fc};if(src.daily.precipitation_probability_max)o.pp=src.daily.precipitation_probability_max[i];if(o.mn==null&&o.mx==null)return;if(fc&&D[d]&&!D[d].fc&&d<TODAY)return;D[d]=Object.assign(D[d]||{},o)})};
+  put(a,false);put(f,true);
+  for(const d in D){if(D[d].mean==null&&D[d].mn!=null)D[d].mean=(D[d].mn+D[d].mx)/2}
+  try{S=(await fetch('wsales.json?v='+Date.now()).then(r=>r.json())).W||{}}catch(e){S={}}
+}
+const drop=d=>{const p=D[add(d,-1)];return p&&D[d]&&D[d].mn!=null&&p.mn!=null?D[d].mn-p.mn:null};
+
+function renderWeek(){
+  const el=document.getElementById('week');let h='';
+  for(let i=-1;i<=7;i++){const d=add(TODAY,i),w=D[d];if(!w)continue;const k=dow(d),l=D[lyd(d)],dr=drop(d);
+    h+=`<div class="wd ${i===0?'today':i<0?'past':''}"><div class="d ${k===5?'sat':k===6?'sun':''}">${+d.slice(5,7)}/${+d.slice(8)} (${DN[k]})${i===0?' 오늘':''}</div>
+    <div class="ic">${ICON(w.wc)}</div><div class="t"><span class="mn">${f1(w.mn)}°</span> / <span class="mx">${f1(w.mx)}°</span></div>
+    <div class="x">${dr!=null&&dr<=-3?`<span class="drop">↓${f1(-dr)}°</span> `:''}${w.pp!=null&&i>=0?'강수 '+w.pp+'%':(w.pr>0?w.pr.toFixed(1)+'mm':'')}${w.sn>0?' · 눈 '+w.sn.toFixed(1)+'cm':''}<br>요일지수 ${DOWI[k].toFixed(2)}<br>${l?`(작년 ${f1(l.mn)}/${f1(l.mx)})`:''}</div></div>`}
+  el.innerHTML=h||'<div class="err">날씨를 불러오지 못했어</div>';
+}
+
+/* ---------- SVG line/bar chart ---------- */
+function chart({xs,series,bars,h=260,yfmt=v=>v+'°',labels,tipf,zero=true,barsfmt=won}){
+  const W=1120,H=h,pl=40,pr=bars?54:12,pt=10,pb=26,iw=W-pl-pr,ih=H-pt-pb;
+  let vals=[];series.forEach(s=>s.v.forEach(v=>v!=null&&vals.push(v)));
+  let lo=Math.min(...vals),hi=Math.max(...vals);if(zero){lo=Math.min(lo,0);hi=Math.max(hi,0)}lo=Math.floor(lo/5)*5;hi=Math.ceil(hi/5)*5;if(hi===lo)hi=lo+5;
+  const n=xs.length,X=i=>pl+(n<=1?iw/2:i*iw/(n-1)),Y=v=>pt+ih-(v-lo)/(hi-lo)*ih;
+  let g='';
+  for(let v=lo;v<=hi;v+=5){g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v===0?'#C9CED6':'#EEF0F3'}" stroke-width="1"/><text x="${pl-6}" y="${Y(v)+4}" text-anchor="end" font-size="10.5" fill="#9AA3AD">${yfmt(v)}</text>`}
+  if(bars){let bm=0;bars.forEach(b=>b.v.forEach(v=>v&&(bm=Math.max(bm,v))));bm=bm||1;const bw=Math.max(2,iw/n*0.8/bars.length);
+    bars.forEach((b,j)=>b.v.forEach((v,i)=>{if(!v)return;const bh=v/bm*ih*0.9;g+=`<rect x="${X(i)-bw*bars.length/2+j*bw}" y="${pt+ih-bh}" width="${bw-1}" height="${bh}" fill="${b.c}" rx="1.5"/>`}));
+    [0.5,1].forEach(r=>{g+=`<text x="${W-pr+6}" y="${pt+ih-ih*0.9*r+4}" font-size="10" fill="#9AA3AD">${barsfmt(bm*r)}</text>`})}
+  series.forEach(s=>{let p='',on=false;s.v.forEach((v,i)=>{if(v==null){on=false;return}p+=(on?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);on=true});
+    g+=`<path d="${p}" fill="none" stroke="${s.c}" stroke-width="${s.w||2}" ${s.dash?'stroke-dasharray="4 3"':''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    if(s.dots)s.v.forEach((v,i)=>{if(v!=null&&s.dots[i])g+=`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="${s.c}" stroke="#fff" stroke-width="1.5"/>`})});
+  const step=Math.ceil(n/16);
+  xs.forEach((x,i)=>{if(i%step===0||i===n-1)g+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="#9AA3AD">${labels?labels[i]:x}</text>`});
+  const id='c'+Math.random().toString(36).slice(2);
+  g+=`<rect id="${id}" x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  setTimeout(()=>{const r=document.getElementById(id);if(!r||!tipf)return;r.addEventListener('mousemove',e=>{const bb=r.getBoundingClientRect();const i=Math.round((e.clientX-bb.left)/bb.width*(n-1));if(i>=0&&i<n)showTip(e,tipf(i))});r.addEventListener('mouseleave',hideTip)},0);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${g}</svg>`;
+}
+
+/* ---------- views ---------- */
+const st={v:'day',month:TODAY.slice(0,7),sales:true,season:null};
+const months=()=>{const out=[];let d=P(START);const end=P(TODAY);while(d<=end){out.push(iso(d).slice(0,7));d.setMonth(d.getMonth()+1)}return out.reverse()};
+const seasonOf=s=>{const y=+s.slice(0,4),m=+s.slice(5,7);return m>=9?y:y-1};
+function viewDay(){
+  const m=st.month,y=+m.slice(0,4),mo=+m.slice(5,7),nd=new Date(y,mo,0).getDate();
+  const ds=[...Array(nd)].map((_,i)=>m+'-'+pad(i+1)),lys=ds.map(lyd);
+  const cur=ds.map(d=>D[d]||{}),ly=lys.map(d=>D[d]||{});
+  const has=cur.filter(x=>x.mn!=null);
+  const avg=(a,k)=>{const v=a.map(x=>x[k]).filter(x=>x!=null);return v.length?v.reduce((p,c)=>p+c,0)/v.length:null};
+  const hv=ds.filter((d,i)=>cur[i].mn!=null&&ly[i].mn!=null);
+  const diff=hv.length?hv.reduce((p,d)=>p+(D[d].mean-D[lyd(d)].mean),0)/hv.length:null;
+  const coldest=has.length?ds.filter(d=>D[d]&&D[d].mn!=null).reduce((a,b)=>D[a].mn<=D[b].mn?a:b):null;
+  const drops=ds.filter(d=>{const x=drop(d);return x!=null&&x<=-3});
+  const sCur=ds.map(d=>S[d]||null),sLy=lys.map(d=>S[d]||null);
+  const sSum=a=>a.reduce((p,c)=>p+(c||0),0);
+  let h=`<div class="card"><div class="ctrl"><select id="selM">${months().map(x=>`<option ${x===m?'selected':''}>${x}</option>`).join('')}</select>
+  <label class="chk"><input type="checkbox" id="chkS" ${st.sales?'checked':''}> W컨셉 매출 겹쳐보기</label></div>
+  <div class="kp"><div class="k"><div class="lab">평균 최저 / 최고</div><div class="val"><span class="mn">${f1(avg(cur,'mn'))}°</span> / <span class="mx">${f1(avg(cur,'mx'))}°</span></div><div class="s2">작년 ${f1(avg(ly,'mn'))}° / ${f1(avg(ly,'mx'))}°</div></div>
+  <div class="k"><div class="lab">작년 같은 날 대비 (일평균기온)</div><div class="val ${diff==null||Math.abs(diff)<0.3?'':diff>0?'up':'dn'}">${diff==null?'–':(diff>0?'+':'')+f1(diff)+'°'}</div><div class="s2">${diff==null?'':Math.abs(diff)<0.3?'작년과 비슷':diff>0?'작년보다 따뜻':'작년보다 추움'} · ${hv.length}일 비교</div></div>
+  <div class="k"><div class="lab">가장 추운 날</div><div class="val mn">${coldest?f1(D[coldest].mn)+'°':'–'}</div><div class="s2">${coldest?+coldest.slice(5,7)+'/'+ +coldest.slice(8)+' ('+DN[dow(coldest)]+')':''}</div></div>
+  <div class="k"><div class="lab">급락일 (최저 3°↓) · 영하일</div><div class="val">${drops.length}일 · ${has.filter(x=>x.mn<0).length}일</div><div class="s2">${drops.map(d=>+d.slice(8)+'일').join(', ')||'없음'}</div></div></div>
+  <div class="legend"><span class="lg"><i style="background:var(--cold)"></i>올해 최저</span><span class="lg"><i style="background:var(--warm)"></i>올해 최고</span><span class="lg"><i class="dash"></i>작년 같은 날 최저·최고</span><span class="lg"><i style="background:var(--cold);width:8px;height:8px;border-radius:50%"></i>최저 3°↓ 급락일</span>${st.sales?'<span class="lg"><i class="box" style="background:var(--sale)"></i>올해 W컨셉 매출</span><span class="lg"><i class="box" style="background:var(--sale-ly)"></i>작년 같은 날 W컨셉 매출</span>':''}</div>`;
+  h+=chart({xs:ds,labels:ds.map(d=>+d.slice(8)+DN[dow(d)]),h:300,
+    series:[{v:ly.map(x=>x.mn),c:'#B9C4D6',dash:1,w:1.5},{v:ly.map(x=>x.mx),c:'#E7B9AA',dash:1,w:1.5},{v:cur.map(x=>x.mn),c:'#2563EB',dots:ds.map(d=>{const x=drop(d);return x!=null&&x<=-3})},{v:cur.map(x=>x.mx),c:'#EA5529'}],
+    bars:st.sales?[{v:sLy,c:'#BFE3CB'},{v:sCur,c:'#16A34A'}]:null,
+    tipf:i=>{const d=ds[i],w=D[d]||{},l=D[lys[i]]||{},dr=drop(d);return `<b>${d} (${DN[dow(d)]})</b> ${ICON(w.wc)} ${WTXT(w.wc)}${w.fc&&d>=TODAY?' · 예보':''}<br>최저 ${f1(w.mn)}° / 최고 ${f1(w.mx)}°${dr!=null?` (전날 대비 ${dr>0?'+':''}${f1(dr)}°)`:''}<br>작년 ${lys[i]}: ${f1(l.mn)}° / ${f1(l.mx)}°${st.sales?`<br>W매출 ${won(sCur[i])} · 작년 ${won(sLy[i])}`:''}<br>요일지수 ${DOWI[dow(d)].toFixed(2)}`}});
+  if(st.sales&&(sSum(sCur)||sSum(sLy)))h+=`<div class="cs" style="margin-top:8px">W컨셉 이번 달 합계 ${won(sSum(sCur))} · 작년 같은 날짜 ${won(sSum(sLy))}</div>`;
+  h+=`</div><div class="card"><h3>일별 표</h3><div class="cs">금·토 회색 배경 · 전날 대비는 최저기온 기준</div><div class="tblwrap"><table><thead><tr><th class="l">날짜</th><th class="c">날씨</th><th>최저</th><th>최고</th><th>전날 대비</th><th>강수·눈</th><th>작년 최저</th><th>작년 최고</th><th>작년 대비</th><th>요일지수</th>${st.sales?'<th>W매출</th><th>작년 W매출</th>':''}</tr></thead><tbody>`;
+  ds.forEach((d,i)=>{const w=D[d],l=D[lys[i]];if(!w)return;const k=dow(d),dr=drop(d),df=w.mean!=null&&l&&l.mean!=null?w.mean-l.mean:null;
+    h+=`<tr class="${k===5?'sat fs':k===6?'sun':k===4?'fs':''}"><td class="l">${+d.slice(5,7)}/${+d.slice(8)} (${DN[k]})${w.fc&&d>=TODAY?' <span class="muted">예보</span>':''}</td><td class="c">${ICON(w.wc)}</td><td class="mn">${f1(w.mn)}°</td><td class="mx">${f1(w.mx)}°</td><td class="${dr!=null&&dr<=-3?'dn':''}">${dr==null?'–':(dr>0?'+':'')+f1(dr)+'°'}</td><td>${w.pr>0?w.pr.toFixed(1)+'mm':''}${w.sn>0?' 눈'+w.sn.toFixed(1)+'cm':''}</td><td class="muted">${l?f1(l.mn)+'°':'–'}</td><td class="muted">${l?f1(l.mx)+'°':'–'}</td><td class="${df>0?'up':'dn'}">${df==null?'–':(df>0?'+':'')+f1(df)+'°'}</td><td class="muted">${DOWI[k].toFixed(2)}</td>${st.sales?`<td>${won(S[d])}</td><td class="muted">${won(S[lys[i]])}</td>`:''}</tr>`});
+  h+='</tbody></table></div></div>';
+  return h;
+}
+function weeksOf(season){ // Sep 1 ~ Mar 31, weeks start Monday
+  let s=season+'-09-01';while(dow(s)!==0)s=add(s,-1);const end=(season+1)+'-03-31';const out=[];
+  for(let a=s;a<=end;a=add(a,7)){const ds=[...Array(7)].map((_,i)=>add(a,i));const v=ds.map(d=>D[d]).filter(x=>x&&x.mn!=null);
+    out.push({a,b:add(a,6),n:v.length,mn:v.length?v.reduce((p,c)=>p+c.mn,0)/v.length:null,mx:v.length?v.reduce((p,c)=>p+c.mx,0)/v.length:null,mean:v.length?v.reduce((p,c)=>p+c.mean,0)/v.length:null,s:ds.reduce((p,d)=>p+(S[d]||0),0),fc:ds.some(d=>D[d]&&D[d].fc&&d>=TODAY)})}
+  return out}
+function viewWk(){
+  const seasons=[];for(let y=+START.slice(0,4)-1;y<=seasonOf(TODAY);y++)if(y>=2024||y===2023)seasons.push(y);
+  const ss=st.season??seasonOf(TODAY);const A=weeksOf(ss),B=weeksOf(ss-1),C=weeksOf(ss-2);
+  const lab=w=>`${+w.a.slice(5,7)}/${+w.a.slice(8)}`;
+  let h=`<div class="card"><div class="ctrl"><select id="selS">${[...new Set([2023,2024,2025,seasonOf(TODAY)])].filter(y=>y<=seasonOf(TODAY)).reverse().map(y=>`<option value="${y}" ${y===ss?'selected':''}>${y}-${String(y+1).slice(2)} 시즌 (9월~3월)</option>`).join('')}</select></div>
+  <div class="legend"><span class="lg"><i style="background:#2563EB"></i>${ss}-${String(ss+1).slice(2)} 주평균 기온</span><span class="lg"><i class="dash"></i>${ss-1}-${String(ss).slice(2)}</span><span class="lg"><i style="background:#D6DBE3"></i>${ss-2}-${String(ss-1).slice(2)}</span>${st.sales?'<span class="lg"><i class="box" style="background:var(--sale)"></i>W매출(주합계)</span><span class="lg"><i class="box" style="background:var(--sale-ly)"></i>작년 같은 주</span>':''}</div>`;
+  h+=chart({xs:A.map(lab),h:300,series:[{v:C.map(w=>w.mean),c:'#D6DBE3',w:1.5},{v:B.map(w=>w.mean),c:'#9AA3AD',dash:1,w:1.5},{v:A.map(w=>w.mean),c:'#2563EB',w:2.5}],
+    bars:st.sales?[{v:B.map(w=>w.s||null),c:'#BFE3CB'},{v:A.map(w=>w.s||null),c:'#16A34A'}]:null,
+    tipf:i=>`<b>${A[i].a} ~ ${A[i].b}</b>${A[i].fc?' · 예보 포함':''}<br>주평균 ${f1(A[i].mean)}° (최저 ${f1(A[i].mn)}° / 최고 ${f1(A[i].mx)}°)<br>작년 같은 주 ${f1(B[i]&&B[i].mean)}° · 재작년 ${f1(C[i]&&C[i].mean)}°${st.sales?`<br>W매출 ${won(A[i].s||null)} · 작년 ${won(B[i]&&B[i].s||null)}`:''}`});
+  h+=`<label class="chk" style="margin-top:8px"><input type="checkbox" id="chkS2" ${st.sales?'checked':''}> W컨셉 매출 겹쳐보기</label></div><div class="card"><h3>주별 표</h3><div class="cs">월요일 시작 주 · 전주 대비는 주평균 기온</div><div class="tblwrap"><table><thead><tr><th class="l">주</th><th>평균 최저</th><th>평균 최고</th><th>주평균</th><th>전주 대비</th><th>작년 같은 주</th><th>작년 대비</th>${st.sales?'<th>W매출</th><th>작년 W매출</th>':''}</tr></thead><tbody>`;
+  A.forEach((w,i)=>{if(w.mean==null)return;const p=A[i-1],l=B[i],dd=p&&p.mean!=null?w.mean-p.mean:null,dl=l&&l.mean!=null?w.mean-l.mean:null;
+    h+=`<tr><td class="l">${w.a.slice(5).replace('-','/')} ~ ${w.b.slice(5).replace('-','/')}${w.fc?' <span class="muted">예보</span>':''}${w.n<7?` <span class="muted">(${w.n}일)</span>`:''}</td><td class="mn">${f1(w.mn)}°</td><td class="mx">${f1(w.mx)}°</td><td>${f1(w.mean)}°</td><td class="${dd<=-3?'dn':dd>=3?'up':''}">${dd==null?'–':(dd>0?'+':'')+f1(dd)+'°'}</td><td class="muted">${f1(l&&l.mean)}°</td><td class="${dl>0?'up':'dn'}">${dl==null?'–':(dl>0?'+':'')+f1(dl)+'°'}</td>${st.sales?`<td>${won(w.s||null)}</td><td class="muted">${won(l&&l.s||null)}</td>`:''}</tr>`});
+  h+='</tbody></table></div></div>';return h;
+}
+function viewMon(){
+  const ys=[];for(let y=+START.slice(0,4);y<=+TODAY.slice(0,4);y++)ys.push(y);
+  const M={};ys.forEach(y=>{for(let m=1;m<=12;m++){const k=y+'-'+pad(m);const v=Object.keys(D).filter(d=>d.startsWith(k)&&D[d].mn!=null&&!(D[d].fc&&d>=TODAY)).map(d=>D[d]);
+    if(v.length)M[k]={n:v.length,mn:v.reduce((p,c)=>p+c.mn,0)/v.length,mx:v.reduce((p,c)=>p+c.mx,0)/v.length,mean:v.reduce((p,c)=>p+c.mean,0)/v.length,lo:Math.min(...v.map(x=>x.mn)),hi:Math.max(...v.map(x=>x.mx)),fz:v.filter(x=>x.mn<0).length,c10:v.filter(x=>x.mn<=-10).length,pr:v.reduce((p,c)=>p+(c.pr||0),0),sn:v.filter(x=>x.sn>0).length,s:Object.keys(S).filter(d=>d.startsWith(k)).reduce((p,d)=>p+S[d],0)}}});
+  const cols=['#E5E8EE','#D6DBE3','#9AA3AD','#2563EB'];
+  let h=`<div class="card"><h3>월평균 기온</h3><div class="cs">연도별 월평균(일평균기온) · 이번 달은 어제까지</div><div class="legend">${ys.map((y,i)=>`<span class="lg"><i style="background:${cols[cols.length-ys.length+i]||'#2563EB'}"></i>${y}</span>`).join('')}</div>`;
+  h+=chart({xs:[...Array(12)].map((_,i)=>i+1+'월'),h:260,series:ys.map((y,i)=>({v:[...Array(12)].map((_,m)=>M[y+'-'+pad(m+1)]?.mean??null),c:cols[cols.length-ys.length+i]||'#2563EB',w:i===ys.length-1?2.5:1.8})),
+    tipf:m=>`<b>${m+1}월</b><br>`+ys.map(y=>{const x=M[y+'-'+pad(m+1)];return x?`${y}: 평균 ${f1(x.mean)}° (${f1(x.mn)}° / ${f1(x.mx)}°) · 영하 ${x.fz}일`:`${y}: –`}).join('<br>')});
+  h+=`</div><div class="card"><h3>월별 표</h3><div class="cs">영하일 = 최저 0° 미만 · 강추위 = 최저 −10° 이하 · W매출 = W컨셉 월 합계</div><div class="tblwrap"><table><thead><tr><th class="l">월</th>${ys.map(y=>`<th>${y} 최저/최고</th><th>${y} 영하·강추위</th>`).join('')}${ys.filter(y=>y>=2025).map(y=>`<th>${y} W매출</th>`).join('')}</tr></thead><tbody>`;
+  for(let m=1;m<=12;m++){h+=`<tr><td class="l">${m}월</td>`+ys.map(y=>{const x=M[y+'-'+pad(m)];return x?`<td><span class="mn">${f1(x.mn)}</span> / <span class="mx">${f1(x.mx)}</span></td><td>${x.fz}일 · ${x.c10}일</td>`:'<td class="muted">–</td><td class="muted">–</td>'}).join('')+ys.filter(y=>y>=2025).map(y=>{const x=M[y+'-'+pad(m)];return `<td>${x&&x.s?won(x.s):'<span class="muted">–</span>'}</td>`}).join('')+'</tr>'}
+  h+='</tbody></table></div></div>';return h;
+}
+function viewYr(){
+  const out=[];for(let s=2023;s<=seasonOf(TODAY);s++){const ds=Object.keys(D).filter(d=>d>=s+'-08-15'&&d<=(s+1)+'-04-30'&&!(D[d].fc&&d>=TODAY)).sort();if(!ds.length)continue;
+    const first=f=>ds.find(d=>d>=s+'-09-01'&&f(D[d]));const fall=ds.filter(d=>d>=s+'-09-01'&&d<=(s+1)+'-03-31');
+    const cold=fall.length?fall.reduce((a,b)=>D[a].mn<=D[b].mn?a:b):null;
+    out.push({s,full:ds[0]<=s+'-09-01',last:ds[ds.length-1],f0:first(x=>x.mn<0),f5:first(x=>x.mn<=-5),f10:first(x=>x.mn<=-10),fs:first(x=>x.sn>0),fz:fall.filter(d=>D[d].mn<0).length,c10:fall.filter(d=>D[d].mn<=-10).length,c12:fall.filter(d=>D[d].mn<=-12).length,cold,n:fall.length,
+      first10:(()=>{const a=fall.filter(d=>d>=s+'-10-01'&&d<=s+'-11-30');return a.length?a.reduce((p,d)=>p+D[d].mean,0)/a.length:null})()})}
+  const md=d=>d?`${+d.slice(5,7)}/${+d.slice(8)}`:'<span class="muted">아직</span>';
+  let h=`<div class="card"><h3>시즌별 추위 요약 (9월 ~ 3월)</h3><div class="cs">아우터 시즌 기준. "첫 영하일" 같은 날짜가 시즌 오픈·리오더 타이밍 기준점 · 진행 중 시즌은 어제까지</div><div class="tblwrap"><table><thead><tr><th class="l">시즌</th><th>10~11월 평균</th><th>첫 영하일</th><th>첫 −5° 이하</th><th>첫 −10° 이하</th><th>첫 눈</th><th>영하일 수</th><th>−10° 이하 일수</th><th>가장 추운 날</th></tr></thead><tbody>`;
+  out.slice().reverse().forEach(r=>{h+=`<tr><td class="l">${r.s}-${String(r.s+1).slice(2)}${r.full?'':' <span class="muted">(12월~)</span>'}${r.last<(r.s+1)+'-03-31'?' <span class="muted">진행 중</span>':''}</td><td>${f1(r.first10)}°</td><td>${md(r.f0)}</td><td>${md(r.f5)}</td><td>${md(r.f10)}</td><td>${md(r.fs)}</td><td>${r.fz}일</td><td>${r.c10}일</td><td>${r.cold?`<span class="mn">${f1(D[r.cold].mn)}°</span> <span class="muted">${r.cold.slice(2).replace(/-/g,'.')}</span>`:'–'}</td></tr>`});
+  h+='</tbody></table></div></div>';
+  const ys=[];for(let y=+START.slice(0,4);y<=+TODAY.slice(0,4);y++)ys.push(y);
+  h+=`<div class="card"><h3>연도별 요약 (1~12월)</h3><div class="cs">올해는 어제까지</div><table><thead><tr><th class="l">연도</th><th>연평균</th><th>최저 기록</th><th>최고 기록</th><th>영하일</th><th>30° 이상 일수</th><th>강수 합계</th><th>W컨셉 매출</th></tr></thead><tbody>`;
+  ys.forEach(y=>{const v=Object.keys(D).filter(d=>d.startsWith(y+'')&&!(D[d].fc&&d>=TODAY)).map(d=>[d,D[d]]);if(!v.length)return;const lo=v.reduce((a,b)=>a[1].mn<=b[1].mn?a:b),hi=v.reduce((a,b)=>a[1].mx>=b[1].mx?a:b);const s=Object.keys(S).filter(d=>d.startsWith(y+'')).reduce((p,d)=>p+S[d],0);
+    h+=`<tr><td class="l">${y}</td><td>${f1(v.reduce((p,c)=>p+c[1].mean,0)/v.length)}°</td><td class="mn">${f1(lo[1].mn)}° <span class="muted">${lo[0].slice(5).replace('-','/')}</span></td><td class="mx">${f1(hi[1].mx)}° <span class="muted">${hi[0].slice(5).replace('-','/')}</span></td><td>${v.filter(x=>x[1].mn<0).length}일</td><td>${v.filter(x=>x[1].mx>=30).length}일</td><td>${Math.round(v.reduce((p,c)=>p+(c[1].pr||0),0))}mm</td><td>${s?'₩'+(s/1e8).toFixed(1)+'억':'<span class="muted">–</span>'}</td></tr>`});
+  h+='</tbody></table></div>';return h;
+}
+function render(){
+  const v=document.getElementById('view');
+  v.innerHTML=st.v==='day'?viewDay():st.v==='wk'?viewWk():st.v==='mon'?viewMon():viewYr();
+  const sm=document.getElementById('selM');if(sm)sm.onchange=e=>{st.month=e.target.value;save();render()};
+  const ss=document.getElementById('selS');if(ss)ss.onchange=e=>{st.season=+e.target.value;render()};
+  ['chkS','chkS2'].forEach(id=>{const c=document.getElementById(id);if(c)c.onchange=e=>{st.sales=e.target.checked;save();render()}});
+}
+function save(){try{localStorage.setItem('wx_st',JSON.stringify({v:st.v,sales:st.sales}))}catch(e){}}
+try{const o=JSON.parse(localStorage.getItem('wx_st')||'{}');if(o.v)st.v=o.v;if(o.sales!=null)st.sales=o.sales}catch(e){}
+document.querySelectorAll('.vtab').forEach(b=>{b.classList.toggle('on',b.dataset.v===st.v);b.onclick=()=>{st.v=b.dataset.v;document.querySelectorAll('.vtab').forEach(x=>x.classList.toggle('on',x===b));save();render()}});
+load().then(()=>{renderWeek();render()}).catch(e=>{document.getElementById('week').innerHTML='<div class="err">날씨 데이터를 불러오지 못했어: '+e.message+'</div>';console.error(e)});
+</script>
+</body></html>
