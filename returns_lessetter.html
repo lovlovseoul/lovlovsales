@@ -23,6 +23,7 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.01em}
 .scope{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px}
 .chip{padding:6px 11px;border-radius:8px;background:var(--surface-1);color:var(--text-2);border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:600;transition:.12s}
 .chip:hover{border-color:var(--text-3)}
+.chip.wk{cursor:default;background:#FBEDEC;color:#B0362F;border-color:#F2C9C5;border-style:dashed}.chip.wkd{color:#B0362F}
 .chip.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .kpi{background:var(--surface-1);border:1px solid var(--line);border-radius:12px;padding:17px 19px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
@@ -116,9 +117,10 @@ function render(){
   document.querySelectorAll('#months .mtab').forEach(b=>{b.onclick=()=>{curMonth=b.dataset.m;scope="전체";render();};});
   // scope chips (선택 월의 날짜만)
   let sc='<div class="chip'+(scope==="전체"?' on':'')+'" data-s="전체">'+MLAB(curMonth)+' 전체</div>';
-  sc+=M.days.map(d=>'<div class="chip'+(scope===d?' on':'')+'" data-s="'+d+'">'+md(d)+'</div>').join('');
+  M.days.forEach(function(d,ix){var prev=ix?M.days[ix-1]:null;if(prev){var gap=dRange(prev,d).slice(1,-1).filter(isWeekend);if(gap.length)sc+='<div class="chip wk" title="주말 · 물류 미근무로 반품완료 없음">'+gap.map(md).join('·')+' 주말</div>';}
+    sc+='<div class="chip'+(scope===d?' on':'')+(isWeekend(d)?' wkd':'')+'" data-s="'+d+'">'+md(d)+'('+WD(d)+')'+(isWeekend(d)?' 주말':'')+'</div>';});
   document.getElementById('scope').innerHTML=sc;
-  document.querySelectorAll('#scope .chip').forEach(b=>{b.onclick=()=>{scope=b.dataset.s;render();};});
+  document.querySelectorAll('#scope .chip[data-s]').forEach(b=>{b.onclick=()=>{scope=b.dataset.s;render();};});
   const S=scopeData();
   renderKPI(S,M);
   let h='';
@@ -145,21 +147,23 @@ function reasonCard(S){
   return '<div class="card"><h3>반품 사유별</h3><div class="cs">'+scopeLabel()+' · 수량 기준</div>'+rows+'</div>';
 }
 function dRange(a,b){var out=[];var pa=a.split('-').map(Number),pb=b.split('-').map(Number);var d=new Date(pa[0],pa[1]-1,pa[2]),e=new Date(pb[0],pb[1]-1,pb[2]);while(d<=e){out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
+function WD(d){var p=d.split('-').map(Number);return '일월화수목금토'[new Date(p[0],p[1]-1,p[2]).getDay()];}
 function isWeekend(d){var p=d.split('-').map(Number);var w=new Date(p[0],p[1]-1,p[2]).getDay();return w===0||w===6;}
 function trendCard(C){
   const dd0=C.days; if(!dd0.length) return '';
   const days=dRange(dd0[0],dd0[dd0.length-1]);  // 연속 날짜(빈 날 0 채움)
   const dt=C.period.dayTotals;
   const max=Math.max(1,...days.map(d=>dt[d]?dt[d].qty:0));
-  const W=Math.max(340,days.length*46), H=180, pad=26, bw=Math.min(30,(W-pad*2)/days.length*0.6);
+  const W=Math.max(340,days.length*52), H=196, pad=26, bw=Math.min(30,(W-pad*2)/days.length*0.6);
   let bars='';
-  days.forEach((d,ix)=>{const v=dt[d]?dt[d].qty:0; const we=isWeekend(d); const x=pad+(W-pad*2)*(ix+0.5)/days.length; const bh=(H-46)*v/max; const y=H-24-bh;
-    if(we)bars+='<rect x="'+(x-(W-pad*2)/days.length/2)+'" y="6" width="'+((W-pad*2)/days.length)+'" height="'+(H-30)+'" fill="rgba(16,24,40,.04)"></rect>';
+  days.forEach((d,ix)=>{const v=dt[d]?dt[d].qty:0; const we=isWeekend(d); const x=pad+(W-pad*2)*(ix+0.5)/days.length; const bh=(H-56)*v/max; const y=H-30-bh;
+    if(we)bars+='<rect x="'+(x-(W-pad*2)/days.length/2)+'" y="6" width="'+((W-pad*2)/days.length)+'" height="'+(H-34)+'" fill="rgba(208,82,74,.06)"></rect>';
     bars+='<rect x="'+(x-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+Math.max(0,bh)+'" rx="3" fill="'+(we?'var(--text-3)':'var(--accent)')+'" class="tb" data-t="'+md(d)+'" data-v="'+v+'장 · '+won(dt[d]?dt[d].amt:0)+'"></rect>';
-    bars+='<text x="'+x+'" y="'+(H-11)+'" fill="'+(we?'var(--text-3)':'var(--text-3)')+'" font-size="10" text-anchor="middle">'+md(d)+'</text>';
-    if(we)bars+='<text x="'+x+'" y="'+(H-1)+'" fill="var(--text-3)" font-size="8" text-anchor="middle">주말</text>';
+    bars+='<text x="'+x+'" y="'+(H-17)+'" fill="'+(we?'#B0362F':'var(--text-3)')+'" font-size="10" text-anchor="middle">'+md(d)+'('+WD(d)+')</text>';
+    if(we)bars+='<text x="'+x+'" y="'+(H-4)+'" fill="#B0362F" font-size="10" font-weight="700" text-anchor="middle">주말</text>';
+    if(we&&!v)bars+='<text x="'+x+'" y="'+(H-46)+'" fill="var(--text-3)" font-size="10" text-anchor="middle">휴무</text>';
     if(v)bars+='<text x="'+x+'" y="'+(y-4)+'" fill="var(--text-2)" font-size="10" text-anchor="middle">'+v+'</text>';});
-  return '<div class="card"><h3>일별 반품 추이</h3><div class="cs">반품완료일 · 일별 수량(막대) · 빈 날 0 포함 · 주말 음영(물류 미근무) · 마우스 올리면 금액</div><div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+bars+'</svg></div></div>';
+  return '<div class="card"><h3>일별 반품 추이</h3><div class="cs">반품완료일 · 일별 수량(막대) · 빈 날 0 포함 · 주말 = 빨간 날짜·음영(물류 미근무라 반품완료 거의 없음) · 마우스 올리면 금액</div><div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+bars+'</svg></div></div>';
 }
 function lifeSalesOf(name){var s=((RD[curChan].salesLife||{}))[name];return s?s.qty:0;}
 function allRetMap(){var m={};((((RD[curChan].all||{}).period||{}).top)||[]).forEach(function(t){var d=0;for(var r in t.reason){if(r==="상품불량"||r==="상품파손"||r==="오배송")d+=t.reason[r];}m[t.name]={qty:t.qty,def:d};});return m;}
