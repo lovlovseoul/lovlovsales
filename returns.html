@@ -78,7 +78,47 @@ const RD={"W컨셉":{"months":["2026-09","2026-10","2026-11"],"all":{"days":["20
 const CHANS=["W컨셉"];
 const REASON_COLORS={"단순변심":"#6b7f99","사이즈불만족":"#d98b3a","색상불만족":"#9b6bd0","상품불량":"#d0524a","상품파손":"#8f2f2f","타사대비 가격불만":"#3f9e8c","기타":"#777"};
 const RORDER=["단순변심","사이즈불만족","색상불만족","상품불량","상품파손","타사대비 가격불만","기타"];
-let curChan=CHANS[0];
+const CH_ORDER=['W컨셉','29CM','무신사','롯데온','지그재그','퀸잇','자사몰'];
+const CH_COL={'W컨셉':'#1A1D21','29CM':'#EA5529','무신사':'#3B6FD8','롯데온':'#C2413B','지그재그':'#D64C9A','퀸잇':'#3F9E8C','자사몰':'#D98B3A'};
+const CH_BASIS={'W컨셉':'1차 할인가','29CM':'실결제','무신사':'환불금액','롯데온':'정상가','지그재그':'실결제','퀸잇':'퀸잇 할인가','자사몰':'정상가'};
+Object.assign(REASON_COLORS,{"오배송":"#8f2f2f","상품 설명과 다름":"#5a8fb0","소재 불만족":"#a07850","주문 실수":"#999","상품 누락":"#8f2f2f","반품":"#aaa"});
+function nk(n){return String(n).replace(/\s+/g,'');}
+function buildCombined(){
+  const chs=CH_ORDER.filter(c=>RD[c]);
+  const empty=()=>({qty:0,amt:0,cnt:0,reason:{},dayTotals:{},top:[],_idx:{}});
+  function addP(P,S,ch,withDays){
+    if(!S)return;
+    P.qty+=S.qty||0; P.amt+=S.amt||0; P.cnt+=S.cnt||0;
+    P.byCh=P.byCh||{}; const bc=P.byCh[ch]=P.byCh[ch]||{qty:0,amt:0,cnt:0}; bc.qty+=S.qty||0; bc.amt+=S.amt||0; bc.cnt+=S.cnt||0;
+    for(const r in (S.reason||{})){const w=P.reason[r]=P.reason[r]||{qty:0,amt:0}; w.qty+=S.reason[r].qty; w.amt+=S.reason[r].amt;}
+    if(withDays) for(const d in (S.dayTotals||{})){const v=S.dayTotals[d]; const w=P.dayTotals[d]=P.dayTotals[d]||{qty:0,amt:0,cnt:0,by:{}}; w.qty+=v.qty; w.amt+=v.amt; w.cnt+=v.cnt; w.by[ch]={qty:v.qty,amt:v.amt};}
+    (S.top||[]).forEach(t=>{const k=nk(t.name); let x=P._idx[k];
+      if(!x){x=P._idx[k]={name:t.name,qty:0,amt:0,reason:{},opt:{},det:[],ch:{}}; P.top.push(x);}
+      x.qty+=t.qty; x.amt+=t.amt; x.ch[ch]=(x.ch[ch]||0)+t.qty;
+      for(const r in t.reason) x.reason[r]=(x.reason[r]||0)+t.reason[r];
+      for(const op in t.opt) x.opt[op]=(x.opt[op]||0)+t.opt[op];
+      (t.det||[]).forEach(dd=>x.det.push(Object.assign({},dd,{text:'['+ch+'] '+dd.text})));});
+  }
+  function fin(P){P.top.sort((a,b)=>b.qty-a.qty||b.amt-a.amt); delete P._idx; return P;}
+  function merge(get){
+    const out={days:[],period:empty(),byDay:{}}; const ds=new Set();
+    chs.forEach(ch=>{const sc=get(ch); if(!sc)return; sc.days.forEach(d=>ds.add(d)); addP(out.period,sc.period,ch,true);
+      for(const d in sc.byDay){out.byDay[d]=out.byDay[d]||empty(); addP(out.byDay[d],sc.byDay[d],ch,false);} });
+    out.days=[...ds].sort(); fin(out.period); for(const d in out.byDay) fin(out.byDay[d]); return out;
+  }
+  const C={basis:'채널별 기준 혼합',dateBasis:'채널별 날짜 기준',combined:true,chs:chs};
+  const ms=new Set(); chs.forEach(c=>(RD[c].months||[]).forEach(m=>ms.add(m))); C.months=[...ms].sort();
+  C.byMonth={}; C.months.forEach(m=>{C.byMonth[m]=merge(ch=>RD[ch].byMonth[m]);});
+  C.all=merge(ch=>RD[ch].all);
+  C.salesLife={}; C.salesRecent={}; let lo='9',hi='0';
+  chs.forEach(ch=>{const L=RD[ch].salesLife||{}; for(const n in L){const k=nk(n); const w=C.salesLife[k]=C.salesLife[k]||{qty:0,amt:0}; w.qty+=L[n].qty; w.amt+=L[n].amt;}
+    const R=RD[ch].salesRecent||{}; for(const n in R){const k=nk(n); C.salesRecent[k]=(C.salesRecent[k]||0)+R[n];}
+    const cv=RD[ch].salesLifeCover; if(cv){if(cv[0]<lo)lo=cv[0]; if(cv[1]>hi)hi=cv[1];}});
+  C.salesLifeCover=[lo,hi];
+  return C;
+}
+RD['통합']=buildCombined();
+let curChan='통합';
 let curMonth="전체"; // "전체" | "2026-08" | "2026-09"
 let scope="전체"; // "전체" or a date string
 let topSort="구성비"; // 구성비 | 생애반품률 | 불량률
@@ -105,12 +145,12 @@ function render(){
   const M=MD();
   const allDays=C.all.days;
   // sub
-  document.getElementById('sub').innerHTML=(allDays.length?allDays[0].replace(/-/g,'.')+' ~ '+allDays[allDays.length-1].replace(/-/g,'.'):'')+(' · '+((RD[curChan]||{}).basis||'판매가')+' 기준 · '+((RD[curChan]||{}).dateBasis||'반품완료일')+' 기준')+' · 상품 클릭→사유·옵션·고객사유';
+  document.getElementById('sub').innerHTML=C.combined?((allDays.length?allDays[0].replace(/-/g,'.')+' ~ '+allDays[allDays.length-1].replace(/-/g,'.'):'')+' · 전 채널 합계 · <b>금액은 채널마다 기준이 달라 수량 위주로 볼 것</b> ('+C.chs.map(c=>c+' '+CH_BASIS[c]).join(' · ')+') · 날짜: 반품완료일(퀸잇 접수일·자사몰 주문일)'):(allDays.length?allDays[0].replace(/-/g,'.')+' ~ '+allDays[allDays.length-1].replace(/-/g,'.'):'')+(' · '+((RD[curChan]||{}).basis||'판매가')+' 기준 · '+((RD[curChan]||{}).dateBasis||'반품완료일')+' 기준')+' · 상품 클릭→사유·옵션·고객사유';
   // chans
-  document.getElementById('chans').innerHTML=['W컨셉', '29CM', '무신사', '롯데온', '지그재그', '퀸잇', '자사몰'].map(c=>{
+  document.getElementById('chans').innerHTML=['통합', 'W컨셉', '29CM', '무신사', '롯데온', '지그재그', '퀸잇', '자사몰'].map(c=>{
     const has=RD[c]; return '<div class="tab'+(c===curChan?' on':'')+(has?'':' dis')+'" data-c="'+c+'">'+c+(has?'':' (준비중)')+'</div>';
   }).join('');
-  document.querySelectorAll('#chans .tab').forEach(b=>{b.onclick=()=>{if(!RD[b.dataset.c])return;curChan=b.dataset.c;curMonth="전체";scope="전체";render();};});
+  document.querySelectorAll('#chans .tab').forEach(b=>{b.onclick=()=>{if(!RD[b.dataset.c])return;const keep=curMonth;curChan=b.dataset.c;curMonth=keep;scope="전체";topSort="구성비";render();};});
   // month tabs
   let mt=(C.months||[]).map(m=>'<div class="mtab'+(m===curMonth?' on':'')+'" data-m="'+m+'">'+MLAB(m)+'</div>').join('');
   document.getElementById('months').innerHTML=mt;
@@ -124,19 +164,37 @@ function render(){
   const S=scopeData();
   renderKPI(S,M);
   let h='';
+  if(C.combined) h+=chanCard(S);
   h+=reasonCard(S);
   if(scope==="전체") h+=trendCard(M);
   h+=topCard(S);
+  if(C.combined) h+=chanTopCard();
   h+=detailCard(S);
   document.getElementById('views').innerHTML=h;
   bindTop(S);
 }
 function renderKPI(S,C){
   const nd=C.days.length||1;
-  let k=[['반품 수량',(S.qty||0)+'장',''],['반품 금액',won(S.amt),((RD[curChan]||{}).basis||'판매가')+' 기준'],['반품 건수',(S.cnt||0)+'건','주문 기준']];
+  let k=[['반품 수량',(S.qty||0)+'장',''],['반품 금액',won(S.amt),RD[curChan].combined?'채널별 기준 혼합 — 참고용':((RD[curChan]||{}).basis||'판매가')+' 기준'],['반품 건수',(S.cnt||0)+'건','주문 기준']];
   if(scope==="전체") k.push(['일평균 반품',(S.qty/nd).toFixed(1)+'장 · '+won(Math.round(S.amt/nd)),'완료 '+nd+'일 평균(주말제외)']);
   else k.push(['최다 사유',topReason(S.reason),'']);
   document.getElementById('kpis').innerHTML=k.map(x=>'<div class="kpi"><div class="lab">'+x[0]+'</div><div class="val">'+x[1]+'</div><div class="sub2">'+x[2]+'</div></div>').join('');
+}
+function chScope(ch){const R=RD[ch];if(!R)return null;const M=curMonth==='전체'?R.all:R.byMonth[curMonth];if(!M)return null;return scope==='전체'?M.period:M.byDay[scope];}
+function chanCard(S){
+  const bc=S.byCh||{}; const tq=S.qty||1;
+  const rows=CH_ORDER.filter(c=>RD[c]).map(c=>{const v=bc[c]||{qty:0,amt:0,cnt:0}; const P=chScope(c); const top=(P&&P.top&&P.top.length)?P.top.slice().sort((a,b)=>b.qty-a.qty)[0]:null;
+    const pct=v.qty/tq*100;
+    return '<tr><td class="n"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+CH_COL[c]+';margin-right:7px"></span>'+c+'</td><td>'+v.qty+'장</td><td><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><div class="cbarwrap" style="width:90px"><div class="cbar" style="width:'+pct+'%;background:'+CH_COL[c]+'"></div></div>'+pct.toFixed(0)+'%</div></td><td>'+won(v.amt)+'</td><td style="color:var(--text-3);font-weight:500;font-size:11.5px">'+CH_BASIS[c]+'</td><td>'+v.cnt+'건</td><td class="n" style="text-align:left;font-weight:500">'+(top?top.name+' <span style="color:var(--text-3)">'+top.qty+'장</span>':'-')+'</td></tr>';}).join('');
+  return '<div class="card"><h3>채널별 반품</h3><div class="cs">'+scopeLabel()+' · 수량 비중 기준 · 금액은 채널별 기준이 달라 직접 비교 주의</div><div style="overflow-x:auto"><table><tr><th class="n">채널</th><th>반품 수량</th><th>수량 비중</th><th>반품 금액</th><th>금액 기준</th><th>건수</th><th class="n" style="text-align:left">최다 반품 상품</th></tr>'+rows+'</table></div></div>';
+}
+function chanTopCard(){
+  const cards=CH_ORDER.filter(c=>RD[c]).map(c=>{const P=chScope(c); const L=(P&&P.top)?P.top.slice().sort((a,b)=>b.qty-a.qty||b.amt-a.amt).slice(0,5):[];
+    const tot=(P&&P.qty)||0;
+    const li=L.length?L.map((t,i)=>{const rs=reasonsSorted(t.reason).map(r=>[r,t.reason[r]]).sort((a,b)=>b[1]-a[1])[0];
+      return '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px"><span><span class="rank">'+(i+1)+'</span>'+t.name+'</span><span style="white-space:nowrap;font-weight:700">'+t.qty+'장 <span style="font-weight:500;color:var(--text-3);font-size:10.5px">'+(rs?rs[0]:'')+'</span></span></div>';}).join(''):'<div style="color:var(--text-3);font-size:12px;padding:8px 0">이 기간 반품 없음</div>';
+    return '<div style="border:1px solid var(--line);border-radius:10px;padding:12px 14px;border-top:3px solid '+CH_COL[c]+'"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><b style="font-size:13.5px">'+c+'</b><span style="color:var(--text-3);font-size:11px">'+tot+'장</span></div>'+li+'</div>';}).join('');
+  return '<div class="card"><h3>채널별 반품 TOP 5</h3><div class="cs">'+scopeLabel()+' · 수량순 · 옆 회색 글씨 = 최다 사유</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">'+cards+'</div></div>';
 }
 function topReason(obj){var e=reasonsSorted(obj).map(r=>[r,obj[r].qty]).sort((a,b)=>b[1]-a[1]);return e.length?e[0][0]+' ('+e[0][1]+')':'-';}
 function reasonCard(S){
@@ -158,43 +216,48 @@ function trendCard(C){
   let bars='';
   days.forEach((d,ix)=>{const v=dt[d]?dt[d].qty:0; const we=isWeekend(d); const x=pad+(W-pad*2)*(ix+0.5)/days.length; const bh=(H-56)*v/max; const y=H-30-bh;
     if(we)bars+='<rect x="'+(x-(W-pad*2)/days.length/2)+'" y="6" width="'+((W-pad*2)/days.length)+'" height="'+(H-34)+'" fill="rgba(208,82,74,.06)"></rect>';
-    bars+='<rect x="'+(x-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+Math.max(0,bh)+'" rx="3" fill="'+(we?'var(--text-3)':'var(--accent)')+'" class="tb" data-t="'+md(d)+'" data-v="'+v+'장 · '+won(dt[d]?dt[d].amt:0)+'"></rect>';
+    if(dt[d]&&dt[d].by){let yy=H-30; const tip=CH_ORDER.filter(c=>dt[d].by[c]&&dt[d].by[c].qty).map(c=>c+' '+dt[d].by[c].qty+'장').join('<br>');
+      CH_ORDER.forEach(c=>{const b=dt[d].by[c]; if(!b||!b.qty)return; const hh=(H-56)*b.qty/max; yy-=hh; bars+='<rect x="'+(x-bw/2)+'" y="'+yy+'" width="'+bw+'" height="'+hh+'" fill="'+CH_COL[c]+'" class="tb" data-t="'+md(d)+' · '+v+'장" data-v="'+tip+'"></rect>';});}
+    else bars+='<rect x="'+(x-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+Math.max(0,bh)+'" rx="3" fill="'+(we?'var(--text-3)':'var(--accent)')+'" class="tb" data-t="'+md(d)+'" data-v="'+v+'장 · '+won(dt[d]?dt[d].amt:0)+'"></rect>';
     bars+='<text x="'+x+'" y="'+(H-17)+'" fill="'+(we?'#B0362F':'var(--text-3)')+'" font-size="10" text-anchor="middle">'+md(d)+'('+WD(d)+')</text>';
     if(we)bars+='<text x="'+x+'" y="'+(H-4)+'" fill="#B0362F" font-size="10" font-weight="700" text-anchor="middle">주말</text>';
     if(we&&!v)bars+='<text x="'+x+'" y="'+(H-46)+'" fill="var(--text-3)" font-size="10" text-anchor="middle">휴무</text>';
     if(v)bars+='<text x="'+x+'" y="'+(y-4)+'" fill="var(--text-2)" font-size="10" text-anchor="middle">'+v+'</text>';});
-  return '<div class="card"><h3>일별 반품 추이</h3><div class="cs">반품완료일 · 일별 수량(막대) · 빈 날 0 포함 · 주말 = 빨간 날짜·음영(물류 미근무라 반품완료 거의 없음) · 마우스 올리면 금액</div><div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+bars+'</svg></div></div>';
+  return '<div class="card"><h3>일별 반품 추이</h3><div class="cs">반품완료일 · 일별 수량(막대) · 빈 날 0 포함 · 주말 = 빨간 날짜·음영(물류 미근무라 반품완료 거의 없음) · 마우스 올리면 '+(RD[curChan].combined?'채널별 수량':'금액')+'</div>'+(RD[curChan].combined?'<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2);margin:-6px 0 8px">'+RD[curChan].chs.map(c=>'<span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+CH_COL[c]+';margin-right:5px"></span>'+c+'</span>').join('')+'</div>':'')+'<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+bars+'</svg></div></div>';
 }
-function lifeSalesOf(name){var s=((RD[curChan].salesLife||{}))[name];return s?s.qty:0;}
+function lifeSalesOf(name){var L=RD[curChan].salesLife||{};var s=RD[curChan].combined?L[nk(name)]:L[name];return s?s.qty:0;}
 function allRetMap(){var m={};((((RD[curChan].all||{}).period||{}).top)||[]).forEach(function(t){var d=0;for(var r in t.reason){if(r==="상품불량"||r==="상품파손"||r==="오배송")d+=t.reason[r];}m[t.name]={qty:t.qty,def:d};});return m;}
 function lifeRate(name,AR){var sq=lifeSalesOf(name);if(sq<LIFE_MIN)return null;return (AR[name]||{qty:0}).qty/sq*100;}
 function defRate(name,AR){var sq=lifeSalesOf(name);if(sq<LIFE_MIN)return null;return (AR[name]||{def:0}).def/sq*100;}
 function colBand(v,yel,red){if(v==null)return 'var(--text-3)';return v>=red?'#d0524a':(v>=yel?'#d98b3a':'var(--text-2)');}
-function matFlag(name){var life=lifeSalesOf(name);var rec=((RD[curChan].salesRecent||{}))[name]||0;return (life>=LIFE_MIN&&rec/life>0.45)?' <span style="font-size:9px;color:var(--text-3)">⏳유입중</span>':'';}
+function matFlag(name){var life=lifeSalesOf(name);var R=RD[curChan].salesRecent||{};var rec=(RD[curChan].combined?R[nk(name)]:R[name])||0;return (life>=LIFE_MIN&&rec/life>0.45)?' <span style="font-size:9px;color:var(--text-3)">⏳유입중</span>':'';}
 function topCard(S){
   var AR=allRetMap(); var totAmt=S.amt||1;
   var items=(S.top||[]).map(function(t,oi){return {t:t,oi:oi};});
   if(topSort==="생애반품률") items.sort(function(a,b){var ra=lifeRate(a.t.name,AR),rb=lifeRate(b.t.name,AR);return (rb==null?-1:rb)-(ra==null?-1:ra);});
   else if(topSort==="불량률") items.sort(function(a,b){var ra=defRate(a.t.name,AR),rb=defRate(b.t.name,AR);return (rb==null?-1:rb)-(ra==null?-1:ra);});
+  else if(RD[curChan].combined) items.sort(function(a,b){return b.t.qty-a.t.qty||b.t.amt-a.t.amt;});
   else items.sort(function(a,b){return b.t.amt-a.t.amt;});
   var list=items.slice(0,15);
   var btns=['구성비','생애반품률','불량률'].map(function(m){return '<span class="chip'+(m===topSort?' on':'')+'" data-sort="'+m+'" style="padding:4px 10px;font-size:11px">'+m+'순</span>';}).join(' ');
   var rows=list.map(function(o){
     var t=o.t; var sq=lifeSalesOf(t.name); var lr=lifeRate(t.name,AR); var dr=defRate(t.name,AR); var ar=AR[t.name]||{qty:0};
-    var share=(t.amt/totAmt*100);
+    var share=RD[curChan].combined?(t.qty/(S.qty||1)*100):(t.amt/totAmt*100);
+    var chx=t.ch?Object.keys(t.ch).sort(function(a,b){return t.ch[b]-t.ch[a];}).map(function(c){return '<span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:5px;margin:1px 2px 1px 0;color:#fff;background:'+CH_COL[c]+'">'+c+' '+t.ch[c]+'</span>';}).join(''):'';
     var rmix=reasonsSorted(t.reason).slice(0,3).map(function(r){return '<span class="rsn" style="background:'+rc(r)+';font-size:9.5px;padding:1px 5px">'+r+' '+t.reason[r]+'</span>';}).join(' ');
     var lrTxt = sq<LIFE_MIN ? '<span style="color:var(--text-3)">표본적음</span>' : '<b style="color:'+colBand(lr,20,30)+'">'+lr.toFixed(1)+'%</b><span style="color:var(--text-3);font-size:10px"> '+ar.qty+'/'+sq+'</span>'+matFlag(t.name);
     var drTxt = sq<LIFE_MIN ? '<span style="color:var(--text-3)">-</span>' : '<b style="color:'+colBand(dr,3,5)+'">'+dr.toFixed(1)+'%</b>';
-    return '<tr class="clk" data-i="'+o.oi+'"><td class="n"><span class="rank"></span>'+t.name+'</td><td>'+t.qty+'장</td><td>'+won(t.amt)+'</td><td>'+share.toFixed(0)+'%</td><td>'+lrTxt+'</td><td>'+drTxt+'</td><td class="n" style="text-align:left">'+rmix+'</td></tr>';}).join('');
+    return '<tr class="clk" data-i="'+o.oi+'"><td class="n"><span class="rank"></span>'+t.name+'</td><td>'+t.qty+'장</td><td>'+won(t.amt)+'</td><td>'+share.toFixed(0)+'%</td><td>'+lrTxt+'</td><td>'+drTxt+'</td><td class="n" style="text-align:left">'+rmix+'</td>'+(RD[curChan].combined?'<td class="n" style="text-align:left">'+chx+'</td>':'')+'</tr>';}).join('');
   var rk=0; rows=rows.replace(/<span class="rank"><\/span>/g,function(){rk++;return '<span class="rank">'+rk+'</span>';});
   var lcov=(RD[curChan].salesLifeCover||['','']);
-  return '<div class="card"><h3>반품 TOP 상품</h3><div class="cs">'+scopeLabel()+' 반품 · <b style="color:var(--text-2)">'+topSort+'순</b> · 구성비=이 기간 반품액 중 비중 · <b>생애반품률</b>=제품 누적반품÷누적판매('+lcov[0].slice(5)+'~'+lcov[1].slice(5)+', '+LIFE_MIN+'장↑) · <b>불량률</b>=불량+파손+오배송만 · 생애 🟠20%/🔴 30%, 불량 🟠3%/🔴 5% · ⏳=반품유입중(신상) · 행 클릭→상세</div><div style="overflow-x:auto"><table><tr><th class="n">순위 · 상품</th><th>기간반품</th><th>반품액</th><th>구성비</th><th>생애 반품률</th><th>불량률</th><th class="n" style="text-align:left">주요 사유</th></tr>'+rows+'</table></div>'+
+  return '<div class="card"><h3>반품 TOP 상품</h3><div class="cs">'+scopeLabel()+' 반품 · <b style="color:var(--text-2)">'+topSort+'순</b> · 구성비=이 기간 '+(RD[curChan].combined?'반품 수량':'반품액')+' 중 비중 · <b>생애반품률</b>=제품 누적반품÷누적판매('+lcov[0].slice(5)+'~'+lcov[1].slice(5)+', '+LIFE_MIN+'장↑) · <b>불량률</b>=불량+파손+오배송만 · 생애 🟠20%/🔴 30%, 불량 🟠3%/🔴 5% · ⏳=반품유입중(신상) · 행 클릭→상세</div><div style="overflow-x:auto"><table><tr><th class="n">순위 · 상품</th><th>기간반품</th><th>반품액</th><th>구성비</th><th>생애 반품률</th><th>불량률</th><th class="n" style="text-align:left">주요 사유</th>'+(RD[curChan].combined?'<th class="n" style="text-align:left">채널</th>':'')+'</tr>'+rows+'</table></div>'+
     '<div style="margin-top:10px;display:flex;gap:6px">'+btns+'</div></div>';
 }
 function detailCard(S){
   let dets=[];
   (S.top||[]).forEach(t=>{(t.det||[]).forEach(d=>dets.push(Object.assign({name:t.name},d)));});
   dets.sort((a,b)=>a.date<b.date?1:-1);
+  if(RD[curChan].combined){dets=dets.filter(d=>['상품불량','상품파손','오배송','상품 누락'].indexOf(d.reason)>=0).slice(0,30);}
   if(!dets.length) return '';
   let h=dets.map(d=>'<div class="det"><div class="dm">'+md(d.date)+' · '+d.name+' · '+d.opt+' · <span class="rsn" style="background:'+rc(d.reason)+';font-size:9.5px">'+d.reason+'</span></div>'+esc(d.text)+'</div>').join('');
   return '<div class="card"><h3>고객 사유 상세 (불량·파손)</h3><div class="cs">'+scopeLabel()+' · 고객이 직접 입력한 사유 '+dets.length+'건</div>'+h+'</div>';
@@ -215,6 +278,7 @@ function bars2(obj,colorFn){
 function showPop(t,e){
   const pop=document.getElementById('pop');
   let h='<span class="pclose" onclick="document.getElementById(\'pop\').hidden=true">✕</span><h4>'+t.name+'</h4><div class="psub">'+scopeLabel()+' · 반품 '+t.qty+'장 · '+won(t.amt)+'</div>';
+  if(t.ch) h+='<div class="seclab">채널별</div>'+bars2(t.ch,function(c){return CH_COL[c]||'#777';});
   h+='<div class="seclab">사유별</div>'+bars2(t.reason,rc);
   h+='<div class="seclab">옵션별</div>'+bars2(t.opt,null);
   if(t.det&&t.det.length){h+='<div class="seclab">고객 사유상세</div>'+t.det.map(d=>'<div class="det"><div class="dm">'+md(d.date)+' · '+d.opt+' · '+d.reason+'</div>'+esc(d.text)+'</div>').join('');}
