@@ -41,7 +41,7 @@ tr.p.open td{background:var(--accent-tint)}
 .c.gen{background:var(--good-tint);color:var(--good);font-weight:600}
 .c.none{background:var(--warn-tint);color:var(--warn);font-weight:600}
 .c.unk{color:var(--ink3);font-weight:600}
-.c.na{color:var(--line2)}
+.c.na{color:var(--ink3);background:#f1f1f1;font-weight:600}
 .num{font-weight:700}
 .num.bad{color:var(--accent-ink)}
 .flags{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left}
@@ -85,7 +85,7 @@ tr.det td{background:#FBFBFC;text-align:left;padding:10px 16px 14px}
  <div id="statDet"></div>
 
  <div class="card"><h2>채널별 예약 발송일 <small>상품을 누르면 채널별 안내 문구 · 미송 · 입고 일정</small></h2>
-  <div class="sub"><span class="c rv">12/9</span> 예약 발송일 &nbsp; <span class="c gen">일반</span> 일반 발송 &nbsp; <span class="c none">표기 없음</span> 예약 표기 안 됨 &nbsp; <span class="c unk">?</span> 확인 못 함 &nbsp; <span class="c na">—</span> 미등록</div>
+  <div class="sub"><span class="c rv">12/9</span> 예약 발송일 &nbsp; <span class="c gen">일반</span> 일반 발송 &nbsp; <span class="c none">표기 없음</span> 예약 표기 안 됨 &nbsp; <span class="c unk">?</span> 확인 못 함 &nbsp; <span class="c na">미등록</span> 그 채널에 상품 없음(상품 등록 현황 기준)</div>
   <div class="tw"><table><thead><tr id="thA"></tr></thead><tbody id="tbA"></tbody></table></div></div>
 
  <div class="card"><h2>미송 <small>이지어드민 송장 &gt; 재고 · 입고 예정으로 언제 풀리는지</small></h2>
@@ -142,7 +142,7 @@ function itemFlags(it,opts){
   return F;
 }
 function cellA(e,k){
-  if(!e||e.s==='na')return '<span class="c na">—</span>';
+  if(!e||e.s==='na')return '<span class="c na">미등록</span>';
   if(e.s==='rv')return `<span class="c rv">${e.d?md(e.d):'예약'}</span>`;
   if(e.s==='gen')return '<span class="c gen">일반</span>';
   if(e.s==='none')return '<span class="c none">표기 없음</span>';
