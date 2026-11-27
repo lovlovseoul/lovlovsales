@@ -75,7 +75,7 @@ for nm,chs in hits.items():
         if not v or all(p in (v.get('fails') or []) for p in mine): it['ch'][c]={'s':'unk','i':mine[0]}; continue
         wk=[p for p in mine if p in WEAK]
         if c=='lotteon' and wk: it['ch'][c]={'s':'rv','d':'','t':'주문제작 설정 (상품명 태그 없음 · 상세 발송예정일이 늦게 잡힘)','i':wk[0]}; continue
-        it['ch'][c]={'s':'none' if c=='own' else 'gen','t':'상품명에 예약 표기 없음' if c=='own' else '예약 표시 없음','i':mine[0]}
+        it['ch'][c]={'s':'none' if c=='own' else 'gen','t':'상품명·옵션명에 예약 표기 없음' if c=='own' else '예약 표시 없음','i':mine[0]}
     items.append(it)
 items.sort(key=lambda it:min([e.get('d') or '9999' for e in it['ch'].values() if e.get('s')=='rv'] or ['9999']))
 def sc(c):
@@ -85,7 +85,7 @@ def sc(c):
         return f"예약 걸린 상품만 상세 확인 ({len(ZZ)}개)" if ZZ else '확인 못 함'
     if not v: return '이번엔 확인 못 함 (스캔 실패)'
     f=len(v.get('fails') or []); s=v.get('scanned',0)
-    base={'wconcept':'전 상품 상세','29cm':'전 상품 상세','musinsa':'전 상품 상세','ssf':'전 상품 상세','lotteon':'공식 상품 상세(주문제작·상품명 태그)','own':'상품명 태그'}[c]
+    base={'wconcept':'전 상품 상세','29cm':'전 상품 상세','musinsa':'전 상품 상세','ssf':'전 상품 상세','lotteon':'공식 상품 상세(주문제작·상품명 태그)','own':'상품명 태그 + 옵션명 예약 표기'}[c]
     return f"{base} {s}개"+(f" · {f}개 응답 실패" if f else '')+(f" · 새 상품 {len(v.get('new') or [])}개" if v.get('new') else '')
 out={'asof':ASOF,'scan':{c:sc(c) for c in CH},'items':items}
 json.dump(out,open(OUT,'w',encoding='utf-8'),ensure_ascii=False,indent=1)
