@@ -49,6 +49,28 @@ tr.det td{background:#FBFBFC;text-align:left;padding:10px 14px 14px}
 .dc li{font-size:12.5px;line-height:1.45}
 .dc li .pr{color:var(--ink2);font-size:11.5px;margin-left:4px;white-space:nowrap}
 .dc.miss{border-style:dashed;color:var(--ink3)}
+.st{cursor:pointer;text-align:left;font:inherit;color:inherit}
+.st:hover{border-color:var(--ink3)}
+.st.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.st small em{font-style:normal;float:right;color:var(--ink3)}
+.chsec{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:none;align-items:center;gap:12px;flex-wrap:wrap}
+.chsec.show{display:flex}
+.chsec h2{font-size:16px;letter-spacing:-.01em}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden}
+.seg button{padding:7px 16px;font-size:13px;color:var(--ink2)}
+.seg button b{margin-left:4px}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:var(--ink);color:#fff}
+.seg button.off.on{background:var(--accent)}
+.chsec .hint{font-size:12.5px;color:var(--ink2)}
+.chsec .cl{margin-left:auto;font-size:12.5px;color:var(--ink3);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.chsec .cl:hover{border-color:var(--ink3);color:var(--ink2)}
+th.hl{color:var(--ink);background:#ECEEF1}
+td.hl{background:#FAFAFB}
+td.ln{text-align:left;font-size:12px;line-height:1.45;max-width:380px}
+td.ln a{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+td.ln a:hover{color:var(--info)}
+td.ln i{font-style:normal;color:var(--ink3);font-size:11px}
 .note{font-size:12px;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.6}
 .empty{padding:30px;text-align:center;color:var(--ink3)}
 @media(max-width:700px){.wrap{padding:16px 14px 40px}}
@@ -57,6 +79,9 @@ tr.det td{background:#FBFBFC;text-align:left;padding:10px 14px 14px}
 <div class="wrap">
  <div class="hd"><h1>상품 등록 현황</h1><p>로브로브 상품이 채널마다 어떤 이름으로 올라가 있는지, 어디에 없는지 · <span id="asof"></span></p></div>
  <div class="stats" id="stats"></div>
+ <div class="chsec" id="chsec"><h2 id="chName"></h2>
+  <div class="seg"><button data-mode="on">등록중<b id="nOn"></b></button><button data-mode="off" class="off">미등록<b id="nOff"></b></button></div>
+  <span class="hint" id="chHint"></span><button class="cl" data-clear>✕ 전체 보기</button></div>
  <div class="tools">
   <input id="q" type="search" placeholder="상품명 검색 (예: 스웨이드 봄버, 애티튜드, SNOWBLOOM)" autocomplete="off">
   <div class="row"><small>미등록 채널</small><span id="missChips"></span></div>
@@ -85,22 +110,40 @@ P.forEach(p=>{p.n=Object.keys(p.ch).length;p.excl=Object.values(p.ch).some(ls=>l
   p.hay=norm(p.name+' '+p.en+' '+Object.values(p.ch).flat().map(l=>l.n).join(' '));});
 document.getElementById('asof').textContent=ASOF+' 기준';document.getElementById('asof2').textContent=ASOF;
 const st=document.getElementById('stats');
-st.innerHTML=`<div class="st"><small>전체 상품</small><b>${P.length}</b><span>개</span></div>`+CH.map(([k,l])=>{const n=P.filter(p=>p.ch[k]).length;return `<div class="st"><small>${l}</small><b>${n}</b><span>미등록 ${P.length-n}</span></div>`;}).join('');
+const CNT={};CH.forEach(([k])=>CNT[k]=P.filter(p=>p.ch[k]).length);
+const CHN=Object.fromEntries(CH);
+st.innerHTML=`<button class="st" data-c=""><small>전체 상품</small><b>${P.length}</b><span>개</span></button>`+CH.map(([k,l])=>`<button class="st" data-c="${k}" title="${l} 등록중 · 미등록 상품 보기"><small>${l}<em>›</em></small><b>${CNT[k]}</b><span>미등록 ${P.length-CNT[k]}</span></button>`).join('');
 document.getElementById('missChips').innerHTML=CH.map(([k,l])=>`<button class="chip miss" data-m="${k}">${l}</button>`).join('');
 document.getElementById('thr').innerHTML='<th>상품</th>'+CH.map(([k,l])=>`<th>${l}</th>`).join('');
-let miss=null,f=null,openK=null;
+let sel=null,f=null,openK=null; // sel={k,mode:'on'|'off'}
 function cell(p,k){const ls=p.ch[k];if(!ls)return '<span class="x">—</span>';const ex=ls.some(l=>l.x&&l.x.length);return `<span class="o">${ls.length}</span>${ex?'<span class="ex">단독</span>':''}`;}
-function detail(p){return `<tr class="det"><td colspan="${CH.length+1}"><div class="dg">`+CH.map(([k,l])=>{const ls=p.ch[k];if(!ls)return `<div class="dc miss"><h4>${l}<em>미등록</em></h4></div>`;
+function detail(p){return `<tr class="det"><td colspan="${ncol()}"><div class="dg">`+CH.map(([k,l])=>{const ls=p.ch[k];if(!ls)return `<div class="dc miss"><h4>${l}<em>미등록</em></h4></div>`;
   return `<div class="dc"><h4>${l}<em>${ls.length}개</em></h4><ul>`+ls.map(x=>`<li><a href="${LINK[k].replace('{}',encodeURIComponent(x.i))}" target="_blank" rel="noopener">${esc(x.n)}</a>${x.p||x.d?`<span class="pr">${x.d?x.d+'% ':''}${x.p?x.p+'원':''}</span>`:''}${x.so?' <span class="ex">품절</span>':''}</li>`).join('')+'</ul></div>';}).join('')+'</div></td></tr>';}
-function render(){const q=norm(document.getElementById('q').value);
-  let L=P.filter(p=>(!q||p.hay.includes(q))&&(!miss||!p.ch[miss])&&(f!=='excl'||p.excl)&&(f!=='one'||p.n===1)&&(f!=='all8'||p.n===CH.length));
+const ncol=()=>CH.length+1+(sel&&sel.mode==='on'?1:0);
+function names(p,k){const ls=p.ch[k];const sh=ls.slice(0,3).map(x=>`<a href="${LINK[k].replace('{}',encodeURIComponent(x.i))}" target="_blank" rel="noopener" title="${esc(x.n)}">${esc(x.n)}</a>`).join('');return sh+(ls.length>3?`<i>+${ls.length-3}개 더</i>`:'');}
+function syncUI(){
+  document.querySelectorAll('.st').forEach(b=>b.classList.toggle('on',sel?b.dataset.c===sel.k:b.dataset.c===''));
+  document.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on',!!sel&&sel.mode==='off'&&b.dataset.m===sel.k));
+  const cs=document.getElementById('chsec');cs.classList.toggle('show',!!sel);if(!sel)return;
+  const l=CHN[sel.k];document.getElementById('chName').textContent=l;
+  document.getElementById('nOn').textContent=CNT[sel.k];document.getElementById('nOff').textContent=P.length-CNT[sel.k];
+  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===sel.mode));
+  document.getElementById('chHint').textContent=sel.mode==='on'?`${l}에 올라간 상품 · ${l} 등록 상품명 같이 표시`:`${l}에 없는 상품 · 다른 채널에 많이 올라간 순 (등록 우선순위 참고)`;}
+function render(){const q=norm(document.getElementById('q').value);syncUI();
+  let L=P.filter(p=>(!q||p.hay.includes(q))&&(!sel||(sel.mode==='on'?!!p.ch[sel.k]:!p.ch[sel.k]))&&(f!=='excl'||p.excl)&&(f!=='one'||p.n===1)&&(f!=='all8'||p.n===CH.length));
   L.sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name,'ko'));
   document.getElementById('cnt').textContent=`${L.length}개`;
   const tb=document.getElementById('tb');
-  if(!L.length){tb.innerHTML=`<tr><td colspan="${CH.length+1}" class="empty">해당 상품 없음</td></tr>`;return;}
-  tb.innerHTML=L.map(p=>`<tr class="p${openK===p.k?' open':''}" data-k="${esc(p.k)}"><td class="nm"><b>${esc(p.name)}</b>${p.n===1?'<span class="only">한 채널만</span>':''}${p.en&&p.en!==p.name?`<small>${esc(p.en)}</small>`:''}</td>`+CH.map(([k])=>`<td>${cell(p,k)}</td>`).join('')+'</tr>'+(openK===p.k?detail(p):'')).join('');}
+  const on=sel&&sel.mode==='on';
+  document.getElementById('thr').innerHTML='<th>상품</th>'+(on?`<th style="text-align:left" class="hl">${CHN[sel.k]} 등록 상품명</th>`:'')+CH.map(([k,l])=>`<th${sel&&sel.k===k?' class="hl"':''}>${l}</th>`).join('');
+  if(!L.length){tb.innerHTML=`<tr><td colspan="${ncol()}" class="empty">해당 상품 없음</td></tr>`;return;}
+  tb.innerHTML=L.map(p=>`<tr class="p${openK===p.k?' open':''}" data-k="${esc(p.k)}"><td class="nm"><b>${esc(p.name)}</b>${p.n===1?'<span class="only">한 채널만</span>':''}${p.en&&p.en!==p.name?`<small>${esc(p.en)}</small>`:''}</td>`+(on?`<td class="ln hl">${names(p,sel.k)}</td>`:'')+CH.map(([k])=>`<td${sel&&sel.k===k?' class="hl"':''}>${cell(p,k)}</td>`).join('')+'</tr>'+(openK===p.k?detail(p):'')).join('');}
 document.getElementById('q').addEventListener('input',()=>{openK=null;render();const q=norm(document.getElementById('q').value);if(q){const L=P.filter(p=>p.hay.includes(q));if(L.length===1){openK=L[0].k;render();}}});
-document.addEventListener('click',e=>{const m=e.target.closest('[data-m]');if(m){miss=miss===m.dataset.m?null:m.dataset.m;document.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===miss));render();return;}
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-c]');if(c){const k=c.dataset.c;sel=!k||(sel&&sel.k===k)?null:{k,mode:'on'};openK=null;render();return;}
+  const md=e.target.closest('[data-mode]');if(md&&sel){sel.mode=md.dataset.mode;openK=null;render();return;}
+  if(e.target.closest('[data-clear]')){sel=null;openK=null;render();return;}
+  const m=e.target.closest('[data-m]');if(m){const k=m.dataset.m;sel=sel&&sel.k===k&&sel.mode==='off'?null:{k,mode:'off'};openK=null;render();return;}
   const ff=e.target.closest('[data-f]');if(ff){f=f===ff.dataset.f?null:ff.dataset.f;document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f===f));render();return;}
   const tr=e.target.closest('tr.p');if(tr&&!e.target.closest('a')){openK=openK===tr.dataset.k?null:tr.dataset.k;render();}});
 render();
