@@ -39,6 +39,10 @@ for c in ['wconcept','29cm','musinsa','lotteon','ssf','own']:
         if c=='lotteon' and not d and t.strip()=='주문제작 설정': WEAK.add(pid); continue
         nm,col=IM[c].get(pid,('(알 수 없는 상품 '+pid+')',''))
         hits.setdefault(nm,{}).setdefault(c,[]).append((pid,d[:10] if d and d!='null' else '',t,col))
+# 지그재그 전 상품 스캔(zz_scan.js) 결과에서 발송예정일이 오늘+5일 넘는 상품은 다른 채널 예약이 없어도 목록에 올림 (11/27)
+for x in ((R.get('zigzag') or {}).get('checked') or []):
+    if x.get('d') and (datetime.date.fromisoformat(x['d'])-TODAY).days>5 and str(x['id']) in IM['zigzag']:
+        hits.setdefault(IM['zigzag'][str(x['id'])][0],{})
 # 1단계: 지그재그 후보
 if len(sys.argv)>6:
     zz=[pid for pid,(nm,col) in IM['zigzag'].items() if nm in hits]
@@ -82,7 +86,7 @@ def sc(c):
     v=R.get(c)
     if c=='queenit': return '상세에 발송일이 안 보여 확인 못 함'
     if c=='zigzag':
-        return f"예약 걸린 상품만 상세 확인 ({len(ZZ)}개)" if ZZ else '확인 못 함'
+        return (f"전 상품 상세 {(R.get('zigzag') or {}).get('scanned')}개 (옵션 일부 발송일 포함)" if (R.get('zigzag') or {}).get('scanned') else f"예약 걸린 상품만 상세 확인 ({len(ZZ)}개)") if ZZ else '확인 못 함'
     if not v: return '이번엔 확인 못 함 (스캔 실패)'
     f=len(v.get('fails') or []); s=v.get('scanned',0)
     base={'wconcept':'전 상품 상세','29cm':'전 상품 상세','musinsa':'전 상품 상세','ssf':'전 상품 상세','lotteon':'공식 상품 상세(주문제작·상품명 태그)','own':'상품명 태그 + 옵션명 예약 표기'}[c]
