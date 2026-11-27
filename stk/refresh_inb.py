@@ -8,6 +8,7 @@ J = json.load(open(S, encoding='utf-8'))
 P = J['P']; today = dt.date.fromisoformat(NOW[:10])
 ix = L.name_index(P, J.get('NA', {}))
 rows = list(csv.DictReader(open(INB, encoding='utf-8'), delimiter='\t'))
+old = {(ko, x['c'], x['s']): sum(i['q'] for i in x.get('in', []) if not i['stale']) for ko, p in P.items() for x in p['o']}
 un = L.attach_inbound(P, rows, today, ix)
 raw = L.read_rsv_tsv(RSV, today)
 try: po = json.load(open(POJ, encoding='utf-8'))['items']
@@ -16,6 +17,10 @@ AL, ER = L.compute(P, today, L.sheet_rsv_by_ko(raw, ix, today), po)
 J.update({'alerts': AL, 'errs': ER, 'inbAsof': NOW, 'rsvRaw': raw})
 json.dump(J, open(OUT, 'w'), ensure_ascii=False, separators=(',', ':'))
 print('ROWS', len(rows), 'UNMATCHED', len(un)); [print('  ', u) for u in un]
+for ko, p in P.items():
+    for x in p['o']:
+        n = sum(i['q'] for i in x.get('in', []) if not i['stale']); o = old.get((ko, x['c'], x['s']), 0)
+        if n != o: print('INBCHG', p['b'], ko, x['c'], x['s'], o, '->', n)
 rk = [a for a in AL if a['risk']]
 print('ALERTS', len(AL), 'RISK', sum(a['risk'][0] == '위험' for a in rk), 'WARN', sum(a['risk'][0] == '주의' for a in rk))
 for a in AL:
