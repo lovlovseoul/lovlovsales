@@ -70,6 +70,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
    <button class="mi" data-go="returns"><i>↺</i>반품</button>
    <button class="mi" data-go="ranking"><i>≡</i>랭킹 · 검색어</button>
    <button class="mi" data-go="products"><i>⊞</i>상품 등록 현황</button>
+   <button class="mi" data-go="preorder"><i>◷</i>예약발송 현황</button>
   </div>
   <div class="sec"><h3>업무 매뉴얼</h3>
    <button class="mi" data-go="manual/toc"><i>☰</i>전체 목차</button>
@@ -98,6 +99,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
      <button class="tile" data-go="returns"><span class="k">대시보드</span><b>반품</b><p>반품 현황, 상품별 반품률 · 불량률</p></button>
      <button class="tile" data-go="ranking"><span class="k">대시보드</span><b>랭킹 · 검색어</b><p>무신사 · W컨셉 · 29CM 여성의류 랭킹과 플랫폼별 인기 검색어</p></button>
      <button class="tile" data-go="products"><span class="k">대시보드</span><b>상품 등록 현황</b><p>채널별 등록 상품명 · 미등록 채널 · 단독 상품 검색</p></button>
+     <button class="tile" data-go="preorder"><span class="k">대시보드</span><b>예약발송 현황</b><p>채널별 예약 발송일 · 미송 · 입고 일정</p></button>
      <button class="tile" data-go="manual/toc"><span class="k">매뉴얼</span><b>업무 매뉴얼</b><p>공통 · MD · 디자인 · 물류 업무 기준과 답변 템플릿</p></button>
     </div>
     <div class="card"><h2>업무 매뉴얼 바로가기</h2><div class="parts">
@@ -134,8 +136,8 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
  </div>
 </div>
 <script>
-const PAGES={sales:'sales.html',returns:'returns.html',ranking:'ranking.html',products:'products.html',manual:'manual.html'};
-const NAMES={home:'홈',sales:'판매',returns:'반품',ranking:'랭킹 · 검색어',products:'상품 등록 현황',manual:'업무 매뉴얼'};
+const PAGES={sales:'sales.html',returns:'returns.html',ranking:'ranking.html',products:'products.html',preorder:'preorder.html',manual:'manual.html'};
+const NAMES={home:'홈',sales:'판매',returns:'반품',ranking:'랭킹 · 검색어',products:'상품 등록 현황',preorder:'예약발송 현황',manual:'업무 매뉴얼'};
 const frames=document.getElementById('frames'),home=document.getElementById('home'),loaded={};
 function show(route){
   let [t,sub]=(route||'home').split('/');
